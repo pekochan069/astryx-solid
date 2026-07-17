@@ -1,0 +1,66 @@
+{
+  "name": "@astryx-solid/core",
+  "version": "0.0.0",
+  "description": "A starter for creating a TypeScript package.",
+  "homepage": "https://github.com/author/library#readme",
+  "bugs": {
+    "url": "https://github.com/author/library/issues"
+  },
+  "license": "MIT",
+  "author": "Author Name <author.name@mail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/author/library.git"
+  },
+  "type": "module",
+  "module": "./src/index.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts"
+    },
+    "./astryx.css": "./dist/astryx.css",
+    "./reset.css": "./dist/reset.css",
+    "./tailwind-theme.css": "./dist/tailwind-theme.css",
+    "./button": {
+      "default": "./dist/button.js",
+      "types": "./dist/button.d.ts",
+      "source": "./src/button/index.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rolldown -c",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "devDependencies": {
+    "@solidjs/web": "^2.0.0-beta.19",
+    "@stylexjs/stylex": "^0.19.0",
+    "@stylexjs/unplugin": "^0.19.0",
+    "@types/node": "^26.1.1",
+    "bumpp": "^11.1.0",
+    "rolldown": "^1.1.5",
+    "rolldown-plugin-dom-expressions-jsx-compiler": "^0.1.0",
+    "rolldown-plugin-dts": "^0.27.6",
+    "solid-js": "^2.0.0-beta.19",
+    "typescript": "^7",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "@solidjs/web": "^2.0.0-beta.19",
+    "@stylexjs/stylex": "^0.19.0",
+    "solid-js": "^2.0.0-beta.19"
+  },
+  "browserslist": [
+    "Chrome >= 123",
+    "Firefox >= 120",
+    "Safari >= 17.5"
+  ]
+}

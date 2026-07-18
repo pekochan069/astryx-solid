@@ -1,7 +1,7 @@
-import { defineConfig } from "vite-plus";
-import solid from "vite-plugin-solid";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import stylex from "@stylexjs/unplugin/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import solid from "vite-plugin-solid";
+import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   lint: {

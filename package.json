@@ -10,7 +10,9 @@
   "type": "module",
   "scripts": {
     "ready": "vp check && vp run -r test && vp run -r build",
-    "dev": "vp run website#dev",
+    "build": "vp run --filter './apps/*' --filter './packages/*' build",
+    "dev": "vp run --parallel --filter './apps/*' --filter './packages/*' dev",
+    "test": "vp run --filter './packages/*' test",
     "prepare": "vp config"
   },
   "devDependencies": {

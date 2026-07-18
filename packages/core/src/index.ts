@@ -1,5 +1,7 @@
 export type { BaseProps } from "./base-props.ts";
 
+export * from "./stylex/index.ts";
+
 // export * from "./alert-dialog/index.ts";
 // export * from "./app-shell/index.ts";
 // export * from "./aspect-ratio/index.ts";
@@ -9,7 +11,7 @@ export type { BaseProps } from "./base-props.ts";
 // export * from "./banner/index.ts";
 // export * from "./blockquote/index.ts";
 // export * from "./breadcrumbs/index.ts";
-export * from "./button/index.ts";
+export * from "./components/button/index.ts";
 // export * from "./button-group/index.ts";
 // export * from "./calendar/index.ts";
 // export * from "./card/index.ts";
@@ -78,7 +80,7 @@ export * from "./button/index.ts";
 // export * from "./skeleton/index.ts";
 // export * from "./slider/index.ts";
 // export * from "./spinner/index.ts";
-// export * from "./stack/index.ts";
+export * from "./components/stack/index.ts";
 // export * from "./status-dot/index.ts";
 // export * from "./switch/index.ts";
 // export * from "./table/index.ts";

@@ -20,6 +20,7 @@ import * as stylex from "@stylexjs/stylex";
 // Color Tokens
 // =============================================================================
 
+/** Default semantic color token values. */
 export const colorDefaults = {
   // Core semantic
   "--color-accent": "light-dark(#0064E0, #2694FE)",
@@ -142,12 +143,14 @@ export const colorDefaults = {
   // Syntax highlighting
 } as const;
 
+/** StyleX variables for semantic color tokens. */
 export const colorVars = stylex.defineVars(colorDefaults);
 
 // =============================================================================
 // Spacing Tokens
 // =============================================================================
 
+/** Default spacing-scale token values. */
 export const spacingDefaults = {
   "--spacing-0": "0px",
   "--spacing-0-5": "2px",
@@ -166,36 +169,43 @@ export const spacingDefaults = {
   "--spacing-12": "48px",
 } as const;
 
+/** StyleX variables for spacing-scale tokens. */
 export const spacingVars = stylex.defineVars(spacingDefaults);
 
 // =============================================================================
 // Size Tokens
 // =============================================================================
 
+/** Default interactive-element size token values. */
 export const sizeDefaults = {
   "--size-element-sm": "28px",
   "--size-element-md": "32px",
   "--size-element-lg": "36px",
 } as const;
 
+/** StyleX variables for interactive-element size tokens. */
 export const sizeVars = stylex.defineVars(sizeDefaults);
 
 // =============================================================================
 // Border Tokens
 // =============================================================================
 
+/** Default border token values. */
 export const borderDefaults = {
   "--border-width": "1px",
 } as const;
 
+/** StyleX variables for border tokens. */
 export const borderVars = stylex.defineVars(borderDefaults);
 
+/** Name of a supported border token. */
 export type BorderVarName = keyof typeof borderDefaults;
 
 // =============================================================================
 // Radius Tokens
 // =============================================================================
 
+/** Default border-radius token values. */
 export const radiusDefaults = {
   "--radius-none": "0px",
   "--radius-inner": "4px",
@@ -209,6 +219,7 @@ export const radiusDefaults = {
   "--radius-full": "9999px",
 } as const;
 
+/** StyleX variables for border-radius tokens. */
 export const radiusVars = stylex.defineVars(radiusDefaults);
 
 // =============================================================================
@@ -217,6 +228,7 @@ export const radiusVars = stylex.defineVars(radiusDefaults);
 // Shadow tokens: low → med → high (ascending intensity).
 // Inset shadows: for input state rings.
 
+/** Default elevation and inset-shadow token values. */
 export const shadowDefaults = {
   // Outer elevation shadows (ascending intensity: low < med < high)
   "--shadow-low":
@@ -234,6 +246,7 @@ export const shadowDefaults = {
   "--shadow-inset-error": "inset 0px 0px 0px 2px rgba(227, 25, 59, 0.3)",
 } as const;
 
+/** StyleX variables for shadow tokens. */
 export const shadowVars = stylex.defineVars(shadowDefaults);
 
 // =============================================================================
@@ -244,6 +257,7 @@ export const shadowVars = stylex.defineVars(shadowDefaults);
 // min/max variants derive from base × ratio (default ratio ≈ 0.75).
 // See motion in defineTheme for computed generation.
 
+/** Default motion-duration token values. */
 export const durationDefaults = {
   "--duration-fast-min": "130ms",
   "--duration-fast": "175ms",
@@ -256,20 +270,25 @@ export const durationDefaults = {
   "--duration-slow-max": "1300ms",
 } as const;
 
+/** StyleX variables for motion-duration tokens. */
 export const durationVars = stylex.defineVars(durationDefaults);
 
+/** Name of a supported motion-duration token. */
 export type DurationVarName = keyof typeof durationDefaults;
 
 // =============================================================================
 // Motion Tokens — Easing
 // =============================================================================
 
+/** Default motion-easing token values. */
 export const easeDefaults = {
   "--ease-standard": "cubic-bezier(0.24, 1, 0.4, 1)",
 } as const;
 
+/** StyleX variables for motion-easing tokens. */
 export const easeVars = stylex.defineVars(easeDefaults);
 
+/** Name of a supported motion-easing token. */
 export type EaseVarName = keyof typeof easeDefaults;
 
 // =============================================================================
@@ -292,6 +311,7 @@ export const transitionVars = stylex.defineVars(transitionDefaults);
 // Typography Tokens - Font Families
 // =============================================================================
 
+/** Default font-family token values. */
 export const typographyDefaults = {
   "--font-family-body":
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -300,12 +320,14 @@ export const typographyDefaults = {
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 } as const;
 
+/** StyleX variables for font-family tokens. */
 export const typographyVars = stylex.defineVars(typographyDefaults);
 
 // =============================================================================
 // Typography Tokens - Text Sizes
 // =============================================================================
 
+/** Default raw font-size scale values. */
 export const textSizeDefaults = {
   // Full geometric scale: round(14 × 1.2^step) / 16, default base=14, ratio=1.2
   "--font-size-4xs": "0.375rem", // step -5: 6px (14 × 1.2⁻⁵ ≈ 5.63 → 6)
@@ -322,12 +344,14 @@ export const textSizeDefaults = {
   "--font-size-5xl": "2.625rem", // step +6: 42px (14 × 1.2⁶ ≈ 41.80 → 42)
 } as const;
 
+/** StyleX variables for raw font-size tokens. */
 export const textSizeVars = stylex.defineVars(textSizeDefaults);
 
 // =============================================================================
 // Typography Tokens - Font Weights
 // =============================================================================
 
+/** Default font-weight token values. */
 export const fontWeightDefaults = {
   "--font-weight-normal": "400", // body, captions, code
   "--font-weight-medium": "500", // subheadlines, data viz
@@ -335,21 +359,38 @@ export const fontWeightDefaults = {
   "--font-weight-bold": "700", // strong emphasis, headings
 } as const;
 
+/** StyleX variables for font-weight tokens. */
 export const fontWeightVars = stylex.defineVars(fontWeightDefaults);
 
 // =============================================================================
 // Token Types
 // =============================================================================
 
+/** Name of a supported semantic color token. */
 export type ColorVarName = keyof typeof colorDefaults;
+
+/** Name of a supported spacing token. */
 export type SpacingVarName = keyof typeof spacingDefaults;
+
+/** Name of a supported interactive-element size token. */
 export type SizeVarName = keyof typeof sizeDefaults;
+
+/** Name of a supported border-radius token. */
 export type RadiusVarName = keyof typeof radiusDefaults;
+
+/** Name of a supported shadow token. */
 export type ShadowVarName = keyof typeof shadowDefaults;
-/** @deprecated Use DurationVarName | EaseVarName instead */
+
+/** @deprecated Use `DurationVarName | EaseVarName` instead. */
 export type TransitionVarName = keyof typeof transitionDefaults;
+
+/** Name of a supported font-family token. */
 export type TypographyVarName = keyof typeof typographyDefaults;
+
+/** Name of a supported raw font-size token. */
 export type TextSizeVarName = keyof typeof textSizeDefaults;
+
+/** Name of a supported font-weight token. */
 export type FontWeightVarName = keyof typeof fontWeightDefaults;
 
 // =============================================================================
@@ -365,6 +406,7 @@ export type FontWeightVarName = keyof typeof fontWeightDefaults;
 //   Default:          { base: 14, ratio: 1.2 }
 //   Airy/editorial:   { base: 16, ratio: 1.25 }
 
+/** Default semantic heading, display, and body type-scale values. */
 export const typeScaleDefaults = {
   // Sizes are var() references to raw size tokens.
   // Line heights are hardcoded computed values (4px grid snapped, tiered target).
@@ -425,6 +467,8 @@ export const typeScaleDefaults = {
   "--text-display-3-leading": "1.2414",
 } as const;
 
+/** StyleX variables for semantic type-scale tokens. */
 export const typeScaleVars = stylex.defineVars(typeScaleDefaults);
 
+/** Name of a supported semantic type-scale token. */
 export type TypeScaleVarName = keyof typeof typeScaleDefaults;

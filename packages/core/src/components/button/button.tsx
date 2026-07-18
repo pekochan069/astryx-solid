@@ -1,5 +1,13 @@
-import type { BaseProps } from "../base-props.ts";
+import type { JSX } from "@solidjs/web";
+
 import * as stylex from "@stylexjs/stylex";
+import { Match, Show, Switch, createMemo, merge, omit } from "solid-js";
+
+import type { BaseProps } from "../../base-props.ts";
+import type { OnClick, OnClickEventType } from "../../types/handler.types.ts";
+
+import { useSize } from "../../size-context/size-context.ts";
+import { stylexProps } from "../../stylex/index.ts";
 import {
   colorVars,
   durationVars,
@@ -9,11 +17,7 @@ import {
   sizeVars,
   spacingVars,
   typeScaleVars,
-} from "../tokens.stylex.ts";
-import type { OnClick, OnClickEventType } from "../types/handler.types.ts";
-import type { JSX } from "@solidjs/web";
-import { Match, Show, Switch, merge, omit } from "solid-js";
-import { useSize } from "../size-context/size-context.ts";
+} from "../../theme/tokens.stylex.ts";
 
 /**
  * Base button styles
@@ -212,19 +216,7 @@ const variants = stylex.create({
   },
 });
 
-/**
- * Extensible variant map for Button.
- *
- * Theme packages can add custom variants via TypeScript module augmentation:
- * @example
- * ```
- * declare module '@astryxdesign/core/Button' {
- *   interface ButtonVariantMap {
- *     'primary-muted': true;
- *   }
- * }
- * ```
- */
+/** Built-in visual variants supported by {@link Button}. */
 export interface ButtonVariantMap {
   primary: true;
   secondary: true;
@@ -232,39 +224,73 @@ export interface ButtonVariantMap {
   destructive: true;
 }
 
-/**
- * Button variant type derived from ButtonVariantMap.
- * Extensible via module augmentation of ButtonVariantMap.
- */
+/** Visual treatment supported by {@link Button}. */
 export type ButtonVariant = keyof ButtonVariantMap;
 
-/**
- * Button size type derived from the sizeStyles StyleX object
- */
+/** Button size derived from the supported StyleX size styles. */
 export type ButtonSize = keyof typeof sizeStyles;
 
-// export interface ButtonProps extends BaseProps<HTMLButtonElement> {
-//   variant?: ButtonVariant;
-//   size?: ButtonSize;
-//   isDisabled?: boolean;
-// }
+/** Props for the {@link Button} component. */
 export interface ButtonProps extends BaseProps<HTMLButtonElement> {
+  /**
+   * Accessible button label and default visible content.
+   * Also becomes `aria-label` when {@link isIconOnly} is true.
+   */
   label: string;
+
+  /** Custom visible label content. Replaces `label` visually when provided. */
   children?: JSX.Element;
+
+  /** Leading icon or visual rendered before the label. */
   icon?: JSX.Element;
+
+  /** Content rendered after the label, such as a shortcut or status icon. */
   endContent?: JSX.Element;
+
+  /** Visual treatment. @default "secondary" */
   variant?: ButtonVariant;
+
+  /** Element height and icon scale. Inherits from size context when omitted. */
   size?: ButtonSize;
+
+  /** Native tooltip text shown through the button `title` attribute. */
   tooltip?: string;
+
+  /** Prevents activation and applies disabled styling. @default false */
   isDisabled?: boolean;
+
+  /** Marks the action busy and disables it unless interruptible. @default false */
   isLoading?: boolean;
+
+  /** Pending-state alias for {@link isLoading}. @default false */
   isPending?: boolean;
+
+  /** Keeps a loading or pending action enabled so another click can interrupt it. */
   isInterruptible?: boolean;
+
+  /** Renders only the icon and uses `label` as its accessible name. @default false */
   isIconOnly?: boolean;
+
+  /** Native button behavior. @default "button" */
   type?: "button" | "submit" | "reset";
+
+  /** Called for enabled button clicks. Disabled clicks are prevented. */
   onClick?: OnClick<HTMLButtonElement>;
 }
 
+/**
+ * Renders an accessible, themed action button.
+ *
+ * Disabled buttons with a tooltip remain focusable and expose
+ * `aria-disabled="true"`, allowing keyboard users to discover the explanation.
+ * Loading and pending states expose `aria-busy="true"`.
+ *
+ * @example
+ * ```tsx
+ * <Button label="Save changes" variant="primary" onClick={save} />
+ * <Button label="Delete" icon={<TrashIcon />} isIconOnly />
+ * ```
+ */
 export function Button(props: ButtonProps) {
   const merged = merge(
     {
@@ -277,10 +303,13 @@ export function Button(props: ButtonProps) {
     },
     props,
   );
-  const size = useSize(merged.size);
-  const loading = merged.isLoading || merged.isPending;
-  const disabled = merged.isDisabled || (loading && !merged.isInterruptible);
-  const ariaDisabled = merged.tooltip != null && disabled;
+  const inheritedSize = useSize();
+  const size = createMemo(() => merged.size ?? inheritedSize);
+  const variant = createMemo(() => merged.variant ?? "secondary");
+  const type = createMemo(() => merged.type ?? "button");
+  const loading = createMemo(() => merged.isLoading || merged.isPending);
+  const disabled = createMemo(() => merged.isDisabled || (loading() && !merged.isInterruptible));
+  const ariaDisabled = createMemo(() => merged.tooltip != null && disabled());
   const rest = omit(
     merged,
     "xstyle",
@@ -302,39 +331,44 @@ export function Button(props: ButtonProps) {
   );
 
   const onClick = (event: OnClickEventType<HTMLButtonElement>) => {
-    if (disabled) {
+    if (disabled()) {
       event.preventDefault();
       return;
     }
     props.onClick?.(event);
   };
 
-  const style = stylex.props(
-    styles.base,
-    size === "sm" && sizeStyles.sm,
-    size === "md" && sizeStyles.md,
-    size === "lg" && sizeStyles.lg,
-    merged.variant === "primary" && variants.primary,
-    merged.variant === "secondary" && variants.secondary,
-    merged.variant === "ghost" && variants.ghost,
-    merged.variant === "destructive" && variants.destructive,
-    styles.pressable,
-    merged.isIconOnly && styles.iconOnly,
-    disabled && styles.disabled,
-    ariaDisabled && styles.ariaDisabled,
-  );
+  const style = createMemo(() => {
+    const s = size();
+    const currentVariant = variant();
+    return stylexProps(
+      styles.base,
+      s === "sm" && sizeStyles.sm,
+      s === "md" && sizeStyles.md,
+      s === "lg" && sizeStyles.lg,
+      currentVariant === "primary" && variants.primary,
+      currentVariant === "secondary" && variants.secondary,
+      currentVariant === "ghost" && variants.ghost,
+      currentVariant === "destructive" && variants.destructive,
+      styles.pressable,
+      merged.isIconOnly && styles.iconOnly,
+      disabled() && styles.disabled,
+      ariaDisabled() && styles.ariaDisabled,
+      merged.xstyle,
+    );
+  });
 
   return (
     <button
       {...rest}
-      class={[style.className, props.class]}
-      style={style.style}
-      data-style-src={style["data-style-src"]}
-      type={merged.type}
+      class={[style().class, props.class]}
+      style={style().style}
+      data-style-src={style()["data-style-src"]}
+      type={type()}
       title={merged.tooltip}
-      disabled={ariaDisabled ? undefined : disabled}
-      aria-busy={loading ? "true" : undefined}
-      aria-disabled={ariaDisabled ? "true" : undefined}
+      disabled={ariaDisabled() ? undefined : disabled()}
+      aria-busy={loading() ? "true" : undefined}
+      aria-disabled={ariaDisabled() ? "true" : undefined}
       aria-label={merged.isIconOnly ? merged.label : undefined}
       onClick={onClick}
     >
@@ -342,9 +376,9 @@ export function Button(props: ButtonProps) {
         <span
           {...stylex.attrs(
             styles.iconWrapper,
-            size === "sm" && iconSizeStyles.sm,
-            size === "md" && iconSizeStyles.md,
-            size === "lg" && iconSizeStyles.lg,
+            size() === "sm" && iconSizeStyles.sm,
+            size() === "md" && iconSizeStyles.md,
+            size() === "lg" && iconSizeStyles.lg,
           )}
         >
           {merged.icon}

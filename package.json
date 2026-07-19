@@ -12,7 +12,7 @@
     "parity": "bun run --filter @astryx-solid/verification parity",
     "build": "vp run --filter './apps/*' --filter './packages/*' build",
     "dev": "vp run --parallel --filter './apps/*' --filter './packages/*' dev",
-    "test": "vp run --filter './packages/*' test",
+    "test": "bun test packages/verification/tests && bun run --cwd packages/core test",
     "prepare": "vp config"
   },
   "devDependencies": {

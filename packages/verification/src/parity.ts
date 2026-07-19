@@ -86,6 +86,9 @@ async function validateLedger() {
   const inventory = await Bun.file(
     resolve(root, "docs/wayfinder/issue-3-parity-inventory.json"),
   ).json();
+  if (ledger.baseline !== inventory.source.commit) {
+    throw new Error("Ledger baseline does not match inventory source commit");
+  }
   const batchesToValidate = selectedBatch
     ? [selectedBatch]
     : packageName

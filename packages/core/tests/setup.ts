@@ -1,7 +1,7 @@
 import stylex from "@stylexjs/unplugin/rolldown";
 import { Window } from "happy-dom";
 import { rolldown } from "rolldown";
-import { solid } from "rolldown-plugin-dom-expressions-jsx-compiler";
+import { solid } from "rolldown-plugin-dom-expressions-compiler";
 
 const root = `${import.meta.dir}/../`;
 

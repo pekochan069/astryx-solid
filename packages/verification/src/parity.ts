@@ -32,7 +32,14 @@ if (batch && packageName && !ledger.batches[batch].packages.includes(packageName
 }
 
 const selectedBatch = batch ?? null;
-const gates = ["ledger", "core", "packed-consumer", "docs", "browser"];
+const selectedBatches = batch
+  ? [batch]
+  : packageName
+    ? Object.keys(ledger.batches).filter((name) =>
+        ledger.batches[name].packages.includes(packageName),
+      )
+    : Object.keys(ledger.batches);
+const gates = [...new Set(selectedBatches.flatMap((name) => ledger.batches[name].gates))];
 
 if (args.includes("--list")) {
   console.log(JSON.stringify({ batch: selectedBatch, package: packageName, gates }));
@@ -152,6 +159,26 @@ const commands: Record<string, string[]> = {
     "build",
   ],
   "packed-consumer": ["bun", "packages/verification/src/packed-consumer.ts"],
+  build: [
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "check",
+    "&&",
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "test",
+    "&&",
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "build",
+  ],
+  "packed-build": ["bun", "packages/verification/src/packed-build-consumer.ts"],
   docs: ["bun", "run", "--filter", "@astryx-solid/docs", "build"],
   browser: ["bun", "run", "--filter", "@astryx-solid/docs", "test:browser"],
 };

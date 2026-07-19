@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": ["src", "vite.config.ts"]
+}

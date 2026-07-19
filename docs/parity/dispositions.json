@@ -5,7 +5,14 @@
     "control-plane": {
       "packages": ["@astryx-solid/core"],
       "inventoryPatterns": ["VisuallyHidden"],
+      "gates": ["ledger", "core", "packed-consumer", "docs", "browser"],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    "build": {
+      "packages": ["@astryx-solid/build"],
+      "inventoryPatterns": ["packages/build/"],
+      "gates": ["ledger", "build", "packed-build"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/16"
     }
   },
   "dispositions": [
@@ -124,6 +131,96 @@
         "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenSupplementaryContext.doc.mjs",
         "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenSupplementaryContext.tsx"
       ]
+    },
+    {
+      "source": "@astryxdesign/build package metadata and documentation",
+      "batch": "build",
+      "package": "@astryx-solid/build",
+      "disposition": "implemented",
+      "replacement": "packages/build/package.json and packages/build/README.md",
+      "rationale": "The Solid package publishes compiled ESM and declarations with Vite Plus setup documentation.",
+      "evidence": [
+        "packages/build/package.json",
+        "packages/build/README.md",
+        "apps/docs/src/registry/packages.json",
+        "packages/verification/src/packed-build-consumer.ts"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/16",
+      "surfaces": [
+        "packages/build/.gitignore",
+        "packages/build/CHANGELOG.md",
+        "packages/build/package.json",
+        "packages/build/README.md",
+        "packages/build/build.mjs",
+        "packages/build/tsconfig.build.json"
+      ]
+    },
+    {
+      "source": "@astryxdesign/build root, Babel, PostCSS, and Next integrations",
+      "batch": "build",
+      "package": "@astryx-solid/build",
+      "disposition": "approved-incompatible",
+      "replacement": "@astryx-solid/build/vite",
+      "rationale": "React source-build integrations are replaced by one Vite Plus integration because Solid packages publish compiled ESM and CSS assets.",
+      "evidence": ["packages/build/src/vite.ts", "packages/build/README.md"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/14",
+      "surfaces": [
+        "packages/build/src/config.js",
+        "packages/build/src/babel.js",
+        "packages/build/src/index.js",
+        "packages/build/src/next.js"
+      ],
+      "classification": "react-source-build-replacement",
+      "affectedSurfaces": [
+        "packages/build/src/config.js",
+        "packages/build/src/babel.js",
+        "packages/build/src/index.js",
+        "packages/build/src/next.js"
+      ],
+      "migrationGuidance": "Use @astryx-solid/build/vite in a Vite Plus configuration and import published Astryx CSS assets."
+    },
+    {
+      "source": "packages/build/src/vite.ts",
+      "batch": "build",
+      "package": "@astryx-solid/build",
+      "disposition": "implemented",
+      "replacement": "packages/build/src/vite.ts",
+      "rationale": "The Vite integration configures StyleX and declares Astryx CSS layer order.",
+      "evidence": [
+        "packages/build/src/vite.ts",
+        "packages/build/tests/vite.test.ts",
+        "packages/verification/src/packed-build-consumer.ts"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/16",
+      "surfaces": ["packages/build/src/vite.ts"]
+    },
+    {
+      "source": "packages/build/src/babel.test.mjs",
+      "batch": "build",
+      "package": "@astryx-solid/build",
+      "disposition": "approved-incompatible",
+      "replacement": "packages/build/tests/vite.test.ts",
+      "rationale": "The Babel wrapper is not retained; the Vite integration's observable layer contract is tested instead.",
+      "evidence": ["packages/build/tests/vite.test.ts"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/14",
+      "surfaces": ["packages/build/src/babel.test.mjs"],
+      "classification": "react-source-build-replacement",
+      "affectedSurfaces": ["packages/build/src/babel.test.mjs"],
+      "migrationGuidance": "Use the Vite Plus integration; no Babel configuration is required."
+    },
+    {
+      "source": "packages/build/src/vite.test.ts",
+      "batch": "build",
+      "package": "@astryx-solid/build",
+      "disposition": "implemented",
+      "replacement": "packages/build/tests/vite.test.ts",
+      "rationale": "The Vite integration's CSS layer ordering remains covered by a package-local test and packed consumer build.",
+      "evidence": [
+        "packages/build/tests/vite.test.ts",
+        "packages/verification/src/packed-build-consumer.ts"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/16",
+      "surfaces": ["packages/build/src/vite.test.ts"]
     }
   ]
 }

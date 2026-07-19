@@ -49,6 +49,17 @@ describe("root parity command", () => {
     expect(JSON.parse(result.stdout).package).toBe("@astryx-solid/core");
   });
 
+  it("selects the Build package and its applicable gates", async () => {
+    const result = await list("--package", "@astryx-solid/build");
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      batch: null,
+      package: "@astryx-solid/build",
+      gates: ["ledger", "build", "packed-build"],
+    });
+  });
+
   it("rejects unknown selectors", async () => {
     const packageResult = await list("--package", "@astryx-solid/unknown");
     const batchResult = await list("--batch", "unknown");

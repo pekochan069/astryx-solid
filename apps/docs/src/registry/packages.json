@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "name": "@astryx-solid/build",
+      "version": "0.1.0",
+      "description": "Vite Plus StyleX integration for Astryx Solid packages.",
+      "exports": [".", "./vite"],
+      "documentation": "packages/build/README.md"
+    }
+  ]
+}

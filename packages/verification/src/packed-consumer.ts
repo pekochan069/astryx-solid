@@ -80,7 +80,7 @@ try {
     }
   } finally {
     await browser?.close().catch(() => {});
-    server.stop(true);
+    await server.stop(true);
   }
   console.log("Packed consumer passed");
 } finally {

@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../../..");
 const temp = await mkdtemp(resolve(tmpdir(), "astryx-packed-consumer-"));
-const tarball = resolve(temp, "astryx-solid-core-0.0.0.tgz");
+const corePackage = await Bun.file(resolve(root, "packages/core/package.json")).json();
+const tarball = resolve(temp, `astryx-solid-core-${corePackage.version}.tgz`);
 
 async function run(command: string[], cwd: string) {
   const process = Bun.spawn(command, { cwd, stdout: "inherit", stderr: "inherit" });
@@ -28,9 +29,9 @@ await writeFile(
       },
       dependencies: {
         "@astryx-solid/core": `file:${tarball}`,
-        "@solidjs/web": "2.0.0-beta.19",
-        "@stylexjs/stylex": "0.19.0",
-        "solid-js": "2.0.0-beta.19",
+        "@solidjs/web": corePackage.devDependencies["@solidjs/web"],
+        "@stylexjs/stylex": corePackage.peerDependencies["@stylexjs/stylex"],
+        "solid-js": corePackage.devDependencies["solid-js"],
       },
       devDependencies: {
         "@types/node": "^26.0.0",

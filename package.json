@@ -20,6 +20,9 @@
     "vite-plus": "catalog:"
   },
   "overrides": {
+    "@solidjs/signals": "2.0.0-beta.19",
+    "@solidjs/web": "2.0.0-beta.19",
+    "solid-js": "2.0.0-beta.19",
     "vite": "catalog:"
   },
   "devEngines": {

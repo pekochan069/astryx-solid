@@ -24,8 +24,8 @@ if (batch && packageName && !ledger.batches[batch].packages.includes(packageName
   fail(`Package ${packageName} is not part of batch ${batch}`);
 }
 
-const selectedBatch = batch ?? (packageName ? null : "control-plane");
-const gates = ["ledger", "core", "packed-consumer"];
+const selectedBatch = batch ?? null;
+const gates = ["ledger", "core", "packed-consumer", "docs", "browser"];
 
 if (args.includes("--list")) {
   console.log(JSON.stringify({ batch: selectedBatch, package: packageName, gates }));
@@ -53,17 +53,49 @@ async function validateLedger() {
   );
   if (selected.length === 0) throw new Error("Selection has no dispositions");
   const allowed = new Set(["implemented", "approved-incompatible", "not-applicable"]);
+  const assigned = new Set<string>();
   for (const item of selected) {
     for (const field of ["source", "batch", "package", "disposition", "rationale", "approval"]) {
       if (!item[field]) throw new Error(`${item.source ?? "Disposition"} is missing ${field}`);
     }
     if (!allowed.has(item.disposition)) throw new Error(`${item.source} has invalid disposition`);
+    if (!item.surfaces?.length) throw new Error(`${item.source} has no assigned surfaces`);
+    for (const surface of item.surfaces) {
+      if (assigned.has(surface)) throw new Error(`${surface} has multiple dispositions`);
+      assigned.add(surface);
+    }
+    if (item.disposition !== "implemented") {
+      for (const field of ["classification", "affectedSurfaces", "migrationGuidance"]) {
+        if (!item[field]?.length) throw new Error(`${item.source} exception is missing ${field}`);
+      }
+      if (!item.approval.startsWith("https://github.com/")) {
+        throw new Error(`${item.source} exception has no linked approval`);
+      }
+    }
     if (!item.evidence?.length) throw new Error(`${item.source} has no evidence`);
     for (const evidence of item.evidence) {
       if (!(await Bun.file(resolve(root, evidence.split("#")[0])).exists())) {
         throw new Error(`${item.source} evidence does not exist: ${evidence}`);
       }
     }
+  }
+
+  const inventory = await Bun.file(
+    resolve(root, "docs/wayfinder/issue-3-parity-inventory.json"),
+  ).json();
+  const expected = new Set<string>();
+  const collect = (value: unknown) => {
+    if (typeof value === "string" && value.includes("VisuallyHidden")) expected.add(value);
+    else if (Array.isArray(value)) value.forEach(collect);
+    else if (value && typeof value === "object") Object.values(value).forEach(collect);
+  };
+  collect(inventory);
+  const missing = [...expected].filter((surface) => !assigned.has(surface));
+  const unknown = [...assigned].filter((surface) => !expected.has(surface));
+  if (missing.length || unknown.length) {
+    throw new Error(
+      `Inventory mismatch; missing: ${missing.join(", ") || "none"}; unknown: ${unknown.join(", ") || "none"}`,
+    );
   }
 }
 
@@ -88,6 +120,8 @@ const commands: Record<string, string[]> = {
     "build",
   ],
   "packed-consumer": ["bun", "packages/verification/src/packed-consumer.ts"],
+  docs: ["bun", "run", "--filter", "@astryx-solid/docs", "build"],
+  browser: ["bun", "run", "--filter", "@astryx-solid/docs", "test:browser"],
 };
 
 const results: GateResult[] = [];

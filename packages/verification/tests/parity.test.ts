@@ -24,8 +24,15 @@ describe("root parity command", () => {
     expect(JSON.parse(result.stdout)).toEqual({
       batch: "control-plane",
       package: null,
-      gates: ["ledger", "core", "packed-consumer"],
+      gates: ["ledger", "core", "packed-consumer", "docs", "browser"],
     });
+  });
+
+  it("defaults to the aggregate selection", async () => {
+    const result = await list();
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout).batch).toBeNull();
   });
 
   it("rejects an unknown package", async () => {

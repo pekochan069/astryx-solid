@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "name": "VisuallyHidden",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/visually-hidden",
+      "docsPath": "/components/visually-hidden",
+      "description": "Hides content visually while keeping it in the accessibility tree.",
+      "states": ["default", "live-region", "structural-heading", "control-label"]
+    }
+  ]
+}

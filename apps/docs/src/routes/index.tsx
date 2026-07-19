@@ -1,5 +1,5 @@
 import { Stack } from "@astryx-solid/core";
-import { Button } from "@asytyx-solid/core/button";
+import { Button } from "@astryx-solid/core/button";
 import { createFileRoute } from "@tanstack/solid-router";
 import { createSignal } from "solid-js";
 

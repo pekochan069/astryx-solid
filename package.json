@@ -4,15 +4,15 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*",
-    "tools/*"
+    "apps/*"
   ],
   "type": "module",
   "scripts": {
-    "ready": "vp check && vp run -r test && vp run -r build",
+    "ready": "vp check && vp lint && bun run test && bun run build",
+    "parity": "bun run --filter @astryx-solid/verification parity",
     "build": "vp run --filter './apps/*' --filter './packages/*' build",
     "dev": "vp run --parallel --filter './apps/*' --filter './packages/*' dev",
-    "test": "vp run --filter './packages/*' test",
+    "test": "bun test packages/verification/tests && bun run --cwd packages/core test",
     "prepare": "vp config"
   },
   "devDependencies": {
@@ -20,6 +20,9 @@
     "vite-plus": "catalog:"
   },
   "overrides": {
+    "@solidjs/signals": "2.0.0-beta.19",
+    "@solidjs/web": "2.0.0-beta.19",
+    "solid-js": "2.0.0-beta.19",
     "vite": "catalog:"
   },
   "devEngines": {

@@ -1,39 +1,33 @@
-import { transformAsync } from "@babel/core";
-// @ts-expect-error Babel preset ships without declarations.
-import typescriptPreset from "@babel/preset-typescript";
-import stylexPlugin from "@stylexjs/babel-plugin";
-// @ts-expect-error Solid preset ships without declarations.
-import solidPreset from "babel-preset-solid";
+import stylex from "@stylexjs/unplugin/rolldown";
 import { Window } from "happy-dom";
+import { rolldown } from "rolldown";
+import { solid } from "rolldown-plugin-dom-expressions-compiler";
 
 const root = `${import.meta.dir}/../`;
 
 Bun.plugin({
-  name: "solid-stylex-tests",
+  name: "solid-tests",
   setup(build) {
     build.onLoad(
       { filter: /packages\/core\/(?:src|tests)\/.*(?:\.tsx|\.stylex\.ts)$/ },
       async ({ path }) => {
         try {
-          const result = await transformAsync(await Bun.file(path).text(), {
-            filename: path,
-            presets: [
-              [solidPreset, { generate: "dom", hydratable: false }],
-              [typescriptPreset, { isTSX: path.endsWith(".tsx"), allExtensions: true }],
-            ],
+          const bundle = await rolldown({
+            input: path,
+            external: (id) => id !== path,
             plugins: [
-              [
-                stylexPlugin,
-                {
-                  dev: false,
-                  runtimeInjection: false,
-                  unstable_moduleResolution: { type: "commonJS", rootDir: root },
-                },
-              ],
+              stylex({
+                dev: false,
+                runtimeInjection: false,
+                unstable_moduleResolution: { type: "commonJS", rootDir: root },
+              }),
+              solid(),
             ],
           });
-
-          return { contents: result?.code ?? "", loader: "js" };
+          const { output } = await bundle.generate({ format: "esm" });
+          const chunk = output.find((item) => item.type === "chunk");
+          if (!chunk) throw new Error(`No JavaScript emitted for ${path}`);
+          return { contents: chunk.code, loader: "js" };
         } catch (error) {
           console.error(`Failed to compile ${path}`, error);
           throw error;

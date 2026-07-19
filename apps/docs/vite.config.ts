@@ -10,9 +10,11 @@ export default defineConfig({
       typeCheck: true,
     },
   },
-  fmt: {},
+  fmt: {
+    ignorePatterns: ["src/routeTree.gen.ts"],
+  },
   oxc: {
-    exclude: [/\.js$/, /\.d\.[cm]?ts$/],
+    exclude: [/\.js$/, /\.d\.[cm]?ts$/, "routeTree.gen.ts"],
   },
   plugins: [
     tanstackRouter({

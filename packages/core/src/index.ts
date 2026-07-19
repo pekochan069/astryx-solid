@@ -101,5 +101,5 @@ export * from "./components/stack/index.ts";
 // export * from "./top-nav/index.ts";
 // export * from "./tree-list/index.ts";
 // export * from "./typeahead/index.ts";
-// export * from "./visually-hidden/index.ts";
+export * from "./components/visually-hidden/index.ts";
 // export * from "./vstack/index.ts";

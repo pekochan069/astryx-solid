@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "baseline": "eb23da710a0b32610c24dd33c1f77c01ac09fd24",
+  "batches": {
+    "control-plane": {
+      "packages": ["@astryx-solid/core"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/15"
+    }
+  },
+  "dispositions": [
+    {
+      "source": "@astryxdesign/core/VisuallyHidden",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "approved-incompatible",
+      "replacement": "@astryx-solid/core/visually-hidden",
+      "rationale": "Solid packages use canonical lowercase subpaths while preserving the exported symbol name.",
+      "evidence": [
+        "packages/core/src/components/visually-hidden/index.ts",
+        "packages/verification/fixtures/packed-consumer/src/main.tsx"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/14"
+    },
+    {
+      "source": "packages/core/src/VisuallyHidden/VisuallyHidden.test.tsx",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "packages/core/tests/components/visually-hidden/visually-hidden.test.ts",
+      "rationale": "Solid public behavior is verified at the DOM seam; SSR is verified by the packed consumer.",
+      "evidence": [
+        "packages/core/tests/components/visually-hidden/visually-hidden.test.ts",
+        "packages/verification/fixtures/packed-consumer/src/ssr.tsx"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    {
+      "source": "apps/storybook/stories/VisuallyHidden.stories.tsx",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "not-applicable",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "The repository owner explicitly removed Storybook from this implementation.",
+      "evidence": ["apps/docs/src/routes/components.visually-hidden.tsx"],
+      "approval": "implementation-session owner directive"
+    },
+    {
+      "source": "packages/core/src/VisuallyHidden/VisuallyHidden.doc.mjs",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "The Solid docs route, source JSDoc, and machine-readable registry describe the public API and examples.",
+      "evidence": [
+        "apps/docs/src/routes/components.visually-hidden.tsx",
+        "apps/docs/src/registry/components.json",
+        "packages/core/src/components/visually-hidden/visually-hidden.tsx"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    {
+      "source": "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenLiveRegion.{doc.mjs,tsx}",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "The retained live-region behavior is executable in the Solid docs route; CLI template delivery belongs to its later batch.",
+      "evidence": ["apps/docs/src/routes/components.visually-hidden.tsx"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    {
+      "source": "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenShowcase.{doc.mjs,tsx}",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "The retained showcase behavior is represented in the Solid docs route.",
+      "evidence": ["apps/docs/src/routes/components.visually-hidden.tsx"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    {
+      "source": "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenStructuralHeading.{doc.mjs,tsx}",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "Polymorphic structural heading behavior is documented by the Solid component API.",
+      "evidence": ["packages/core/src/components/visually-hidden/visually-hidden.tsx"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    },
+    {
+      "source": "packages/cli/templates/blocks/components/VisuallyHidden/VisuallyHiddenSupplementaryContext.{doc.mjs,tsx}",
+      "batch": "control-plane",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "apps/docs/src/routes/components.visually-hidden.tsx",
+      "rationale": "Supplementary accessible control context is represented in the Solid docs route.",
+      "evidence": ["apps/docs/src/routes/components.visually-hidden.tsx"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/15"
+    }
+  ]
+}

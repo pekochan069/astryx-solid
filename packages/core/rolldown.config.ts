@@ -1,4 +1,6 @@
 import stylex from "@stylexjs/unplugin/rolldown";
+import { existsSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig } from "rolldown";
 import { solid } from "rolldown-plugin-dom-expressions-compiler";
 import { dts } from "rolldown-plugin-dts";
@@ -28,9 +30,21 @@ export default defineConfig({
     {
       name: "copy-css-files",
       async generateBundle() {
+        const dist = import.meta.dirname + "/dist";
+
+        if (!existsSync(dist)) {
+          mkdirSync(dist);
+        }
+
         await Promise.all([
-          this.fs.copyFile("./src/reset.css", "./dist/reset.css"),
-          this.fs.copyFile("./src/tailwind-theme.css", "./dist/tailwind-theme.css"),
+          this.fs.copyFile(
+            resolve(import.meta.dirname, "src/reset.css"),
+            resolve(import.meta.dirname, "dist/reset.css"),
+          ),
+          this.fs.copyFile(
+            resolve(import.meta.dirname, "src/tailwind-theme.css"),
+            resolve(import.meta.dirname, "dist/tailwind-theme.css"),
+          ),
         ]);
       },
     },

@@ -21,22 +21,22 @@
   "exports": {
     "./package.json": "./package.json",
     ".": {
-      "default": "./dist/index.js",
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts"
+      "source": "./src/index.ts",
+      "default": "./dist/index.js"
     },
     "./astryx.css": "./dist/astryx.css",
     "./reset.css": "./dist/reset.css",
     "./tailwind-theme.css": "./dist/tailwind-theme.css",
     "./button": {
-      "default": "./dist/button.js",
       "types": "./dist/button.d.ts",
-      "source": "./src/components/button/index.ts"
+      "source": "./src/components/button/index.ts",
+      "default": "./dist/button.js"
     },
     "./visually-hidden": {
-      "default": "./dist/visually-hidden.js",
       "types": "./dist/visually-hidden.d.ts",
-      "source": "./src/components/visually-hidden/index.ts"
+      "source": "./src/components/visually-hidden/index.ts",
+      "default": "./dist/visually-hidden.js"
     }
   },
   "publishConfig": {

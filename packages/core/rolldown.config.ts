@@ -1,6 +1,6 @@
 import stylex from "@stylexjs/unplugin/rolldown";
 import { defineConfig } from "rolldown";
-import { solid } from "rolldown-plugin-dom-expressions-jsx-compiler";
+import { solid } from "rolldown-plugin-dom-expressions-compiler";
 import { dts } from "rolldown-plugin-dts";
 
 const stylexPlugin = stylex({

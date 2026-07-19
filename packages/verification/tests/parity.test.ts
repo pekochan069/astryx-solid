@@ -42,10 +42,30 @@ describe("root parity command", () => {
     expect(result.stderr).toContain("Missing value for --batch");
   });
 
-  it("rejects an unknown package", async () => {
-    const result = await list("--package", "@astryx-solid/unknown");
+  it("selects a known package", async () => {
+    const result = await list("--package", "@astryx-solid/core");
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout).package).toBe("@astryx-solid/core");
+  });
+
+  it("rejects unknown selectors", async () => {
+    const packageResult = await list("--package", "@astryx-solid/unknown");
+    const batchResult = await list("--batch", "unknown");
+    const optionResult = await list("--bacth", "control-plane");
+
+    expect(packageResult.exitCode).toBe(2);
+    expect(packageResult.stderr).toContain("Unknown package");
+    expect(batchResult.exitCode).toBe(2);
+    expect(batchResult.stderr).toContain("Unknown batch");
+    expect(optionResult.exitCode).toBe(2);
+    expect(optionResult.stderr).toContain("Unknown option");
+  });
+
+  it("rejects duplicate selectors", async () => {
+    const result = await list("--batch", "control-plane", "--batch", "control-plane");
 
     expect(result.exitCode).toBe(2);
-    expect(result.stderr).toContain("Unknown package");
+    expect(result.stderr).toContain("Duplicate option");
   });
 });

@@ -1,18 +1,22 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, realpath, writeFile } from "node:fs/promises";
+import { isAbsolute, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../../..");
+const canonicalRoot = await realpath(root);
 const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).json();
 const args = process.argv.slice(2);
-const value = (flag: string) => {
-  const index = args.indexOf(flag);
-  if (index === -1) return null;
-  const selected = args[index + 1];
+const selectors = new Map<string, string>();
+for (let index = 0; index < args.length; index++) {
+  const flag = args[index];
+  if (flag === "--list") continue;
+  if (flag !== "--batch" && flag !== "--package") fail(`Unknown option: ${flag}`);
+  if (selectors.has(flag)) fail(`Duplicate option: ${flag}`);
+  const selected = args[++index];
   if (!selected || selected.startsWith("--")) fail(`Missing value for ${flag}`);
-  return selected;
-};
-const batch = value("--batch");
-const packageName = value("--package");
+  selectors.set(flag, selected);
+}
+const batch = selectors.get("--batch") ?? null;
+const packageName = selectors.get("--package") ?? null;
 const batches = Object.keys(ledger.batches);
 const packages = [...new Set(ledger.dispositions.map((item: { package: string }) => item.package))];
 
@@ -42,7 +46,6 @@ type GateResult = {
   name: string;
   status: "passed" | "failed";
   durationMs: number;
-  command?: string;
   error?: string;
 };
 
@@ -77,8 +80,17 @@ async function validateLedger() {
     }
     if (!item.evidence?.length) throw new Error(`${item.source} has no evidence`);
     for (const evidence of item.evidence) {
-      if (!(await Bun.file(resolve(root, evidence.split("#")[0])).exists())) {
-        throw new Error(`${item.source} evidence does not exist: ${evidence}`);
+      if (evidence.includes("#"))
+        throw new Error(`${item.source} evidence anchors are unsupported`);
+      const evidencePath = resolve(root, evidence);
+      let repoPath: string;
+      try {
+        repoPath = relative(canonicalRoot, await realpath(evidencePath));
+      } catch {
+        throw new Error(`${item.source} evidence does not exist in the repository: ${evidence}`);
+      }
+      if (isAbsolute(repoPath) || repoPath.startsWith("..")) {
+        throw new Error(`${item.source} evidence does not exist in the repository: ${evidence}`);
       }
     }
   }

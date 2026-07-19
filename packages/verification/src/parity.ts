@@ -6,7 +6,10 @@ const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).js
 const args = process.argv.slice(2);
 const value = (flag: string) => {
   const index = args.indexOf(flag);
-  return index === -1 ? null : args[index + 1];
+  if (index === -1) return null;
+  const selected = args[index + 1];
+  if (!selected || selected.startsWith("--")) fail(`Missing value for ${flag}`);
+  return selected;
 };
 const batch = value("--batch");
 const packageName = value("--package");

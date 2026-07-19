@@ -12,6 +12,7 @@ test("VisuallyHidden remains accessible and visually absent", async ({ page }) =
   await expect(hiddenLabel).toHaveCSS("position", "absolute");
   await expect(hiddenLabel).toHaveCSS("overflow", "hidden");
   await expect(hiddenLabel).toHaveCSS("width", "1px");
+  await expect(page.getByText("Upload complete")).toHaveAttribute("aria-live", "polite");
 
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(

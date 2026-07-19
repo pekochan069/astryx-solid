@@ -35,6 +35,13 @@ describe("root parity command", () => {
     expect(JSON.parse(result.stdout).batch).toBeNull();
   });
 
+  it("rejects a selector without a value", async () => {
+    const result = await list("--batch");
+
+    expect(result.exitCode).toBe(2);
+    expect(result.stderr).toContain("Missing value for --batch");
+  });
+
   it("rejects an unknown package", async () => {
     const result = await list("--package", "@astryx-solid/unknown");
 

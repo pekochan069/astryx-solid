@@ -4,6 +4,7 @@
   "batches": {
     "control-plane": {
       "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": ["VisuallyHidden"],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/15"
     }
   },

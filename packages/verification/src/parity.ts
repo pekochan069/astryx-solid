@@ -86,9 +86,23 @@ async function validateLedger() {
   const inventory = await Bun.file(
     resolve(root, "docs/wayfinder/issue-3-parity-inventory.json"),
   ).json();
+  const batchesToValidate = selectedBatch
+    ? [selectedBatch]
+    : packageName
+      ? Object.keys(ledger.batches).filter((name) =>
+          ledger.batches[name].packages.includes(packageName),
+        )
+      : Object.keys(ledger.batches);
+  const inventoryPatterns = batchesToValidate.flatMap(
+    (name) => ledger.batches[name].inventoryPatterns,
+  );
   const expected = new Set<string>();
   const collect = (value: unknown) => {
-    if (typeof value === "string" && value.includes("VisuallyHidden")) expected.add(value);
+    if (
+      typeof value === "string" &&
+      inventoryPatterns.some((pattern: string) => value.includes(pattern))
+    )
+      expected.add(value);
     else if (Array.isArray(value)) value.forEach(collect);
     else if (value && typeof value === "object") Object.values(value).forEach(collect);
   };

@@ -55,6 +55,10 @@ try {
   if (!html.includes("@layer reset, astryx-base, astryx-theme, product;")) {
     throw new Error("Packed Build package did not inject its CSS layer order");
   }
+  const css = await Bun.file(resolve(temp, "dist/assets/stylex.css")).text();
+  if (!css.includes("@layer product.priority")) {
+    throw new Error("Packed Build package did not nest StyleX CSS in the product layer");
+  }
   console.log("Packed Build consumer passed");
 } finally {
   await rm(temp, { recursive: true, force: true });

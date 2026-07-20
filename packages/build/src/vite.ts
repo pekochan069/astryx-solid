@@ -39,7 +39,7 @@ export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
       runtimeInjection: false,
       treeshakeCompensation: true,
       unstable_moduleResolution: { type: "commonJS", rootDir },
-      useCSSLayers: true,
+      useCSSLayers: { prefix: product },
     }) as Plugin,
   ];
 }

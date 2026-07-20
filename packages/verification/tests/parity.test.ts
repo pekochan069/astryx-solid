@@ -1,4 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 
 const root = new URL("../../..", import.meta.url).pathname;
 
@@ -58,6 +61,51 @@ describe("root parity command", () => {
       package: "@astryx-solid/build",
       gates: ["ledger", "build", "packed-build"],
     });
+  });
+
+  it("retains subprocess output when a gate fails", async () => {
+    const bin = await mkdtemp(resolve(tmpdir(), "astryx-fake-bun-"));
+    const artifacts = await mkdtemp(resolve(tmpdir(), "astryx-parity-artifacts-"));
+    const fakeBun = resolve(bin, "bun");
+    await writeFile(
+      fakeBun,
+      `#!/bin/sh\ncase "$*" in *packed-build-consumer*) echo useful-diagnostic >&2; exit 42;; esac\nexec "$REAL_BUN" "$@"\n`,
+    );
+    await chmod(fakeBun, 0o755);
+
+    try {
+      const child = Bun.spawn(
+        [
+          process.execPath,
+          "packages/verification/src/parity.ts",
+          "--package",
+          "@astryx-solid/build",
+        ],
+        {
+          cwd: root,
+          env: {
+            ...process.env,
+            ASTRYX_PARITY_ARTIFACTS: artifacts,
+            PATH: `${bin}:${process.env.PATH}`,
+            REAL_BUN: process.execPath,
+          },
+          stdout: "pipe",
+          stderr: "pipe",
+        },
+      );
+      expect(await child.exited).toBe(1);
+      expect(await readFile(resolve(artifacts, "packed-build.stderr.log"), "utf8")).toContain(
+        "useful-diagnostic",
+      );
+      expect(
+        JSON.parse(await readFile(resolve(artifacts, "packed-build.json"), "utf8")).error,
+      ).toContain("packed-build.stderr.log");
+    } finally {
+      await Promise.all([
+        rm(bin, { recursive: true, force: true }),
+        rm(artifacts, { recursive: true, force: true }),
+      ]);
+    }
   });
 
   it("rejects unknown selectors", async () => {

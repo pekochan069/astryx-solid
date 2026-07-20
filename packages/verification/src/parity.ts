@@ -1,4 +1,4 @@
-import { mkdir, realpath, writeFile } from "node:fs/promises";
+import { mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../../..");
@@ -46,7 +46,7 @@ if (args.includes("--list")) {
   process.exit(0);
 }
 
-const artifacts = resolve(root, "artifacts/parity");
+const artifacts = resolve(process.env.ASTRYX_PARITY_ARTIFACTS ?? resolve(root, "artifacts/parity"));
 await mkdir(artifacts, { recursive: true });
 
 type GateResult = {
@@ -108,14 +108,7 @@ async function validateLedger() {
   if (ledger.baseline !== inventory.source.commit) {
     throw new Error("Ledger baseline does not match inventory source commit");
   }
-  const batchesToValidate = selectedBatch
-    ? [selectedBatch]
-    : packageName
-      ? Object.keys(ledger.batches).filter((name) =>
-          ledger.batches[name].packages.includes(packageName),
-        )
-      : Object.keys(ledger.batches);
-  const inventoryPatterns = batchesToValidate.flatMap(
+  const inventoryPatterns = selectedBatches.flatMap(
     (name) => ledger.batches[name].inventoryPatterns,
   );
   const expected = new Set<string>();
@@ -183,6 +176,23 @@ const commands: Record<string, string[]> = {
   browser: ["bun", "run", "--filter", "@astryx-solid/docs", "test:browser"],
 };
 
+async function captureOutput(
+  stream: ReadableStream<Uint8Array>,
+  path: string,
+  target: NodeJS.WriteStream,
+) {
+  const file = await open(path, "w");
+  const reader = stream.getReader();
+  try {
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+      await file.write(chunk.value);
+      target.write(chunk.value);
+    }
+  } finally {
+    await file.close();
+  }
+}
+
 const results: GateResult[] = [];
 for (const name of gates) {
   const started = performance.now();
@@ -195,10 +205,17 @@ for (const name of gates) {
       const shell = command.includes("&&");
       const child = Bun.spawn(shell ? ["bash", "-lc", command.join(" ")] : command, {
         cwd: root,
-        stdout: "inherit",
-        stderr: "inherit",
+        stdout: "pipe",
+        stderr: "pipe",
       });
-      if ((await child.exited) !== 0) throw new Error(`${name} gate failed`);
+      const [exitCode] = await Promise.all([
+        child.exited,
+        captureOutput(child.stdout, resolve(artifacts, `${name}.stdout.log`), process.stdout),
+        captureOutput(child.stderr, resolve(artifacts, `${name}.stderr.log`), process.stderr),
+      ]);
+      if (exitCode !== 0) {
+        throw new Error(`${name} gate failed; see ${name}.stdout.log and ${name}.stderr.log`);
+      }
     }
     result = { name, status: "passed", durationMs: Math.round(performance.now() - started) };
   } catch (error) {

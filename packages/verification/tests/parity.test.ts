@@ -69,7 +69,7 @@ describe("root parity command", () => {
     const fakeBun = resolve(bin, "bun");
     await writeFile(
       fakeBun,
-      `#!/bin/sh\ncase "$*" in *packed-build-consumer*) echo useful-diagnostic >&2; exit 42;; esac\nexec "$REAL_BUN" "$@"\n`,
+      `#!/bin/sh\ncase "$*" in *packed-build-consumer*) echo useful-stdout; echo useful-stderr >&2; exit 42;; esac\nexec "$REAL_BUN" "$@"\n`,
     );
     await chmod(fakeBun, 0o755);
 
@@ -93,14 +93,19 @@ describe("root parity command", () => {
           stderr: "pipe",
         },
       );
-      const [exitCode] = await Promise.all([
+      const [exitCode, stdout, stderr] = await Promise.all([
         child.exited,
         new Response(child.stdout).text(),
         new Response(child.stderr).text(),
       ]);
       expect(exitCode).toBe(1);
+      expect(stdout).toContain("useful-stdout");
+      expect(stderr).toContain("useful-stderr");
+      expect(await readFile(resolve(artifacts, "packed-build.stdout.log"), "utf8")).toContain(
+        "useful-stdout",
+      );
       expect(await readFile(resolve(artifacts, "packed-build.stderr.log"), "utf8")).toContain(
-        "useful-diagnostic",
+        "useful-stderr",
       );
       expect(
         JSON.parse(await readFile(resolve(artifacts, "packed-build.json"), "utf8")).error,

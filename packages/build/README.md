@@ -20,3 +20,7 @@ The plugin declares `reset, astryx-base, astryx-theme, product` CSS layer order 
 ```
 
 `@astryx-solid/build` re-exports `astryxStylex`; `@astryx-solid/build/vite` is the canonical subpath.
+
+## Publishing
+
+Push a `build-vX.Y.Z` tag matching this package's version. GitHub Actions runs the Build parity gates before publishing to npm.

@@ -14,7 +14,7 @@ export type AstryxStylexOptions = {
 /** Adds Astryx's CSS layer order and configures StyleX for a Vite Plus app. */
 export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
   const {
-    dev = process.env.NODE_ENV !== "production",
+    dev = Reflect.get(process.env, "NODE_ENV") !== "production",
     rootDir = process.cwd(),
     layers = {},
   } = options;

@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readdir, rename, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
@@ -21,34 +21,17 @@ try {
   if (!contents.includes(`astryx-solid-build-${buildPackage.version}.tgz`)) {
     throw new Error("Build package tarball was not created");
   }
+  await rename(tarball, resolve(temp, "astryx-solid-build.tgz"));
   await cp(resolve(import.meta.dirname, "../fixtures/packed-build-consumer"), temp, {
     recursive: true,
   });
-  await writeFile(
-    resolve(temp, "package.json"),
-    `${JSON.stringify(
-      {
-        private: true,
-        type: "module",
-        scripts: { build: "tsc --noEmit && vite build" },
-        dependencies: {
-          "@astryx-solid/build": `file:${tarball}`,
-          "@stylexjs/stylex": "0.19.0",
-          "@stylexjs/unplugin": "0.19.0",
-          "solid-js": "2.0.0-beta.19",
-        },
-        devDependencies: {
-          typescript: "^7.0.0",
-          vite: buildPackage.peerDependencies.vite,
-          "vite-plus": "0.2.4",
-          "vite-plugin-solid": "3.0.0-next.12",
-        },
-      },
-      null,
-      2,
-    )}\n`,
-  );
-  await run(["bun", "install"], temp);
+  await run(["bun", "install", "--frozen-lockfile"], temp);
+  const bundledVite = await Bun.file(
+    resolve(temp, "node_modules/@astryx-solid/build/dist/vite.js"),
+  ).text();
+  if (!/Reflect\.get\(process\.env,\s*["']NODE_ENV["']\)/.test(bundledVite)) {
+    throw new Error("Packed Build package folded the consumer NODE_ENV default");
+  }
   await run(["bun", "run", "build"], temp);
 
   const html = await Bun.file(resolve(temp, "dist/index.html")).text();

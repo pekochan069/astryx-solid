@@ -93,7 +93,12 @@ describe("root parity command", () => {
           stderr: "pipe",
         },
       );
-      expect(await child.exited).toBe(1);
+      const [exitCode] = await Promise.all([
+        child.exited,
+        new Response(child.stdout).text(),
+        new Response(child.stderr).text(),
+      ]);
+      expect(exitCode).toBe(1);
       expect(await readFile(resolve(artifacts, "packed-build.stderr.log"), "utf8")).toContain(
         "useful-diagnostic",
       );

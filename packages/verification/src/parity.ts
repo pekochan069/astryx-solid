@@ -1,3 +1,4 @@
+import { once } from "node:events";
 import { mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
 
@@ -186,7 +187,7 @@ async function captureOutput(
   try {
     for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
       await file.write(chunk.value);
-      target.write(chunk.value);
+      if (!target.write(chunk.value)) await once(target, "drain");
     }
   } finally {
     await file.close();

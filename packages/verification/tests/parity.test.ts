@@ -20,6 +20,17 @@ async function list(...args: string[]) {
 }
 
 describe("root parity command", () => {
+  it("assigns every disposition package to a batch", async () => {
+    const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).json();
+    const packages = new Set(
+      Object.values(ledger.batches).flatMap((batch) => (batch as { packages: string[] }).packages),
+    );
+
+    expect(
+      ledger.dispositions.every((item: { package: string }) => packages.has(item.package)),
+    ).toBe(true);
+  });
+
   it("selects the control-plane batch", async () => {
     const result = await list("--batch", "control-plane");
 

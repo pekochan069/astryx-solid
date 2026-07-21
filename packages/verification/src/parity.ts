@@ -19,7 +19,7 @@ for (let index = 0; index < args.length; index++) {
 const batch = selectors.get("--batch") ?? null;
 const packageName = selectors.get("--package") ?? null;
 const batches = Object.keys(ledger.batches);
-const packages = [...new Set(ledger.dispositions.map((item: { package: string }) => item.package))];
+const packages = [...new Set(batches.flatMap((name) => ledger.batches[name].packages))];
 
 function fail(message: string, code = 2): never {
   console.error(message);

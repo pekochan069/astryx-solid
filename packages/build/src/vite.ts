@@ -13,8 +13,10 @@ export type AstryxStylexOptions = {
 
 const cssIdentifier = /^[A-Za-z_][\w-]*$/;
 
-function validateLayer(name: string) {
-  if (!cssIdentifier.test(name)) throw new Error(`Invalid CSS layer name: ${name}`);
+function validateLayer(name: unknown) {
+  if (typeof name !== "string" || !cssIdentifier.test(name)) {
+    throw new Error("Invalid CSS layer name");
+  }
   return name;
 }
 

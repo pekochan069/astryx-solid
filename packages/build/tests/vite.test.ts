@@ -34,5 +34,13 @@ describe("astryxStylex", () => {
     expect(() => layerOrder({ layers: { product: "app.layer" } })).toThrow(
       "Invalid CSS layer name",
     );
+
+    let calls = 0;
+    const changingValue = {
+      toString: () => (calls++ === 0 ? "safe" : "safe;</style><script>"),
+    };
+    expect(() => layerOrder({ layers: { library: changingValue as unknown as string } })).toThrow(
+      "Invalid CSS layer name",
+    );
   });
 });

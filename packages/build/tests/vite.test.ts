@@ -22,5 +22,8 @@ describe("astryxStylex", () => {
     expect(layerOrder({ layers: { library: "library", product: "app" } })).toBe(
       "@layer reset, library, astryx-theme, app;",
     );
+    expect(layerOrder({ layers: { product: "app" } })).toBe(
+      "@layer reset, astryx-base, astryx-theme, app;",
+    );
   });
 });

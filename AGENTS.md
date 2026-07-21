@@ -1,3 +1,8 @@
+## Rules
+
+- DO NOT modify any package versions or install new packages without confirmation
+- Make sure functions don't exceed more than 100 lines, and 150 lines for components
+
 ## Agent skills
 
 ### Issue tracker

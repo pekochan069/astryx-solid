@@ -1,4 +1,5 @@
-import { mkdir, realpath, writeFile } from "node:fs/promises";
+import { once } from "node:events";
+import { mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../../..");
@@ -18,7 +19,7 @@ for (let index = 0; index < args.length; index++) {
 const batch = selectors.get("--batch") ?? null;
 const packageName = selectors.get("--package") ?? null;
 const batches = Object.keys(ledger.batches);
-const packages = [...new Set(ledger.dispositions.map((item: { package: string }) => item.package))];
+const packages = [...new Set(batches.flatMap((name) => ledger.batches[name].packages))];
 
 function fail(message: string, code = 2): never {
   console.error(message);
@@ -32,14 +33,21 @@ if (batch && packageName && !ledger.batches[batch].packages.includes(packageName
 }
 
 const selectedBatch = batch ?? null;
-const gates = ["ledger", "core", "packed-consumer", "docs", "browser"];
+const selectedBatches = batch
+  ? [batch]
+  : packageName
+    ? Object.keys(ledger.batches).filter((name) =>
+        ledger.batches[name].packages.includes(packageName),
+      )
+    : Object.keys(ledger.batches);
+const gates = [...new Set(selectedBatches.flatMap((name) => ledger.batches[name].gates))];
 
 if (args.includes("--list")) {
   console.log(JSON.stringify({ batch: selectedBatch, package: packageName, gates }));
   process.exit(0);
 }
 
-const artifacts = resolve(root, "artifacts/parity");
+const artifacts = resolve(process.env.ASTRYX_PARITY_ARTIFACTS ?? resolve(root, "artifacts/parity"));
 await mkdir(artifacts, { recursive: true });
 
 type GateResult = {
@@ -101,14 +109,7 @@ async function validateLedger() {
   if (ledger.baseline !== inventory.source.commit) {
     throw new Error("Ledger baseline does not match inventory source commit");
   }
-  const batchesToValidate = selectedBatch
-    ? [selectedBatch]
-    : packageName
-      ? Object.keys(ledger.batches).filter((name) =>
-          ledger.batches[name].packages.includes(packageName),
-        )
-      : Object.keys(ledger.batches);
-  const inventoryPatterns = batchesToValidate.flatMap(
+  const inventoryPatterns = selectedBatches.flatMap(
     (name) => ledger.batches[name].inventoryPatterns,
   );
   const expected = new Set<string>();
@@ -152,9 +153,46 @@ const commands: Record<string, string[]> = {
     "build",
   ],
   "packed-consumer": ["bun", "packages/verification/src/packed-consumer.ts"],
+  build: [
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "check",
+    "&&",
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "test",
+    "&&",
+    "bun",
+    "run",
+    "--filter",
+    "@astryx-solid/build",
+    "build",
+  ],
+  "packed-build": ["bun", "packages/verification/src/packed-build-consumer.ts"],
   docs: ["bun", "run", "--filter", "@astryx-solid/docs", "build"],
   browser: ["bun", "run", "--filter", "@astryx-solid/docs", "test:browser"],
 };
+
+async function captureOutput(
+  stream: ReadableStream<Uint8Array>,
+  path: string,
+  target: NodeJS.WriteStream,
+) {
+  const file = await open(path, "w");
+  const reader = stream.getReader();
+  try {
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+      await file.write(chunk.value);
+      if (!target.write(chunk.value)) await once(target, "drain");
+    }
+  } finally {
+    await file.close();
+  }
+}
 
 const results: GateResult[] = [];
 for (const name of gates) {
@@ -168,10 +206,17 @@ for (const name of gates) {
       const shell = command.includes("&&");
       const child = Bun.spawn(shell ? ["bash", "-lc", command.join(" ")] : command, {
         cwd: root,
-        stdout: "inherit",
-        stderr: "inherit",
+        stdout: "pipe",
+        stderr: "pipe",
       });
-      if ((await child.exited) !== 0) throw new Error(`${name} gate failed`);
+      const [exitCode] = await Promise.all([
+        child.exited,
+        captureOutput(child.stdout, resolve(artifacts, `${name}.stdout.log`), process.stdout),
+        captureOutput(child.stderr, resolve(artifacts, `${name}.stderr.log`), process.stderr),
+      ]);
+      if (exitCode !== 0) {
+        throw new Error(`${name} gate failed; see ${name}.stdout.log and ${name}.stderr.log`);
+      }
     }
     result = { name, status: "passed", durationMs: Math.round(performance.now() - started) };
   } catch (error) {

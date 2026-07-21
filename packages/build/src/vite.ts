@@ -1,0 +1,54 @@
+import type { Plugin } from "vite";
+
+import stylex from "@stylexjs/unplugin/vite";
+
+export type AstryxStylexOptions = {
+  dev?: boolean;
+  rootDir?: string;
+  layers?: {
+    library?: string;
+    product?: string;
+  };
+};
+
+const cssIdentifier = /^[A-Za-z_][\w-]*$/;
+
+function validateLayer(name: unknown) {
+  if (typeof name !== "string" || !cssIdentifier.test(name)) {
+    throw new Error("Invalid CSS layer name");
+  }
+  return name;
+}
+
+/** Adds Astryx's CSS layer order and configures StyleX for a Vite Plus app. */
+export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
+  const {
+    dev = Reflect.get(process.env, "NODE_ENV") !== "production",
+    rootDir = process.cwd(),
+    layers = {},
+  } = options;
+  const library = validateLayer(layers.library ?? "astryx-base");
+  const product = validateLayer(layers.product ?? "product");
+
+  return [
+    {
+      name: "astryx-solid-css-layer-order",
+      transformIndexHtml() {
+        return [
+          {
+            tag: "style",
+            children: `@layer reset, ${library}, astryx-theme, ${product};`,
+            injectTo: "head-prepend",
+          },
+        ];
+      },
+    },
+    stylex({
+      dev,
+      runtimeInjection: false,
+      treeshakeCompensation: true,
+      unstable_moduleResolution: { type: "commonJS", rootDir },
+      useCSSLayers: { prefix: product },
+    }) as Plugin,
+  ];
+}

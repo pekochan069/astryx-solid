@@ -26,4 +26,13 @@ describe("astryxStylex", () => {
       "@layer reset, astryx-base, astryx-theme, app;",
     );
   });
+
+  it("rejects layer names that can escape the generated style tag", () => {
+    expect(() => layerOrder({ layers: { library: "safe;</style><script>" } })).toThrow(
+      "Invalid CSS layer name",
+    );
+    expect(() => layerOrder({ layers: { product: "app.layer" } })).toThrow(
+      "Invalid CSS layer name",
+    );
+  });
 });

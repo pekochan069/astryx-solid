@@ -11,6 +11,13 @@ export type AstryxStylexOptions = {
   };
 };
 
+const cssIdentifier = /^[A-Za-z_][\w-]*$/;
+
+function validateLayer(name: string) {
+  if (!cssIdentifier.test(name)) throw new Error(`Invalid CSS layer name: ${name}`);
+  return name;
+}
+
 /** Adds Astryx's CSS layer order and configures StyleX for a Vite Plus app. */
 export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
   const {
@@ -18,8 +25,8 @@ export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
     rootDir = process.cwd(),
     layers = {},
   } = options;
-  const library = layers.library ?? "astryx-base";
-  const product = layers.product ?? "product";
+  const library = validateLayer(layers.library ?? "astryx-base");
+  const product = validateLayer(layers.product ?? "product");
 
   return [
     {

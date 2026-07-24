@@ -1,4 +1,3 @@
-import { Button } from "@astryx-solid/core/button";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
 import { defineTheme, Theme, useTheme } from "@astryx-solid/core/theme";
 import { createFileRoute } from "@tanstack/solid-router";
@@ -37,14 +36,34 @@ export function CoreSubstrate() {
           <div class="astryx-solid-button" data-testid="theme-role" style={{ color: "#fff" }}>
             Theme role
           </div>
-          <Button
-            label="Toggle theme"
+          <button
+            type="button"
+            class="astryx-solid-button"
+            style={{
+              "background-color": "var(--color-accent)",
+              color: "#fff",
+              border: 0,
+              padding: "8px 12px",
+              cursor: "pointer",
+            }}
             onClick={() => setMode(mode() === "light" ? "dark" : "light")}
-          />
-          <Button
-            label="Toggle locale"
+          >
+            Toggle theme
+          </button>
+          <button
+            type="button"
+            class="astryx-solid-button"
+            style={{
+              "background-color": "var(--color-accent)",
+              color: "#fff",
+              border: 0,
+              padding: "8px 12px",
+              cursor: "pointer",
+            }}
             onClick={() => setLocale(locale() === "en" ? "fr" : "en")}
-          />
+          >
+            Toggle locale
+          </button>
         </main>
       </InternationalizationProvider>
     </Theme>

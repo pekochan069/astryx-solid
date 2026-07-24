@@ -1,21 +1,36 @@
-import { renderToString } from "@solidjs/web";
+import { generateHydrationScript, renderToString } from "@solidjs/web";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { createUniqueId } from "solid-js";
 
-import { VisuallyHiddenDocs } from "./routes/components.visually-hidden";
-import { CoreSubstrate } from "./routes/core-substrate";
-import { RouteComponent as Index } from "./routes/index";
+import { createDocsApp } from "./app";
+import { prerenderRoutes } from "./prerender-routes";
+const root = process.cwd();
+const template = (await readFile(resolve(root, "dist/index.html"), "utf8")).replace(
+  "<head>",
+  `<head>${generateHydrationScript()}`,
+);
+const generatedRouteTree = await readFile(resolve(root, "src/routeTree.gen.ts"), "utf8");
+const generatedPaths = [...generatedRouteTree.matchAll(/fullPath: ['"]([^'"]+)['"]/g)].flatMap(
+  ([, path]) => (path ? [path] : []),
+);
+const prerenderedPaths = prerenderRoutes.map(({ path }) => path);
+const prerenderedPathSet = new Set<string>(prerenderedPaths);
+if (
+  generatedPaths.length !== prerenderedPaths.length ||
+  generatedPaths.some((path) => !prerenderedPathSet.has(path))
+) {
+  throw new Error(
+    `Prerender route manifest mismatch: generated=${generatedPaths.join(",")} manifest=${prerenderedPaths.join(",")}`,
+  );
+}
 
-const routes = [
-  { path: "/", Component: Index },
-  { path: "/components/visually-hidden", Component: VisuallyHiddenDocs },
-  { path: "/core-substrate", Component: CoreSubstrate },
-];
-const template = await readFile(resolve(process.cwd(), "dist/index.html"), "utf8");
-
-for (const { path, Component } of routes) {
-  const content = renderToString(() => <Component />);
-  const output = resolve(process.cwd(), "dist", path.slice(1), "index.html");
+for (const { path } of prerenderRoutes) {
+  const content = renderToString(() => {
+    if (path === "/core-substrate") createUniqueId();
+    return createDocsApp(path);
+  });
+  const output = resolve(root, "dist", path.slice(1), "index.html");
   await mkdir(dirname(output), { recursive: true });
   await writeFile(
     output,

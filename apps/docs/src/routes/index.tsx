@@ -1,5 +1,4 @@
 import { Stack } from "@astryx-solid/core";
-import { Button } from "@astryx-solid/core/button";
 import { createFileRoute } from "@tanstack/solid-router";
 import { createSignal } from "solid-js";
 
@@ -18,12 +17,12 @@ export function RouteComponent() {
       </Stack>
 
       <Stack direction="horizontal" gap={2} align="center" wrap="wrap">
-        <Button
-          label={`Clicked ${count()} times`}
-          variant="primary"
-          onClick={() => setCount(count() + 1)}
-        />
-        <Button label="Reset" onClick={() => setCount(0)} />
+        <button type="button" onClick={() => setCount(count() + 1)}>
+          Clicked {count()} times
+        </button>
+        <button type="button" onClick={() => setCount(0)}>
+          Reset
+        </button>
       </Stack>
     </Stack>
   );

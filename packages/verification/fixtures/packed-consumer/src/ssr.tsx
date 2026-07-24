@@ -1,21 +1,21 @@
-import { defineTheme, Theme } from "@astryx-solid/core/theme";
-import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
 import { generateHydrationScript, renderToString } from "@solidjs/web";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { createUniqueId } from "solid-js";
 
-const theme = defineTheme({ name: "consumer", tokens: { "--color-accent": ["a", "b"] } });
-const render = () => renderToString(() => <VisuallyHidden as="span">Close dialog</VisuallyHidden>);
+import { createApp } from "./app";
+
+const render = () =>
+  renderToString(() => {
+    createUniqueId();
+    return createApp();
+  });
 const first = render();
-const themed = renderToString(() => (
-  <Theme theme={theme} mode="dark">
-    <VisuallyHidden as="span">Close dialog</VisuallyHidden>
-  </Theme>
-));
 if (
   first !== render() ||
   !first.includes("Close dialog") ||
-  !themed.includes('data-astryx-solid-theme="consumer"')
+  !first.includes("consumer-light") ||
+  !first.includes("Hello")
 ) {
   throw new Error(`Unexpected server output: ${first}`);
 }

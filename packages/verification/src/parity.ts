@@ -2,6 +2,8 @@ import { once } from "node:events";
 import { mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
 
+import { matchesInventoryPattern } from "./inventory-pattern.js";
+
 const root = resolve(import.meta.dirname, "../../..");
 const canonicalRoot = await realpath(root);
 const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).json();
@@ -85,6 +87,12 @@ async function validateLedger() {
       if (!item.approval.startsWith("https://github.com/")) {
         throw new Error(`${item.source} exception has no linked approval`);
       }
+      if (
+        item.batch === "core-styling-theme" &&
+        !/^https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/\d+#issuecomment-\d+$/.test(item.approval)
+      ) {
+        throw new Error(`${item.source} exception has no linked human approval comment`);
+      }
     }
     if (!item.evidence?.length) throw new Error(`${item.source} has no evidence`);
     for (const evidence of item.evidence) {
@@ -116,9 +124,7 @@ async function validateLedger() {
   const collect = (value: unknown) => {
     if (
       typeof value === "string" &&
-      inventoryPatterns.some((pattern: string) =>
-        pattern.startsWith("=") ? value === pattern.slice(1) : value.includes(pattern),
-      )
+      inventoryPatterns.some((pattern: string) => matchesInventoryPattern(value, pattern))
     )
       expected.add(value);
     else if (Array.isArray(value)) value.forEach(collect);
@@ -137,9 +143,7 @@ async function validateLedger() {
       if (selectedBatches.some((name) => ledger.batches[name].requireCurrentExports)) {
         const uncovered = currentExports.filter(
           (value) =>
-            !inventoryPatterns.some((pattern: string) =>
-              pattern.startsWith("=") ? value === pattern.slice(1) : value.includes(pattern),
-            ),
+            !inventoryPatterns.some((pattern: string) => matchesInventoryPattern(value, pattern)),
         );
         if (uncovered.length) {
           throw new Error(`Current exports missing inventory patterns: ${uncovered.join(", ")}`);
@@ -177,6 +181,7 @@ const commands: Record<string, string[]> = {
     "@astryx-solid/core",
     "build",
   ],
+  "core-signatures": ["bun", "packages/verification/src/public-signatures.ts"],
   "packed-consumer": ["bun", "packages/verification/src/packed-consumer.ts"],
   "core-behavior": [
     "bun",

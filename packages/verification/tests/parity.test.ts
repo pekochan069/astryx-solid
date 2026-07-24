@@ -3,6 +3,8 @@ import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
+import { matchesInventoryPattern } from "../src/inventory-pattern.js";
+
 const root = new URL("../../..", import.meta.url).pathname;
 
 async function list(...args: string[]) {
@@ -18,6 +20,14 @@ async function list(...args: string[]) {
   ]);
   return { stdout, stderr, exitCode };
 }
+
+describe("inventory patterns", () => {
+  it("uses exact matching only for equals-prefixed patterns", () => {
+    expect(matchesInventoryPattern("./theme", "=./theme")).toBe(true);
+    expect(matchesInventoryPattern("./theme/syntax", "=./theme")).toBe(false);
+    expect(matchesInventoryPattern("packages/core/src/theme/theme.tsx", "src/theme/")).toBe(true);
+  });
+});
 
 describe("root parity command", () => {
   it("assigns every disposition package to a batch", async () => {

@@ -54,7 +54,15 @@
         "packages/core/src/README.md",
         "packages/core/README.md"
       ],
-      "gates": ["ledger", "core", "core-behavior", "packed-consumer", "docs", "browser"],
+      "gates": [
+        "ledger",
+        "core",
+        "core-signatures",
+        "core-behavior",
+        "packed-consumer",
+        "docs",
+        "browser"
+      ],
       "requireCurrentExports": true,
       "issue": "https://github.com/pekochan069/astryx-solid/issues/18"
     }
@@ -131,7 +139,7 @@
         "packages/core/src/theme/index.ts",
         "packages/core/src/i18n/index.ts"
       ],
-      "approval": "https://github.com/pekochan069/astryx-solid/issues/18",
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/18#issuecomment-5071949119",
       "surfaces": [
         "packages/core/src/Stack/StackItem.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-pagination.test.tsx",

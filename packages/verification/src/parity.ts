@@ -125,6 +125,29 @@ async function validateLedger() {
     else if (value && typeof value === "object") Object.values(value).forEach(collect);
   };
   collect(inventory);
+  for (const packageName of new Set(
+    selectedBatches.flatMap((name) => ledger.batches[name].packages),
+  )) {
+    const packageEntry = inventory.packages.target.find(
+      (entry: { name: string }) => entry.name === packageName,
+    );
+    if (packageEntry) {
+      const currentPackage = await Bun.file(resolve(root, packageEntry.path)).json();
+      const currentExports = Object.keys(currentPackage.exports ?? {});
+      if (selectedBatches.some((name) => ledger.batches[name].requireCurrentExports)) {
+        const uncovered = currentExports.filter(
+          (value) =>
+            !inventoryPatterns.some((pattern: string) =>
+              pattern.startsWith("=") ? value === pattern.slice(1) : value.includes(pattern),
+            ),
+        );
+        if (uncovered.length) {
+          throw new Error(`Current exports missing inventory patterns: ${uncovered.join(", ")}`);
+        }
+      }
+      collect(currentExports);
+    }
+  }
   const missing = [...expected].filter((surface) => !assigned.has(surface));
   const unknown = [...assigned].filter((surface) => !expected.has(surface));
   if (missing.length || unknown.length) {
@@ -155,6 +178,15 @@ const commands: Record<string, string[]> = {
     "build",
   ],
   "packed-consumer": ["bun", "packages/verification/src/packed-consumer.ts"],
+  "core-behavior": [
+    "bun",
+    "--conditions=browser",
+    "test",
+    "--preload",
+    "./packages/core/tests/setup.ts",
+    "packages/core/tests/theme/theme.test.ts",
+    "packages/core/tests/i18n/i18n.test.ts",
+  ],
   build: [
     "bun",
     "run",

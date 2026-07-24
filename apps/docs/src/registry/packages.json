@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "@astryx-solid/core",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "description": "Solid-native Astryx base types, styling, themes, and localization.",
       "exports": [
         ".",
@@ -11,9 +11,11 @@
         "./button",
         "./i18n",
         "./locales/*.json",
+        "./package.json",
         "./naming",
         "./reset.css",
         "./stylex",
+        "./tailwind-theme.css",
         "./theme",
         "./theme/syntax",
         "./theme/tokens",

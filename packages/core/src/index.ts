@@ -1,6 +1,12 @@
 export type { BaseProps } from "./base-props.ts";
-
+export type { SizeValue } from "./types/size-value.types.ts";
+export type { SpacingStep } from "./types/spacing-steps.types.ts";
+export * from "./naming.ts";
 export * from "./stylex/index.ts";
+export { mergeProps } from "./utils/merge-props.ts";
+export type { SolidStyleProps } from "./utils/merge-props.ts";
+export * from "./theme/index.ts";
+export * from "./i18n/index.ts";
 
 // export * from "./alert-dialog/index.ts";
 // export * from "./app-shell/index.ts";

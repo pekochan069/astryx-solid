@@ -18,12 +18,12 @@
  * Usage:
  *
  * 1. Import directly (global reset):
- *    import '@astryxdesign/core/reset.css';
+ *    import '@astryx-solid/core/reset.css';
  *
  * 2. Combine with base styles and theme:
- *    import '@astryxdesign/core/reset.css';        // @layer reset  — clean slate
- *    import '@astryxdesign/core/astryx.css';        // @layer astryx-base — component styles
- *    import '@astryxdesign/theme-neutral/theme.css'; // @layer astryx-theme — theme overrides
+ *    import '@astryx-solid/core/reset.css';        // @layer reset  — clean slate
+ *    import '@astryx-solid/core/astryx.css';        // @layer astryx-base — component styles
+ *    import '@astryx-solid/theme-neutral/theme.css'; // @layer astryx-theme — theme overrides
  *
  * Layer order: reset → astryx-base → astryx-theme
  * Consumer styles (unlayered) always override all Astryx layers.
@@ -35,6 +35,8 @@
  * - Bootstrap Reboot
  * - modern-normalize
  */
+
+@layer reset, astryx-base, astryx-theme;
 
 @layer reset {
   /* ===========================================================================
@@ -206,26 +208,29 @@
 
   /*
    * Child sizing for AspectRatio's `fit` prop — the component marks the
-   * child's direct parent with `data-astryx-aspect-ratio-override` (carrying
+   * child's direct parent with `data-astryx-solid-aspect-ratio-override` (carrying
    * the fit value), and these direct-child rules size the child, so
    * consumers don't hand-write width/height/object-fit on every media child.
    * The marker sits on the parent itself, so the rules don't depend on
    * AspectRatio's internal element structure or its theming surface. As with
-   * the [data-astryx-media] baseline below, the rules are zero-specificity
+   * the [data-astryx-solid-media] baseline below, the rules are zero-specificity
    * and any styling the child sets itself still wins. `fit="center"` needs
    * no rules here — the component centers the child from its own wrapper.
    */
-  :where([data-astryx-aspect-ratio-override="cover"], [data-astryx-aspect-ratio-override="contain"])
+  :where(
+      [data-astryx-solid-aspect-ratio-override="cover"],
+      [data-astryx-solid-aspect-ratio-override="contain"]
+    )
     > :where(*) {
     width: 100%;
     height: 100%;
   }
 
-  :where([data-astryx-aspect-ratio-override="cover"]) > :where(img, video) {
+  :where([data-astryx-solid-aspect-ratio-override="cover"]) > :where(img, video) {
     object-fit: cover;
   }
 
-  :where([data-astryx-aspect-ratio-override="contain"]) > :where(img, video) {
+  :where([data-astryx-solid-aspect-ratio-override="contain"]) > :where(img, video) {
     object-fit: contain;
   }
 
@@ -429,11 +434,11 @@
    * Token overrides (text/icon/accent) are theme-level (generateOnMediaCSS).
    * Dual-prefix (astryx + legacy xds) during the compat window.
    */
-  :where([data-astryx-media="dark"]) {
+  :where([data-astryx-solid-media="dark"]) {
     color-scheme: dark;
   }
 
-  :where([data-astryx-media="light"]) {
+  :where([data-astryx-solid-media="light"]) {
     color-scheme: light;
   }
 }

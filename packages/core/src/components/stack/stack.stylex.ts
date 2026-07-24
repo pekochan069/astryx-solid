@@ -197,7 +197,7 @@ export interface StackOptions {
  *
  * @example
  * ```
- * import { stack } from '@astryxdesign/core/Layout';
+ * import { stack } from '@astryx-solid/core/stack';
  * import * as stylex from '@stylexjs/stylex';
  *
  * // Horizontal stack with numeric gap

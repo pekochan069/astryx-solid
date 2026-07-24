@@ -17,6 +17,14 @@ export default defineConfig({
 
     button: "./src/components/button/index.ts",
     "visually-hidden": "./src/components/visually-hidden/index.ts",
+    naming: "./src/naming.ts",
+    stylex: "./src/stylex/index.ts",
+    utils: "./src/utils/merge-props.ts",
+    theme: "./src/theme/index.ts",
+    "theme/tokens": "./src/theme/tokens.ts",
+    "theme/tokens.stylex": "./src/theme/tokens.stylex.ts",
+    "theme/syntax": "./src/theme/syntax/index.ts",
+    i18n: "./src/i18n/index.ts",
   },
   platform: "browser",
   external: ["solid-js", "@solidjs/web"],
@@ -31,10 +39,7 @@ export default defineConfig({
       name: "copy-css-files",
       async generateBundle() {
         const dist = import.meta.dirname + "/dist";
-
-        if (!existsSync(dist)) {
-          mkdirSync(dist);
-        }
+        if (!existsSync(dist)) mkdirSync(dist);
 
         await Promise.all([
           this.fs.copyFile(

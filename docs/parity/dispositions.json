@@ -13,9 +13,61 @@
       "inventoryPatterns": ["packages/build/"],
       "gates": ["ledger", "build", "packed-build"],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/16"
+    },
+    "core-styling-theme": {
+      "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": [
+        "./astryx.css",
+        "./button",
+        "./i18n",
+        "./locales/*.json",
+        "./naming",
+        "./package.json",
+        "./reset.css",
+        "./tailwind-theme.css",
+        "=./theme",
+        "./theme/syntax",
+        "./theme/tokens",
+        "=./utils",
+        "./visually-hidden"
+      ],
+      "gates": ["ledger", "core", "packed-consumer", "docs", "browser"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/18"
     }
   },
   "dispositions": [
+    {
+      "source": "@astryx-solid/core styling and theme exports",
+      "batch": "core-styling-theme",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "@astryx-solid/core lowercase Solid exports",
+      "rationale": "Core publishes verified Solid styling, theme, locale, and CSS-role artifacts.",
+      "evidence": [
+        "packages/core/package.json",
+        "packages/core/rolldown.config.ts",
+        "packages/core/src/theme/index.ts",
+        "packages/core/src/i18n/index.ts",
+        "packages/core/locales/en.json"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/18",
+      "surfaces": [
+        "./astryx.css",
+        "./button",
+        "./i18n",
+        "./locales/*.json",
+        "./naming",
+        "./package.json",
+        "./reset.css",
+        "./tailwind-theme.css",
+        "./theme",
+        "./theme/syntax",
+        "./theme/tokens",
+        "./theme/tokens.stylex",
+        "./utils",
+        "./visually-hidden"
+      ]
+    },
     {
       "source": "@astryxdesign/core/VisuallyHidden",
       "batch": "control-plane",

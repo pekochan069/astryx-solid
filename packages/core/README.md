@@ -1,23 +1,18 @@
-# vite-plus-starter
+# @astryx-solid/core
 
-A starter for creating a Vite Plus project.
+Solid-native Astryx styling and theme substrate.
 
-## Development
+```tsx
+import { Button, defineTheme, Theme } from "@astryx-solid/core";
+import "@astryx-solid/core/reset.css";
+import "@astryx-solid/core/astryx.css";
 
-- Install dependencies:
+const theme = defineTheme({ name: "app", tokens: { "--color-accent": "#0064e0" } });
 
-```bash
-vp install
+<Theme theme={theme} mode="system">
+  <Button label="Continue" variant="primary" />
+</Theme>;
 ```
 
-- Run the unit tests:
-
-```bash
-vp test
-```
-
-- Build the library:
-
-```bash
-vp pack
-```
+Public subpaths expose naming, StyleX merging, theme tokens and syntax themes,
+i18n, locale JSON, and CSS roles.

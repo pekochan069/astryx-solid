@@ -2,6 +2,28 @@
   "schemaVersion": 1,
   "packages": [
     {
+      "name": "@astryx-solid/core",
+      "version": "0.0.0",
+      "description": "Solid-native Astryx base types, styling, themes, and localization.",
+      "exports": [
+        ".",
+        "./astryx.css",
+        "./button",
+        "./i18n",
+        "./locales/*.json",
+        "./naming",
+        "./reset.css",
+        "./stylex",
+        "./theme",
+        "./theme/syntax",
+        "./theme/tokens",
+        "./theme/tokens.stylex",
+        "./utils",
+        "./visually-hidden"
+      ],
+      "documentation": "packages/core/README.md"
+    },
+    {
       "name": "@astryx-solid/build",
       "version": "0.1.0",
       "description": "Vite Plus StyleX integration for Astryx Solid packages.",

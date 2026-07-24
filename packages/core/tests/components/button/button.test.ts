@@ -27,6 +27,8 @@ describe("Button", () => {
     expect(button.textContent).toBe("Save");
     expect(button.type).toBe("button");
     expect(button.disabled).toBe(false);
+    expect(button.className).toContain("astryx-solid-button");
+    expect(button.getAttribute("data-variant")).toBe("secondary");
   });
 
   it("calls onClick unless disabled", () => {

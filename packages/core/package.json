@@ -14,15 +14,17 @@
   },
   "files": [
     "dist",
-    "src"
+    "locales"
   ],
   "type": "module",
-  "module": "./src/index.ts",
+  "sideEffects": [
+    "./dist/*.css",
+    "./locales/*.json"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./astryx.css": "./dist/astryx.css",
@@ -30,14 +32,45 @@
     "./tailwind-theme.css": "./dist/tailwind-theme.css",
     "./button": {
       "types": "./dist/button.d.ts",
-      "source": "./src/components/button/index.ts",
       "default": "./dist/button.js"
     },
     "./visually-hidden": {
       "types": "./dist/visually-hidden.d.ts",
-      "source": "./src/components/visually-hidden/index.ts",
       "default": "./dist/visually-hidden.js"
-    }
+    },
+    "./naming": {
+      "types": "./dist/naming.d.ts",
+      "default": "./dist/naming.js"
+    },
+    "./stylex": {
+      "types": "./dist/stylex.d.ts",
+      "default": "./dist/stylex.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "default": "./dist/utils.js"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "default": "./dist/theme.js"
+    },
+    "./theme/tokens": {
+      "types": "./dist/theme/tokens.d.ts",
+      "default": "./dist/theme/tokens.js"
+    },
+    "./theme/tokens.stylex": {
+      "types": "./dist/theme/tokens.stylex.d.ts",
+      "default": "./dist/theme/tokens.stylex.js"
+    },
+    "./theme/syntax": {
+      "types": "./dist/theme/syntax.d.ts",
+      "default": "./dist/theme/syntax.js"
+    },
+    "./i18n": {
+      "types": "./dist/i18n.d.ts",
+      "default": "./dist/i18n.js"
+    },
+    "./locales/*.json": "./locales/*.json"
   },
   "publishConfig": {
     "access": "public"

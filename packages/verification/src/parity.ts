@@ -116,7 +116,9 @@ async function validateLedger() {
   const collect = (value: unknown) => {
     if (
       typeof value === "string" &&
-      inventoryPatterns.some((pattern: string) => value.includes(pattern))
+      inventoryPatterns.some((pattern: string) =>
+        pattern.startsWith("=") ? value === pattern.slice(1) : value.includes(pattern),
+      )
     )
       expected.add(value);
     else if (Array.isArray(value)) value.forEach(collect);

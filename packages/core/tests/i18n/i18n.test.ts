@@ -1,6 +1,12 @@
-import { describe, expect, it } from "bun:test";
+import { render } from "@solidjs/web";
+import { afterEach, describe, expect, it } from "bun:test";
+import { createComponent, createEffect, createSignal } from "solid-js";
 
+import { InternationalizationProvider } from "../../src/i18n/internationalization-provider";
 import { resolve, resolveLocaleChain } from "../../src/i18n/resolve";
+import { useTranslator } from "../../src/i18n/use-translator";
+
+afterEach(() => document.body.replaceChildren());
 
 describe("i18n substrate", () => {
   it("walks regional locale fallbacks", () => {
@@ -25,5 +31,44 @@ describe("i18n substrate", () => {
       "Salut",
     );
     expect(resolve("@astryx.pagination.next", undefined, "fr", {})).toBe("Go to next page");
+  });
+
+  it("updates translator context when provider props change", async () => {
+    const [locale, setLocale] = createSignal<"en" | "fr">("en");
+    const messages = {
+      en: { greeting: { defaultMessage: "Hello" } },
+      fr: { greeting: { defaultMessage: "Bonjour" } },
+    };
+    const Probe = () => {
+      const translate = useTranslator();
+      const node = document.createElement("span");
+      createEffect(
+        () => translate("greeting"),
+        (text) => {
+          node.textContent = text;
+        },
+      );
+      return node;
+    };
+    const container = document.createElement("div");
+    document.body.append(container);
+    const dispose = render(
+      () =>
+        createComponent(InternationalizationProvider, {
+          get locale() {
+            return locale();
+          },
+          messages,
+          get children() {
+            return createComponent(Probe, {});
+          },
+        }),
+      container,
+    );
+    expect(container.textContent).toBe("Hello");
+    setLocale("fr");
+    await Promise.resolve();
+    expect(container.textContent).toBe("Bonjour");
+    dispose();
   });
 });

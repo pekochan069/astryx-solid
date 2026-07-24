@@ -1,4 +1,5 @@
-import { tokenDefaults, type DefinedTheme, type TokenName, type TokenValue } from "./defineTheme";
+import { tokenDefaults, type DefinedTheme, type TokenName, type TokenValue } from "./define-theme";
+import { resolveLightDark } from "./light-dark";
 
 /** Effective color mode used by server-safe token resolution. */
 export type ResolvedThemeMode = "light" | "dark";
@@ -21,27 +22,8 @@ export const tokenVars = Object.fromEntries(
   Object.keys(tokenDefaults).map((name) => [name, tokenVar(name)]),
 ) as Record<TokenName, string>;
 
-function splitTopLevel(input: string): [string, string] | null {
-  let depth = 0;
-  let quote = "";
-  for (let index = 0; index < input.length; index++) {
-    const char = input[index];
-    if (quote) {
-      if (char === quote && input[index - 1] !== "\\") quote = "";
-    } else if (char === "'" || char === '"') quote = char;
-    else if (char === "(") depth++;
-    else if (char === ")") depth--;
-    else if (char === "," && depth === 0)
-      return [input.slice(0, index).trim(), input.slice(index + 1).trim()];
-  }
-  return null;
-}
-
 function modeValue(value: TokenValue | string, mode: ResolvedThemeMode): string {
-  if (Array.isArray(value)) return value[mode === "dark" ? 1 : 0];
-  const match = value.trim().match(/^light-dark\((.*)\)$/);
-  const sides = match && splitTopLevel(match[1]);
-  return sides ? sides[mode === "dark" ? 1 : 0] : value;
+  return resolveLightDark(value, mode);
 }
 
 function substitute(value: string, values: Record<string, string>, seen: Set<string>): string {

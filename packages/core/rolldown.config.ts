@@ -17,6 +17,7 @@ export default defineConfig({
 
     button: "./src/components/button/index.ts",
     "visually-hidden": "./src/components/visually-hidden/index.ts",
+
     naming: "./src/naming.ts",
     stylex: "./src/stylex/index.ts",
     utils: "./src/utils/merge-props.ts",

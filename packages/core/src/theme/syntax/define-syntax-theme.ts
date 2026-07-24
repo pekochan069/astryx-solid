@@ -1,8 +1,9 @@
+import { resolveLightDark, toLightDark, type LightDarkValue } from "../light-dark";
 import { syntaxTokenDefaults } from "./tokens";
 
 export type SyntaxThemeTokenKey =
   keyof typeof syntaxTokenDefaults extends `--color-syntax-${infer Name}` ? Name : never;
-export type SyntaxTokenValue = string | readonly [light: string, dark: string];
+export type SyntaxTokenValue = string | LightDarkValue;
 export type SyntaxThemeTokenInput = Record<SyntaxThemeTokenKey, SyntaxTokenValue>;
 export type SyntaxThemeTokenMap = Record<SyntaxThemeTokenKey, string>;
 
@@ -22,16 +23,12 @@ export const ALL_SYNTAX_KEYS = Object.keys(syntaxTokenDefaults).map((name) =>
 ) as SyntaxThemeTokenKey[];
 
 function toCssValue(value: SyntaxTokenValue): string {
-  return typeof value !== "string" ? `light-dark(${value[0]}, ${value[1]})` : value;
+  return typeof value !== "string" ? toLightDark(value) : value;
 }
 
 /** Resolve one syntax token for a concrete color mode. */
 export function resolveSyntaxTokenForMode(value: SyntaxTokenValue, mode: "light" | "dark"): string {
-  if (typeof value !== "string") return value[mode === "dark" ? 1 : 0];
-  const match = value.match(/^light-dark\((.*)\)$/);
-  if (!match) return value;
-  const comma = match[1].indexOf(",");
-  return (mode === "dark" ? match[1].slice(comma + 1) : match[1].slice(0, comma)).trim();
+  return resolveLightDark(value, mode);
 }
 
 /** Define a complete syntax theme. */

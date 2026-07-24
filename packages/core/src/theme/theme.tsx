@@ -1,11 +1,11 @@
 import { Dynamic, type JSX } from "@solidjs/web";
 import { createContext, createEffect, createMemo, useContext } from "solid-js";
 
-import type { DefinedTheme } from "./defineTheme";
+import type { DefinedTheme } from "./define-theme";
 import type { ThemeMode } from "./types";
 
-import { generateThemeCSS } from "./defineTheme";
-import { ThemeContext, type ThemeContextValue } from "./useTheme";
+import { generateThemeCSS } from "./define-theme";
+import { ThemeContext, type ThemeContextValue } from "./use-theme";
 
 const ThemeNestingContext = createContext(false);
 
@@ -39,7 +39,14 @@ function injectThemeCSS(theme: DefinedTheme): VoidFunction | undefined {
 /** Apply a Solid theme with deterministic SSR markup and browser cleanup. */
 export function Theme(props: ThemeProps) {
   const mode = createMemo(() => props.mode ?? "system");
-  const context = createMemo<ThemeContextValue>(() => ({ theme: props.theme, mode: mode() }));
+  const context: ThemeContextValue = {
+    get theme() {
+      return props.theme;
+    },
+    get mode() {
+      return mode();
+    },
+  };
   const isNested = useContext(ThemeNestingContext);
   if (typeof document !== "undefined") {
     createEffect(
@@ -56,7 +63,7 @@ export function Theme(props: ThemeProps) {
   }
   return (
     <ThemeNestingContext value={true}>
-      <ThemeContext value={context()}>
+      <ThemeContext value={context}>
         <Dynamic
           component="div"
           data-astryx-solid-theme={props.theme.name}

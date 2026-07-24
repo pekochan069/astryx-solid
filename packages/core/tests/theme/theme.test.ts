@@ -1,11 +1,12 @@
 import { render } from "@solidjs/web";
 import { afterEach, describe, expect, it } from "bun:test";
-import { createComponent } from "solid-js";
+import { createComponent, createEffect, createSignal } from "solid-js";
 
-import { defineTheme, generateThemeCSS } from "../../src/theme/defineTheme";
+import { defineTheme, generateThemeCSS } from "../../src/theme/define-theme";
 import { defineSyntaxTheme, resolveSyntaxTokenForMode } from "../../src/theme/syntax";
-import { Theme } from "../../src/theme/Theme";
+import { Theme } from "../../src/theme/theme";
 import { resolveThemeToken, resolveThemeTokens, tokenVar } from "../../src/theme/tokens";
+import { useTheme } from "../../src/theme/use-theme";
 
 const syntaxTokens = {
   keyword: ["light", "dark"],
@@ -56,6 +57,50 @@ describe("theme substrate", () => {
     const theme = defineSyntaxTheme({ name: "test", tokens: syntaxTokens });
     expect(theme.tokens.keyword).toBe("light-dark(light, dark)");
     expect(resolveSyntaxTokenForMode(["day", "night"], "dark")).toBe("night");
+    expect(resolveSyntaxTokenForMode("light-dark(rgb(1, 2, 3), blue)", "light")).toBe(
+      "rgb(1, 2, 3)",
+    );
+  });
+
+  it("updates theme context when props change", async () => {
+    const [mode, setMode] = createSignal<"light" | "dark">("light");
+    const [theme, setTheme] = createSignal(
+      defineTheme({ name: "one", tokens: { "--color-accent": "red" } }),
+    );
+    const Probe = () => {
+      const current = useTheme();
+      const node = document.createElement("span");
+      createEffect(
+        () => `${current.name}:${current.mode}:${current.token("--color-accent")}`,
+        (text) => {
+          node.textContent = text;
+        },
+      );
+      return node;
+    };
+    const container = document.createElement("div");
+    document.body.append(container);
+    const dispose = render(
+      () =>
+        createComponent(Theme, {
+          get theme() {
+            return theme();
+          },
+          get mode() {
+            return mode();
+          },
+          get children() {
+            return createComponent(Probe, {});
+          },
+        }),
+      container,
+    );
+    expect(container.textContent).toBe("one:light:red");
+    setMode("dark");
+    setTheme(defineTheme({ name: "two", tokens: { "--color-accent": "blue" } }));
+    await Promise.resolve();
+    expect(container.textContent).toBe("two:dark:blue");
+    dispose();
   });
 
   it("applies and cleans up root theme attributes", async () => {

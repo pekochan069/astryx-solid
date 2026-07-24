@@ -1,6 +1,6 @@
 import { createContext, createMemo, useContext } from "solid-js";
 
-import type { DefinedTheme } from "./defineTheme";
+import type { DefinedTheme } from "./define-theme";
 import type { ThemeMode } from "./types";
 
 import { resolveThemeTokens } from "./tokens";

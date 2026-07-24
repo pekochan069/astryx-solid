@@ -6,13 +6,13 @@ export {
   resolveSyntaxTokenForMode,
   syntaxThemeStyle,
   syntaxThemeToCSS,
-} from "./defineSyntaxTheme";
+} from "./define-syntax-theme";
 export type {
   SyntaxThemeInput,
   SyntaxThemeTokenKey,
   SyntaxThemeTokenMap,
   SyntaxThemeTokenInput,
   SyntaxTokenValue,
-} from "./defineSyntaxTheme";
-export { SyntaxTheme, useSyntaxTheme } from "./SyntaxTheme";
-export type { SyntaxThemeDefinition } from "./SyntaxTheme";
+} from "./define-syntax-theme";
+export { SyntaxTheme, useSyntaxTheme } from "./syntax-theme";
+export type { SyntaxThemeDefinition } from "./syntax-theme";

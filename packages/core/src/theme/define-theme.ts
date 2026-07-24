@@ -1,5 +1,6 @@
 import type { TypographyConfig } from "./types";
 
+import { toLightDark, type LightDarkValue } from "./light-dark";
 import { syntaxTokenDefaults } from "./syntax/tokens";
 import {
   colorDefaults,
@@ -18,7 +19,7 @@ import {
 } from "./tokens.stylex";
 
 /** Token value shared by theme and syntax authoring. */
-export type TokenValue = string | [light: string, dark: string];
+export type TokenValue = string | LightDarkValue;
 
 /** CSS property overrides for one component rule. */
 export type StyleOverrides = Record<string, string | Record<string, string>>;
@@ -67,7 +68,7 @@ export const tokenDefaults: Record<string, string> = {
 };
 
 function resolveToken(value: TokenValue): string {
-  return Array.isArray(value) ? `light-dark(${value[0]}, ${value[1]})` : value;
+  return typeof value === "string" ? value : toLightDark(value);
 }
 
 function mergeComponents(

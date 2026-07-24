@@ -1,9 +1,9 @@
 import { Dynamic, type JSX } from "@solidjs/web";
 import { createContext, createMemo, useContext } from "solid-js";
 
-import type { SyntaxThemeDefinition } from "./defineSyntaxTheme";
+import type { SyntaxThemeDefinition } from "./define-syntax-theme";
 
-import { syntaxThemeStyle } from "./defineSyntaxTheme";
+import { syntaxThemeStyle } from "./define-syntax-theme";
 
 const SyntaxThemeContext = createContext<SyntaxThemeDefinition>();
 

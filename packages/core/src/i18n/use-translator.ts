@@ -1,6 +1,6 @@
 import { createMemo, useContext } from "solid-js";
 
-import { InternationalizationContext } from "./InternationalizationContext";
+import { InternationalizationContext } from "./internationalization-context";
 import { resolve } from "./resolve";
 
 export type TranslatorFn = (key: string, values?: Record<string, unknown>) => string;

@@ -1,10 +1,8 @@
 import type { JSX } from "@solidjs/web";
 
-import { createMemo } from "solid-js";
-
 import type { Locale, MessagesByLocale, Overrides } from "./types";
 
-import { InternationalizationContext } from "./InternationalizationContext";
+import { InternationalizationContext } from "./internationalization-context";
 
 export interface InternationalizationProviderProps {
   locale: Locale;
@@ -15,12 +13,16 @@ export interface InternationalizationProviderProps {
 
 /** Provide locale catalogs and sparse consumer overrides to descendants. */
 export function InternationalizationProvider(props: InternationalizationProviderProps) {
-  const value = createMemo(() => ({
-    locale: props.locale,
-    messages: props.messages ?? {},
-    overrides: props.overrides,
-  }));
-  return (
-    <InternationalizationContext value={value()}>{props.children}</InternationalizationContext>
-  );
+  const value = {
+    get locale() {
+      return props.locale;
+    },
+    get messages() {
+      return props.messages ?? {};
+    },
+    get overrides() {
+      return props.overrides;
+    },
+  };
+  return <InternationalizationContext value={value}>{props.children}</InternationalizationContext>;
 }

@@ -1,7 +1,7 @@
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
 import { defineTheme, Theme, useTheme } from "@astryx-solid/core/theme";
 import { createFileRoute } from "@tanstack/solid-router";
-import { createSignal } from "solid-js";
+import { createSignal, createUniqueId } from "solid-js";
 
 export const Route = createFileRoute("/core-substrate")({
   component: CoreSubstrate,
@@ -19,6 +19,9 @@ const messages = {
 };
 
 export function CoreSubstrate() {
+  // ponytail: Solid 2 beta SSR ID offset; remove after Start/Solid stable hydration matches.
+  if (import.meta.env.SSR) createUniqueId();
+
   const [mode, setMode] = createSignal<"light" | "dark">("light");
   const [locale, setLocale] = createSignal<"en" | "fr">("en");
 

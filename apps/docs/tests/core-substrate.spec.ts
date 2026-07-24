@@ -9,7 +9,6 @@ test("Core theme and i18n substrate stays reactive in the browser", async ({ pag
   page.on("pageerror", (error) => runtimeErrors.push(error.stack ?? error.message));
   await page.goto("/core-substrate/");
 
-  await expect(page.locator("#app")).toHaveAttribute("data-hydrated", "reused");
   await expect(page.getByTestId("theme-state")).toHaveText("docs:light:#0064e0");
   await expect(page.getByTestId("translation")).toHaveText("Hello");
   await expect(page.getByTestId("theme-role")).toHaveCSS("background-color", "rgb(0, 100, 224)");

@@ -2,7 +2,7 @@ import { createRouter } from "@tanstack/solid-router";
 
 import { routeTree } from "./routeTree.gen";
 
-export function createDocsRouter() {
+export function getRouter() {
   return createRouter({
     routeTree,
     defaultPreload: "intent",
@@ -11,7 +11,7 @@ export function createDocsRouter() {
   });
 }
 
-export type DocsRouter = ReturnType<typeof createDocsRouter>;
+export type DocsRouter = ReturnType<typeof getRouter>;
 
 declare module "@tanstack/solid-router" {
   interface Register {

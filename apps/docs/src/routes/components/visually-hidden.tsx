@@ -2,7 +2,7 @@ import { Stack } from "@astryx-solid/core";
 import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
 import { createFileRoute } from "@tanstack/solid-router";
 
-import registry from "../registry/components.json";
+import registry from "../../registry/components.json";
 
 export const Route = createFileRoute("/components/visually-hidden")({
   component: VisuallyHiddenDocs,

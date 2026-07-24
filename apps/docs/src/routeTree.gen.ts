@@ -9,18 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoreSubstrateRouteImport } from './routes/core-substrate'
-import { Route as ComponentsVisuallyHiddenRouteImport } from './routes/components.visually-hidden'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ComponentsVisuallyHiddenRouteImport } from './routes/components/visually-hidden'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CoreSubstrateRoute = CoreSubstrateRouteImport.update({
   id: '/core-substrate',
   path: '/core-substrate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComponentsVisuallyHiddenRoute =
@@ -62,18 +62,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/solid-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/core-substrate': {
       id: '/core-substrate'
       path: '/core-substrate'
       fullPath: '/core-substrate'
       preLoaderRoute: typeof CoreSubstrateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/components/visually-hidden': {
@@ -94,3 +94,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/solid-start'
+declare module '@tanstack/solid-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

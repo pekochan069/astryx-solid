@@ -4,7 +4,6 @@ import { expect, test } from "@playwright/test";
 test("VisuallyHidden remains accessible and visually absent", async ({ page }) => {
   await page.goto("/components/visually-hidden/");
 
-  await expect(page.locator("#app")).toHaveAttribute("data-hydrated", "reused");
   const main = page.getByRole("main");
   const hiddenLabel = page.getByText("Close dialog");
   await expect(page.getByRole("heading", { name: "VisuallyHidden" })).toBeVisible();

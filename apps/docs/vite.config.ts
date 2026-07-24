@@ -1,5 +1,5 @@
 import stylex from "@stylexjs/unplugin/vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { tanstackStart } from "@tanstack/solid-start/plugin/vite";
 import solid from "vite-plugin-solid";
 import { defineConfig } from "vite-plus";
 
@@ -17,19 +17,14 @@ export default defineConfig({
     exclude: [/\.js$/, /\.d\.[cm]?ts$/, "routeTree.gen.ts"],
   },
   plugins: [
-    tanstackRouter({
-      target: "solid",
-      autoCodeSplitting: true,
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        autoSubfolderIndex: true,
+      },
     }),
     // @ts-expect-error: stylex plugin problem
     stylex(),
-    solid({ solid: { hydratable: true } }),
+    solid({ ssr: true, solid: { hydratable: true } }),
   ],
-  build: {
-    outDir: "./dist",
-    emptyOutDir: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-  },
 });

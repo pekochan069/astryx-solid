@@ -25,6 +25,7 @@
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
+      "node": "./dist/server/index.js",
       "default": "./dist/index.js"
     },
     "./astryx.css": "./dist/astryx.css",
@@ -32,42 +33,52 @@
     "./tailwind-theme.css": "./dist/tailwind-theme.css",
     "./button": {
       "types": "./dist/button.d.ts",
+      "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
     "./visually-hidden": {
       "types": "./dist/visually-hidden.d.ts",
+      "node": "./dist/server/visually-hidden.js",
       "default": "./dist/visually-hidden.js"
     },
     "./naming": {
       "types": "./dist/naming.d.ts",
+      "node": "./dist/server/naming.js",
       "default": "./dist/naming.js"
     },
     "./stylex": {
       "types": "./dist/stylex.d.ts",
+      "node": "./dist/server/stylex.js",
       "default": "./dist/stylex.js"
     },
     "./utils": {
       "types": "./dist/utils.d.ts",
+      "node": "./dist/server/utils.js",
       "default": "./dist/utils.js"
     },
     "./theme": {
       "types": "./dist/theme.d.ts",
+      "node": "./dist/server/theme.js",
       "default": "./dist/theme.js"
     },
     "./theme/tokens": {
       "types": "./dist/theme/tokens.d.ts",
+      "node": "./dist/server/theme/tokens.js",
       "default": "./dist/theme/tokens.js"
     },
     "./theme/tokens.stylex": {
       "types": "./dist/theme/tokens.stylex.d.ts",
+      "node": "./dist/server/theme/tokens.stylex.js",
       "default": "./dist/theme/tokens.stylex.js"
     },
     "./theme/syntax": {
       "types": "./dist/theme/syntax.d.ts",
+      "node": "./dist/server/theme/syntax.js",
       "default": "./dist/theme/syntax.js"
     },
     "./i18n": {
       "types": "./dist/i18n.d.ts",
+      "node": "./dist/server/i18n.js",
       "default": "./dist/i18n.js"
     },
     "./locales/*.json": "./locales/*.json"

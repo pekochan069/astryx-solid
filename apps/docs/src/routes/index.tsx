@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+export function RouteComponent() {
   const [count, setCount] = createSignal(0);
 
   return (

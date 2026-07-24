@@ -19,7 +19,7 @@ const messages = {
   fr: { greeting: { defaultMessage: "Bonjour" } },
 };
 
-function CoreSubstrate() {
+export function CoreSubstrate() {
   const [mode, setMode] = createSignal<"light" | "dark">("light");
   const [locale, setLocale] = createSignal<"en" | "fr">("en");
 
@@ -34,7 +34,7 @@ function CoreSubstrate() {
           <p data-testid="translation">
             <Translation />
           </p>
-          <div class="astryx-solid-button" data-testid="theme-role">
+          <div class="astryx-solid-button" data-testid="theme-role" style={{ color: "#fff" }}>
             Theme role
           </div>
           <Button

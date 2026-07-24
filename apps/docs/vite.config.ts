@@ -23,7 +23,7 @@ export default defineConfig({
     }),
     // @ts-expect-error: stylex plugin problem
     stylex(),
-    solid({}),
+    solid({ solid: { hydratable: true } }),
   ],
   build: {
     outDir: "./dist",

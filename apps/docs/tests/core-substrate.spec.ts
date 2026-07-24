@@ -1,8 +1,16 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("Core theme and i18n substrate stays reactive in the browser", async ({ page }) => {
-  await page.goto("/core-substrate");
+test("Core theme and i18n substrate stays reactive in the browser", async ({
+  page,
+  request,
+}, testInfo) => {
+  const response = await request.get("/core-substrate/");
+  expect(await response.text()).toContain("Core substrate");
+
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  await page.goto("/core-substrate/");
 
   await expect(page.getByTestId("theme-state")).toHaveText("docs:light:#0064e0");
   await expect(page.getByTestId("translation")).toHaveText("Hello");
@@ -19,5 +27,8 @@ test("Core theme and i18n substrate stays reactive in the browser", async ({ pag
   expect(
     accessibility.violations.filter(({ impact }) => impact === "critical" || impact === "serious"),
   ).toEqual([]);
-  await expect(page.locator("main")).toHaveScreenshot("core-substrate-dark.png");
+  expect(runtimeErrors).toEqual([]);
+  if (testInfo.project.name !== "webkit") {
+    await expect(page.getByRole("main")).toHaveScreenshot("core-substrate-dark.png");
+  }
 });

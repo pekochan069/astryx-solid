@@ -8,7 +8,7 @@ export const Route = createFileRoute("/components/visually-hidden")({
   component: VisuallyHiddenDocs,
 });
 
-function VisuallyHiddenDocs() {
+export function VisuallyHiddenDocs() {
   const component = registry.components.find(({ name }) => name === "VisuallyHidden")!;
 
   return (

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "tsc && vp build",
+    "build": "tsc && vp build && vp build --config vite.prerender.config.ts --ssr src/prerender.tsx --outDir dist-ssr && bun dist-ssr/prerender.js",
     "preview": "vp preview",
     "test:browser": "playwright test -c playwright.config.ts"
   },

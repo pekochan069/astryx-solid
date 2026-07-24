@@ -5,3 +5,11 @@ html {
   color: #171717;
   background: #fff;
 }
+
+.docs-button {
+  background-color: var(--color-accent);
+  color: #fff;
+  border: 0;
+  padding: 8px 12px;
+  cursor: pointer;
+}

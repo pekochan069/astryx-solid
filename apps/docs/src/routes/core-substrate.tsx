@@ -38,28 +38,14 @@ export function CoreSubstrate() {
           </div>
           <button
             type="button"
-            class="astryx-solid-button"
-            style={{
-              "background-color": "var(--color-accent)",
-              color: "#fff",
-              border: 0,
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
+            class="astryx-solid-button docs-button"
             onClick={() => setMode(mode() === "light" ? "dark" : "light")}
           >
             Toggle theme
           </button>
           <button
             type="button"
-            class="astryx-solid-button"
-            style={{
-              "background-color": "var(--color-accent)",
-              color: "#fff",
-              border: 0,
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
+            class="astryx-solid-button docs-button"
             onClick={() => setLocale(locale() === "en" ? "fr" : "en")}
           >
             Toggle locale

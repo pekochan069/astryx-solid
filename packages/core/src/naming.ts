@@ -30,7 +30,7 @@
  *
  * SYNC: packages/core/src/utils/themeProps.ts (consumes classPrefix)
  * SYNC: packages/core/src/utils/parseStyleKey.ts
- * SYNC: packages/cli/src/commands/build-theme.mjs (imports @astryxdesign/core/naming)
+ * SYNC: packages/cli/src/commands/build-theme.mjs (imports @astryx-solid/core/naming)
  */
 
 /**

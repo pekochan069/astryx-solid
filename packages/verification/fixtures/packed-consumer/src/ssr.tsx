@@ -1,11 +1,22 @@
-import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
 import { generateHydrationScript, renderToString } from "@solidjs/web";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { createUniqueId } from "solid-js";
 
-const render = () => renderToString(() => <VisuallyHidden as="span">Close dialog</VisuallyHidden>);
+import { createApp } from "./app";
+
+const render = () =>
+  renderToString(() => {
+    createUniqueId();
+    return createApp();
+  });
 const first = render();
-if (first !== render() || !first.includes("Close dialog")) {
+if (
+  first !== render() ||
+  !first.includes("Close dialog") ||
+  !first.includes("consumer-light") ||
+  !first.includes("Hello")
+) {
   throw new Error(`Unexpected server output: ${first}`);
 }
 

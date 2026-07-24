@@ -27,7 +27,7 @@ try {
         type: "module",
         scripts: {
           build:
-            "tsc --noEmit && vite build && vite build --ssr src/ssr.tsx --outDir dist-ssr && bun dist-ssr/ssr.js && vite build",
+            "tsc --noEmit && vite build && vite build --config vite.ssr.config.ts --ssr src/ssr.tsx --outDir dist-ssr && bun dist-ssr/ssr.js && vite build",
         },
         dependencies: {
           "@astryx-solid/core": `file:${tarball}`,
@@ -69,13 +69,35 @@ try {
       runtimeErrors.push(`${request.url()} ${request.failure()?.errorText}`),
     );
     await page.goto(server.url.toString());
-    await page.waitForFunction(() => document.getElementById("app")?.dataset.hydrated);
+    try {
+      await page.waitForFunction(
+        () => document.getElementById("app")?.dataset.hydrated,
+        undefined,
+        {
+          timeout: 5000,
+        },
+      );
+    } catch {
+      throw new Error(`Packed consumer runtime failed: ${runtimeErrors.join("; ")}`);
+    }
     const hydration = await page.locator("#app").getAttribute("data-hydrated");
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
-    if (hydration !== "reused" || closeLabels !== 1 || rootExports !== 1 || runtimeErrors.length) {
+    const initialContext = await page.locator("#app").getAttribute("data-server-context");
+    await page.waitForFunction(() =>
+      document.querySelector('[data-testid="consumer-state"]')?.textContent?.includes("Bonjour"),
+    );
+    const updatedContext = await page.getByTestId("consumer-state").textContent();
+    if (
+      hydration !== "reused" ||
+      closeLabels !== 1 ||
+      rootExports !== 1 ||
+      initialContext !== "consumer-light:light:a:Hello" ||
+      updatedContext !== "consumer-dark:dark:b:Bonjour" ||
+      runtimeErrors.length
+    ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, initialContext, updatedContext, runtimeErrors })}`,
       );
     }
   } finally {

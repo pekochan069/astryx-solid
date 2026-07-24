@@ -1,28 +1,31 @@
 {
   "name": "@astryx-solid/core",
-  "version": "0.0.0",
-  "description": "A starter for creating a TypeScript package.",
-  "homepage": "https://github.com/author/library#readme",
+  "version": "0.1.0",
+  "description": "Solid-native Astryx base types, styling, themes, and localization.",
+  "homepage": "https://github.com/pekochan069/astryx-solid#readme",
   "bugs": {
-    "url": "https://github.com/author/library/issues"
+    "url": "https://github.com/pekochan069/astryx-solid/issues"
   },
   "license": "MIT",
-  "author": "Author Name <author.name@mail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/author/library.git"
+    "url": "https://github.com/pekochan069/astryx-solid.git",
+    "directory": "packages/core"
   },
   "files": [
     "dist",
-    "src"
+    "locales"
   ],
   "type": "module",
-  "module": "./src/index.ts",
+  "sideEffects": [
+    "./dist/*.css",
+    "./locales/*.json"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts",
+      "node": "./dist/server/index.js",
       "default": "./dist/index.js"
     },
     "./astryx.css": "./dist/astryx.css",
@@ -30,14 +33,55 @@
     "./tailwind-theme.css": "./dist/tailwind-theme.css",
     "./button": {
       "types": "./dist/button.d.ts",
-      "source": "./src/components/button/index.ts",
+      "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
     "./visually-hidden": {
       "types": "./dist/visually-hidden.d.ts",
-      "source": "./src/components/visually-hidden/index.ts",
+      "node": "./dist/server/visually-hidden.js",
       "default": "./dist/visually-hidden.js"
-    }
+    },
+    "./naming": {
+      "types": "./dist/naming.d.ts",
+      "node": "./dist/server/naming.js",
+      "default": "./dist/naming.js"
+    },
+    "./stylex": {
+      "types": "./dist/stylex.d.ts",
+      "node": "./dist/server/stylex.js",
+      "default": "./dist/stylex.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "node": "./dist/server/utils.js",
+      "default": "./dist/utils.js"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "node": "./dist/server/theme.js",
+      "default": "./dist/theme.js"
+    },
+    "./theme/tokens": {
+      "types": "./dist/theme/tokens.d.ts",
+      "node": "./dist/server/theme/tokens.js",
+      "default": "./dist/theme/tokens.js"
+    },
+    "./theme/tokens.stylex": {
+      "types": "./dist/theme/tokens.stylex.d.ts",
+      "node": "./dist/server/theme/tokens.stylex.js",
+      "default": "./dist/theme/tokens.stylex.js"
+    },
+    "./theme/syntax": {
+      "types": "./dist/theme/syntax.d.ts",
+      "node": "./dist/server/theme/syntax.js",
+      "default": "./dist/theme/syntax.js"
+    },
+    "./i18n": {
+      "types": "./dist/i18n.d.ts",
+      "node": "./dist/server/i18n.js",
+      "default": "./dist/i18n.js"
+    },
+    "./locales/*.json": "./locales/*.json"
   },
   "publishConfig": {
     "access": "public"
@@ -50,13 +94,14 @@
     "prepublishOnly": "vp run build"
   },
   "devDependencies": {
+    "@dom-expressions/compiler": "^0.50.0-next.25",
     "@solidjs/web": "2.0.0-beta.19",
     "@stylexjs/stylex": "^0.19.0",
     "@stylexjs/unplugin": "^0.19.0",
     "@types/bun": "^1.3.14",
     "@types/node": "^26.1.1",
-    "bumpp": "^11.1.0",
-    "happy-dom": "^20.10.6",
+    "bumpp": "^12.0.0",
+    "happy-dom": "^20.11.1",
     "rolldown": "^1.1.5",
     "rolldown-plugin-dom-expressions-compiler": "^0.1.1",
     "rolldown-plugin-dts": "^0.27.6",

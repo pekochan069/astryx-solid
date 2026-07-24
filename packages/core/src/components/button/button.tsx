@@ -18,6 +18,7 @@ import {
   spacingVars,
   typeScaleVars,
 } from "../../theme/tokens.stylex.ts";
+import { themeProps } from "../../utils/theme-props.ts";
 
 /**
  * Base button styles
@@ -328,6 +329,7 @@ export function Button(props: ButtonProps) {
     "type",
     "onClick",
     "class",
+    "style",
   );
 
   const onClick = (event: OnClickEventType<HTMLButtonElement>) => {
@@ -337,6 +339,8 @@ export function Button(props: ButtonProps) {
     }
     props.onClick?.(event);
   };
+
+  const theme = createMemo(() => themeProps("button", { variant: variant(), size: size() }));
 
   const style = createMemo(() => {
     const s = size();
@@ -361,8 +365,9 @@ export function Button(props: ButtonProps) {
   return (
     <button
       {...rest}
-      class={[style().class, props.class]}
-      style={style().style}
+      {...theme()}
+      class={[theme().class, style().class, props.class]}
+      style={{ ...style().style, ...merged.style }}
       data-style-src={style()["data-style-src"]}
       type={type()}
       title={merged.tooltip}

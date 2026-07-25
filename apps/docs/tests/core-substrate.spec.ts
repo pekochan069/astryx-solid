@@ -11,6 +11,8 @@ test("Core theme and i18n substrate stays reactive in the browser", async ({ pag
 
   await expect(page.getByTestId("theme-state")).toHaveText("docs:light:#0064e0");
   await expect(page.getByTestId("translation")).toHaveText("Hello");
+  await expect(page.getByTestId("interactive-role")).toHaveText("button");
+  await expect(page.getByTestId("inherited-size")).toHaveText("sm");
   await expect(page.getByTestId("theme-role")).toHaveCSS("background-color", "rgb(0, 100, 224)");
 
   await page.getByRole("button", { name: "Toggle theme" }).click();

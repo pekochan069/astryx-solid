@@ -1,3 +1,9 @@
+import {
+  InteractiveRoleContext,
+  SizeContext,
+  useInteractiveRole,
+  useSize,
+} from "@astryx-solid/core";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
 import { defineTheme, Theme, useTheme } from "@astryx-solid/core/theme";
 import { createFileRoute } from "@tanstack/solid-router";
@@ -36,6 +42,16 @@ export function CoreSubstrate() {
           <p data-testid="translation">
             <Translation />
           </p>
+          <InteractiveRoleContext value={{ role: "button" }}>
+            <p data-testid="interactive-role">
+              <InteractiveRole />
+            </p>
+          </InteractiveRoleContext>
+          <SizeContext value={{ size: "sm" }}>
+            <p data-testid="inherited-size">
+              <InheritedSize />
+            </p>
+          </SizeContext>
           <div class="astryx-solid-button" data-testid="theme-role" style={{ color: "#fff" }}>
             Theme role
           </div>
@@ -71,4 +87,14 @@ function ThemeState() {
 function Translation() {
   const translate = useTranslator();
   return <>{translate("greeting")}</>;
+}
+
+function InteractiveRole() {
+  const role = useInteractiveRole({});
+  return <>{role()}</>;
+}
+
+function InheritedSize() {
+  const size = useSize();
+  return <>{size()}</>;
 }

@@ -149,7 +149,15 @@ async function validateLedger() {
           throw new Error(`Current exports missing inventory patterns: ${uncovered.join(", ")}`);
         }
       }
-      collect(currentExports);
+      for (const currentExport of currentExports) {
+        if (
+          inventoryPatterns.some((pattern: string) =>
+            matchesInventoryPattern(currentExport, pattern),
+          )
+        ) {
+          expected.add(currentExport);
+        }
+      }
     }
   }
   const missing = [...expected].filter((surface) => !assigned.has(surface));

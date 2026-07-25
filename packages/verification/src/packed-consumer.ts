@@ -84,6 +84,8 @@ try {
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
     const initialContext = await page.locator("#app").getAttribute("data-server-context");
+    const role = await page.getByTestId("consumer-role").textContent();
+    const size = await page.getByTestId("consumer-size").textContent();
     await page.waitForFunction(() =>
       document.querySelector('[data-testid="consumer-state"]')?.textContent?.includes("Bonjour"),
     );
@@ -94,10 +96,12 @@ try {
       rootExports !== 1 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
+      role !== "button" ||
+      size !== "sm" ||
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, initialContext, updatedContext, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

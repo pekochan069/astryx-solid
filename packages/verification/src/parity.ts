@@ -59,6 +59,41 @@ type GateResult = {
   error?: string;
 };
 
+type Inventory = {
+  packages: { target: { name: string; path: string }[] };
+};
+
+async function validateCurrentPackageExports(
+  inventory: Inventory,
+  inventoryPatterns: string[],
+  packageNames: string[],
+  requireCurrentExports: boolean,
+  expected: Set<string>,
+) {
+  for (const packageName of packageNames) {
+    const packageEntry = inventory.packages.target.find(
+      (entry: { name: string }) => entry.name === packageName,
+    );
+    if (!packageEntry) continue;
+
+    const currentPackage = await Bun.file(resolve(root, packageEntry.path)).json();
+    const currentExports = Object.keys(currentPackage.exports ?? {});
+    if (requireCurrentExports) {
+      const uncovered = currentExports.filter(
+        (value) => !inventoryPatterns.some((pattern) => matchesInventoryPattern(value, pattern)),
+      );
+      if (uncovered.length) {
+        throw new Error(`Current exports missing inventory patterns: ${uncovered.join(", ")}`);
+      }
+    }
+    for (const currentExport of currentExports) {
+      if (inventoryPatterns.some((pattern) => matchesInventoryPattern(currentExport, pattern))) {
+        expected.add(currentExport);
+      }
+    }
+  }
+}
+
 async function validateLedger() {
   if (ledger.schemaVersion !== 1 || ledger.baseline.length !== 40)
     throw new Error("Invalid ledger header");
@@ -131,35 +166,13 @@ async function validateLedger() {
     else if (value && typeof value === "object") Object.values(value).forEach(collect);
   };
   collect(inventory);
-  for (const packageName of new Set(
-    selectedBatches.flatMap((name) => ledger.batches[name].packages),
-  )) {
-    const packageEntry = inventory.packages.target.find(
-      (entry: { name: string }) => entry.name === packageName,
-    );
-    if (packageEntry) {
-      const currentPackage = await Bun.file(resolve(root, packageEntry.path)).json();
-      const currentExports = Object.keys(currentPackage.exports ?? {});
-      if (selectedBatches.some((name) => ledger.batches[name].requireCurrentExports)) {
-        const uncovered = currentExports.filter(
-          (value) =>
-            !inventoryPatterns.some((pattern: string) => matchesInventoryPattern(value, pattern)),
-        );
-        if (uncovered.length) {
-          throw new Error(`Current exports missing inventory patterns: ${uncovered.join(", ")}`);
-        }
-      }
-      for (const currentExport of currentExports) {
-        if (
-          inventoryPatterns.some((pattern: string) =>
-            matchesInventoryPattern(currentExport, pattern),
-          )
-        ) {
-          expected.add(currentExport);
-        }
-      }
-    }
-  }
+  await validateCurrentPackageExports(
+    inventory,
+    inventoryPatterns,
+    [...new Set(selectedBatches.flatMap((name) => ledger.batches[name].packages))],
+    selectedBatches.some((name) => ledger.batches[name].requireCurrentExports),
+    expected,
+  );
   const missing = [...expected].filter((surface) => !assigned.has(surface));
   const unknown = [...assigned].filter((surface) => !expected.has(surface));
   if (missing.length || unknown.length) {

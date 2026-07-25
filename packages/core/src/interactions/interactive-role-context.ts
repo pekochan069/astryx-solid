@@ -1,3 +1,5 @@
+import type { Accessor } from "solid-js";
+
 import { createContext, useContext } from "solid-js";
 
 import type { InteractiveRole } from "./interactive-role";
@@ -12,7 +14,8 @@ export const InteractiveRoleContext = createContext<InteractiveRoleContextValue 
   undefined,
 );
 
-/** Return the nearest interaction-role override, if one exists. */
-export function useInteractiveRoleContext(): InteractiveRole | undefined {
-  return useContext(InteractiveRoleContext)?.role;
+/** Return an accessor for nearest interaction-role override, if one exists. */
+export function useInteractiveRoleContext(): Accessor<InteractiveRole | undefined> {
+  const context = useContext(InteractiveRoleContext);
+  return () => context?.role;
 }

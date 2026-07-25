@@ -51,6 +51,7 @@ export interface TextProps extends BaseProps {
   weight?: TextWeight;
   display?: TextDisplay;
   maxLines?: number;
+  hasTruncateTooltip?: boolean;
   wordBreak?: WordBreak;
   textWrap?: TextWrap;
   justify?: TextJustify;
@@ -185,6 +186,7 @@ export function Text(props: TextProps) {
     "weight",
     "display",
     "maxLines",
+    "hasTruncateTooltip",
     "wordBreak",
     "textWrap",
     "justify",
@@ -215,12 +217,17 @@ export function Text(props: TextProps) {
   const theme = createMemo(() =>
     themeProps("text", { type: type(), size: props.size, color: color() }),
   );
+  const title = () =>
+    props.maxLines && props.hasTruncateTooltip !== false && typeof props.children === "string"
+      ? props.children
+      : undefined;
   return (
     <Dynamic
       component={props.as ?? "span"}
       {...rest}
       {...theme()}
       class={[theme().class, style().class, props.class]}
+      title={title()}
       style={{
         ...style().style,
         ...(props.maxLines && { "-webkit-line-clamp": props.maxLines }),

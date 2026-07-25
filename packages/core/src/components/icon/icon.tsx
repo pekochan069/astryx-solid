@@ -56,16 +56,15 @@ export type IconColor =
   | "purple";
 export type IconSize = "xsm" | "sm" | "md" | "lg";
 export type IconRegistry = Partial<Record<IconName, JSX.Element>>;
-import { defaultIcons } from "./default-icons";
 let registry: Record<string, JSX.Element | undefined> = {};
 export function registerIcons(icons: IconRegistry) {
   registry = { ...registry, ...icons };
 }
 export function getIconRegistry() {
-  return { ...defaultIcons, ...registry };
+  return registry;
 }
 export function getIcon(name: string) {
-  return registry[name] ?? defaultIcons[name];
+  return registry[name];
 }
 export function resetIcons() {
   registry = {};

@@ -7,7 +7,7 @@ import { Citation } from "../../../src/components/citation/citation";
 import { Code } from "../../../src/components/code/code";
 import { Divider } from "../../../src/components/divider/divider";
 import { Heading } from "../../../src/components/heading/heading";
-import { getIcon, Icon } from "../../../src/components/icon/icon";
+import { Icon } from "../../../src/components/icon/icon";
 import { Kbd } from "../../../src/components/kbd/kbd";
 import { Skeleton } from "../../../src/components/skeleton/skeleton";
 import { Spinner } from "../../../src/components/spinner/spinner";
@@ -67,7 +67,6 @@ describe("content primitives", () => {
 
     expect(container.textContent).toContain("Ready");
     expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe("Success");
-    expect(getIcon("check")).toBeDefined();
     expect(container.querySelector("kbd")?.textContent).toBe("⌃");
     expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
     expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe(

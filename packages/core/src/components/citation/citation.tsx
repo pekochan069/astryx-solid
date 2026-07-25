@@ -110,6 +110,7 @@ export function Citation(props: CitationProps) {
       href={props.source.url}
       target={props.source.url ? "_blank" : undefined}
       rel={props.source.url ? "noopener noreferrer" : undefined}
+      role={props.source.url ? "doc-noteref" : undefined}
       title={title()}
       aria-label={t("@astryx.citation.label", { number: props.number, title: title() })}
       class={[theme().class, style().class, props.class]}

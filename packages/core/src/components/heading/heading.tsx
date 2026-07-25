@@ -19,6 +19,7 @@ export interface HeadingProps extends BaseProps<HTMLHeadingElement> {
   color?: TextColor;
   display?: TextDisplay;
   maxLines?: number;
+  hasTruncateTooltip?: boolean;
   wordBreak?: WordBreak;
   textWrap?: TextWrap;
   justify?: TextJustify;
@@ -120,6 +121,7 @@ export function Heading(props: HeadingProps) {
     "color",
     "display",
     "maxLines",
+    "hasTruncateTooltip",
     "wordBreak",
     "textWrap",
     "justify",
@@ -145,6 +147,10 @@ export function Heading(props: HeadingProps) {
   const theme = createMemo(() =>
     themeProps("heading", { level: props.level, type: props.type, color: color() }),
   );
+  const title = () =>
+    props.maxLines && props.hasTruncateTooltip !== false && typeof props.children === "string"
+      ? props.children
+      : undefined;
   return (
     <Dynamic
       component={tags[props.level]}
@@ -152,6 +158,7 @@ export function Heading(props: HeadingProps) {
       {...theme()}
       aria-level={props.accessibilityLevel !== props.level ? props.accessibilityLevel : undefined}
       class={[theme().class, style().class, props.class]}
+      title={title()}
       style={{
         ...style().style,
         ...(props.maxLines && { "-webkit-line-clamp": props.maxLines }),

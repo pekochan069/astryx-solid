@@ -6,6 +6,7 @@ import { Match, Show, Switch, createMemo, merge, omit } from "solid-js";
 import type { BaseProps } from "../../base-props.ts";
 import type { OnClick, OnClickEventType } from "../../types/handler.types.ts";
 
+import { composeEventHandlers } from "../../interactions/compose-event-handlers.ts";
 import { useSize } from "../../size-context/size-context.ts";
 import { stylexProps } from "../../stylex/index.ts";
 import {
@@ -305,7 +306,7 @@ export function Button(props: ButtonProps) {
     props,
   );
   const inheritedSize = useSize();
-  const size = createMemo(() => merged.size ?? inheritedSize);
+  const size = createMemo(() => merged.size ?? inheritedSize());
   const variant = createMemo(() => merged.variant ?? "secondary");
   const type = createMemo(() => merged.type ?? "button");
   const loading = createMemo(() => merged.isLoading || merged.isPending);
@@ -332,13 +333,9 @@ export function Button(props: ButtonProps) {
     "style",
   );
 
-  const onClick = (event: OnClickEventType<HTMLButtonElement>) => {
-    if (disabled()) {
-      event.preventDefault();
-      return;
-    }
-    props.onClick?.(event);
-  };
+  const onClick = composeEventHandlers<OnClickEventType<HTMLButtonElement>>((event) => {
+    if (disabled()) event.preventDefault();
+  }, props.onClick);
 
   const theme = createMemo(() => themeProps("button", { variant: variant(), size: size() }));
 

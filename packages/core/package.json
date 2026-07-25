@@ -56,6 +56,21 @@
       "node": "./dist/server/utils.js",
       "default": "./dist/utils.js"
     },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "node": "./dist/server/hooks.js",
+      "default": "./dist/hooks.js"
+    },
+    "./interactive-role-context": {
+      "types": "./dist/interactive-role-context.d.ts",
+      "node": "./dist/server/interactive-role-context.js",
+      "default": "./dist/interactive-role-context.js"
+    },
+    "./size-context": {
+      "types": "./dist/size-context.d.ts",
+      "node": "./dist/server/size-context.js",
+      "default": "./dist/size-context.js"
+    },
     "./theme": {
       "types": "./dist/theme.d.ts",
       "node": "./dist/server/theme.js",

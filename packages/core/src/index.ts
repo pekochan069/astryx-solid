@@ -7,6 +7,8 @@ export { mergeProps } from "./utils/merge-props.ts";
 export type { SolidStyleProps } from "./utils/merge-props.ts";
 export * from "./theme/index.ts";
 export * from "./i18n/index.ts";
+export * from "./interactions/index.ts";
+export * from "./size-context/index.ts";
 
 // export * from "./alert-dialog/index.ts";
 // export * from "./app-shell/index.ts";

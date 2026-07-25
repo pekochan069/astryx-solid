@@ -40,6 +40,7 @@ const styles = stylex.create({
 });
 export function Code(props: CodeProps) {
   const color = () => props.color ?? "primary";
+
   const rest = omit(props, "color", "size", "xstyle", "class", "style", "children");
   const style = createMemo(() =>
     stylexProps(

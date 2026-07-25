@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -13,7 +13,9 @@ export interface DividerVariantMap {
   subtle: true;
   strong: true;
 }
+
 export type DividerVariant = keyof DividerVariantMap;
+
 export interface DividerProps extends BaseProps<HTMLDivElement> {
   orientation?: "horizontal" | "vertical";
   label?: JSX.Element;
@@ -78,6 +80,7 @@ export function Divider(props: DividerProps) {
   const theme = createMemo(() =>
     themeProps("divider", { orientation: orientation(), variant: variant() }),
   );
+
   return (
     <div
       {...rest}
@@ -89,14 +92,12 @@ export function Divider(props: DividerProps) {
       data-style-src={root()["data-style-src"]}
     >
       <div {...line()} />
-      {props.label != null && (
-        <>
-          <div {...stylexProps(styles.label, !horizontal() && styles.verticalLabel)}>
-            {props.label}
-          </div>
-          <div {...line()} />
-        </>
-      )}
+      <Show when={props.label != null}>
+        <div {...stylexProps(styles.label, !horizontal() && styles.verticalLabel)}>
+          {props.label}
+        </div>
+        <div {...line()} />
+      </Show>
     </div>
   );
 }

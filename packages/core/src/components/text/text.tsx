@@ -13,6 +13,8 @@ import {
   typographyVars,
 } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
+import { truncationStyles } from "./truncation.stylex";
+import { setElementRef, useTruncation } from "./use-truncation";
 
 export type TextType =
   | "body"
@@ -176,8 +178,15 @@ function textWrapStyle(textWrap: TextWrap | undefined) {
 export function Text(props: TextProps) {
   const type = () => props.type ?? "body";
   const color = () => props.color ?? (type() === "supporting" ? "secondary" : "primary");
-  const display = () =>
-    props.maxLines || props.hasCapsize ? "block" : (props.display ?? "inline");
+  const maxLines = () => props.maxLines ?? 0;
+  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
+  const wordBreak = () => props.wordBreak ?? (maxLines() === 1 ? "break-all" : "break-word");
+  const truncation = useTruncation(maxLines);
+  const ref = (element: HTMLElement) => {
+    truncation.ref(element);
+    setElementRef(props.ref, element);
+  };
+
   const rest = omit(
     props,
     "type",
@@ -205,8 +214,9 @@ export function Text(props: TextProps) {
       typeStyle(type()),
       props.size && sizeStyles[props.size],
       props.weight && styles[props.weight],
-      styles[display()],
-      props.wordBreak && styles[props.wordBreak],
+      maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
+      maxLines() > 0 && styles[wordBreak()],
+      maxLines() === 0 && styles[display()],
       textWrapStyle(props.textWrap),
       props.justify && props.justify !== "start" && styles[props.justify],
       props.hasStrikethrough && styles.strikethrough,
@@ -218,19 +228,21 @@ export function Text(props: TextProps) {
     themeProps("text", { type: type(), size: props.size, color: color() }),
   );
   const title = () =>
-    props.maxLines && props.hasTruncateTooltip !== false && typeof props.children === "string"
-      ? props.children
+    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+      ? truncation.fullText()
       : undefined;
+
   return (
     <Dynamic
       component={props.as ?? "span"}
       {...rest}
       {...theme()}
       class={[theme().class, style().class, props.class]}
+      ref={ref}
       title={title()}
       style={{
         ...style().style,
-        ...(props.maxLines && { "-webkit-line-clamp": props.maxLines }),
+        ...(maxLines() > 1 && { "-webkit-line-clamp": maxLines() }),
         ...props.style,
       }}
       data-style-src={style()["data-style-src"]}

@@ -8,6 +8,8 @@ import type { TextColor, TextDisplay, TextJustify, TextWrap, WordBreak } from ".
 import { stylexProps } from "../../stylex";
 import { colorVars, typeScaleVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
+import { truncationStyles } from "../text/truncation.stylex";
+import { setElementRef, useTruncation } from "../text/use-truncation";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingType = "display-1" | "display-2" | "display-3";
@@ -112,7 +114,14 @@ function headingWrapStyle(textWrap: TextWrap | undefined) {
 
 export function Heading(props: HeadingProps) {
   const color = () => props.color ?? "primary";
-  const display = () => (props.maxLines || props.hasCapsize ? "block" : (props.display ?? "block"));
+  const maxLines = () => props.maxLines ?? 0;
+  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
+  const wordBreak = () => props.wordBreak ?? (maxLines() === 1 ? "break-all" : "break-word");
+  const truncation = useTruncation(maxLines);
+  const ref = (element: HTMLHeadingElement) => {
+    truncation.ref(element);
+    setElementRef(props.ref, element);
+  };
   const rest = omit(
     props,
     "level",
@@ -136,8 +145,9 @@ export function Heading(props: HeadingProps) {
     stylexProps(
       styles[color()],
       props.type ? styles[props.type] : styles[props.level],
-      styles[display()],
-      props.wordBreak && styles[props.wordBreak],
+      maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
+      maxLines() > 0 && styles[wordBreak()],
+      maxLines() === 0 && styles[display()],
       headingWrapStyle(props.textWrap),
       props.justify && props.justify !== "start" && styles[props.justify],
       props.hasStrikethrough && styles.strikethrough,
@@ -148,8 +158,8 @@ export function Heading(props: HeadingProps) {
     themeProps("heading", { level: props.level, type: props.type, color: color() }),
   );
   const title = () =>
-    props.maxLines && props.hasTruncateTooltip !== false && typeof props.children === "string"
-      ? props.children
+    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+      ? truncation.fullText()
       : undefined;
   return (
     <Dynamic
@@ -158,10 +168,11 @@ export function Heading(props: HeadingProps) {
       {...theme()}
       aria-level={props.accessibilityLevel !== props.level ? props.accessibilityLevel : undefined}
       class={[theme().class, style().class, props.class]}
+      ref={ref}
       title={title()}
       style={{
         ...style().style,
-        ...(props.maxLines && { "-webkit-line-clamp": props.maxLines }),
+        ...(maxLines() > 1 && { "-webkit-line-clamp": maxLines() }),
         ...props.style,
       }}
       data-style-src={style()["data-style-src"]}

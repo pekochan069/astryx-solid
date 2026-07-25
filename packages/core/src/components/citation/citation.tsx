@@ -1,6 +1,6 @@
 import { Dynamic, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -21,6 +21,7 @@ export interface CitationSource {
   url?: string;
   icon?: string;
 }
+
 export interface CitationProps extends BaseProps<HTMLElement> {
   source: CitationSource;
   number: number;
@@ -87,24 +88,12 @@ export function Citation(props: CitationProps) {
     ),
   );
   const theme = createMemo(() => themeProps("citation", { variant: variant() }));
-  const content = () =>
-    variant() === "number" ? (
-      props.number
-    ) : (
-      <>
-        {props.source.icon != null && (
-          <span {...stylexProps(styles.iconWrap)}>
-            <img src={props.source.icon} alt="" aria-hidden="true" {...stylexProps(styles.icon)} />
-          </span>
-        )}
-        <span {...stylexProps(styles.labelText)}>{title()}</span>
-      </>
-    );
   const rest = omit(props, "source", "number", "variant", "xstyle", "class", "style");
-  const component: ValidComponent = props.source.url ? "a" : "span";
+  const component = (): ValidComponent => (props.source.url ? "a" : "span");
+
   return (
     <Dynamic
-      component={component}
+      component={component()}
       {...rest}
       {...theme()}
       href={props.source.url}
@@ -116,8 +105,16 @@ export function Citation(props: CitationProps) {
       class={[theme().class, style().class, props.class]}
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}
+      textContent={variant() === "number" ? props.number : undefined}
     >
-      {content()}
+      <Show when={variant() === "label"}>
+        <Show when={props.source.icon != null}>
+          <span {...stylexProps(styles.iconWrap)}>
+            <img src={props.source.icon} alt="" aria-hidden="true" {...stylexProps(styles.icon)} />
+          </span>
+        </Show>
+        <span textContent={title()} {...stylexProps(styles.labelText)} />
+      </Show>
     </Dynamic>
   );
 }

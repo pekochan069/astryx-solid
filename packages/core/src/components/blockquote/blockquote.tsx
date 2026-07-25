@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -32,6 +32,7 @@ const styles = stylex.create({
 });
 export function Blockquote(props: BlockquoteProps) {
   const rest = omit(props, "cite", "xstyle", "class", "style", "children");
+
   const style = createMemo(() => stylexProps(styles.root, props.xstyle));
   const theme = createMemo(() => themeProps("blockquote"));
   return (
@@ -43,11 +44,11 @@ export function Blockquote(props: BlockquoteProps) {
       data-style-src={style()["data-style-src"]}
     >
       {props.children}
-      {props.cite != null && (
+      <Show when={props.cite != null}>
         <footer>
           <cite {...stylexProps(styles.cite)}>{props.cite}</cite>
         </footer>
-      )}
+      </Show>
     </blockquote>
   );
 }

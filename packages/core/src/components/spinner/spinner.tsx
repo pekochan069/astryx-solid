@@ -1,6 +1,7 @@
-import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
+import type { JSX } from "@solidjs/web";
+
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -13,6 +14,7 @@ const rotation = stylex.keyframes({
   "100%": { transform: "rotate(360deg)" },
 });
 const sizes = { sm: 14, md: 20, lg: 24, xl: 36 };
+
 export type SpinnerSize = keyof typeof sizes;
 export type SpinnerShade = "default" | "onMedia" | "subtle" | "inherit";
 export interface SpinnerProps extends BaseProps<HTMLSpanElement> {
@@ -55,6 +57,7 @@ export function Spinner(props: SpinnerProps) {
   const size = () => props.size ?? "md";
   const shade = () => props.shade ?? "default";
   const hasLabel = () => props.label != null;
+
   const rest = omit(props, "size", "shade", "label", "xstyle", "class", "style", "aria-label");
   const spinnerStyle = createMemo(() =>
     stylexProps(
@@ -65,54 +68,52 @@ export function Spinner(props: SpinnerProps) {
     ),
   );
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
+  const wrapperStyle = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const frame = () => sizes[size()];
-  const spinner = (
-    <span
-      role="status"
-      aria-label={
-        props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
+
+  return (
+    <Show
+      when={hasLabel()}
+      fallback={
+        <span
+          {...rest}
+          {...theme()}
+          class={[theme().class, spinnerStyle().class, props.class]}
+          style={{
+            ...spinnerStyle().style,
+            width: `${frame()}px`,
+            height: `${frame()}px`,
+            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
+            ...props.style,
+          }}
+          role="status"
+          aria-label={props["aria-label"] ?? "Loading"}
+          data-style-src={spinnerStyle()["data-style-src"]}
+        />
       }
-      class={spinnerStyle().class}
-      style={{
-        ...spinnerStyle().style,
-        width: `${frame()}px`,
-        height: `${frame()}px`,
-        "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-      }}
-      data-style-src={spinnerStyle()["data-style-src"]}
-    />
-  );
-  if (hasLabel()) {
-    const component: ValidComponent = "div";
-    const wrapperStyle = stylexProps(styles.wrapper, props.xstyle);
-    return (
-      <Dynamic
-        component={component}
+    >
+      <span
         {...rest}
         {...theme()}
-        class={[theme().class, wrapperStyle.class, props.class]}
-        style={{ ...wrapperStyle.style, ...props.style }}
+        class={[theme().class, wrapperStyle().class, props.class]}
+        style={{ ...wrapperStyle().style, ...props.style }}
       >
-        {spinner}
+        <span
+          role="status"
+          aria-label={
+            props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
+          }
+          class={spinnerStyle().class}
+          style={{
+            ...spinnerStyle().style,
+            width: `${frame()}px`,
+            height: `${frame()}px`,
+            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
+          }}
+          data-style-src={spinnerStyle()["data-style-src"]}
+        />
         {props.label}
-      </Dynamic>
-    );
-  }
-  return (
-    <span
-      {...rest}
-      {...theme()}
-      class={[theme().class, spinnerStyle().class, props.class]}
-      style={{
-        ...spinnerStyle().style,
-        width: `${frame()}px`,
-        height: `${frame()}px`,
-        "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-        ...props.style,
-      }}
-      role="status"
-      aria-label={props["aria-label"] ?? "Loading"}
-      data-style-src={spinnerStyle()["data-style-src"]}
-    />
+      </span>
+    </Show>
   );
 }

@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, createSignal, omit, onSettled } from "solid-js";
+import { createMemo, createSignal, For, omit, onSettled } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -102,11 +102,15 @@ export function Kbd(props: KbdProps) {
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}
     >
-      {keys().map((key) => (
-        <kbd aria-hidden="true" {...stylexProps(styles.key)}>
-          {display(key, isMac())}
-        </kbd>
-      ))}
+      <For each={keys()}>
+        {(key) => (
+          <kbd
+            aria-hidden="true"
+            textContent={display(key, isMac())}
+            {...stylexProps(styles.key)}
+          />
+        )}
+      </For>
     </span>
   );
 }

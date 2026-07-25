@@ -1,10 +1,11 @@
 import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import { stylexProps } from "../../stylex";
 import { colorVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
+import { defaultIcons } from "./default-icons";
 
 export type IconName =
   | "close"
@@ -34,6 +35,7 @@ export type IconName =
   | "stop"
   | "microphone";
 export type IconType = ValidComponent;
+export type IconValue = JSX.Element | IconType;
 export type IconColor =
   | "primary"
   | "secondary"
@@ -55,20 +57,34 @@ export type IconColor =
   | "pink"
   | "purple";
 export type IconSize = "xsm" | "sm" | "md" | "lg";
-export type IconRegistry = Partial<Record<IconName, JSX.Element>>;
-let registry: Record<string, JSX.Element | undefined> = {};
+export type IconRegistry = Partial<Record<IconName, IconValue>>;
+
+let registry: Record<string, IconValue | undefined> = {};
+
 export function registerIcons(icons: IconRegistry) {
   registry = { ...registry, ...icons };
 }
+
 export function getIconRegistry() {
-  return registry;
+  return { ...defaultIcons, ...registry };
 }
+
+function isIconName(name: string): name is IconName {
+  return Object.hasOwn(defaultIcons, name);
+}
+
+function isIconComponent(icon: IconValue | undefined): icon is IconType {
+  return typeof icon === "function" || typeof icon === "string";
+}
+
 export function getIcon(name: string) {
-  return registry[name];
+  return registry[name] ?? (isIconName(name) ? defaultIcons[name] : undefined);
 }
+
 export function resetIcons() {
   registry = {};
 }
+
 const styles = stylex.create({
   root: { flexShrink: 0 },
   span: { display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
@@ -110,12 +126,40 @@ export interface IconProps extends Omit<
 export function Icon(props: IconProps) {
   const color = () => props.color ?? "inherit";
   const size = () => props.size ?? "md";
+
   const rest = omit(props, "icon", "color", "size", "class", "style");
   const style = createMemo(() => stylexProps(styles.root, styles[color()], styles[size()]));
   const spanStyle = createMemo(() => stylexProps(styles.span, styles[color()], styles[size()]));
   const theme = createMemo(() => themeProps("icon", { size: size(), color: color() }));
-  if (typeof props.icon === "string")
-    return (
+
+  const isRegistered = () => typeof props.icon === "string" && isIconName(props.icon);
+  const registeredIcon = createMemo(() =>
+    isRegistered() && typeof props.icon === "string" ? getIcon(props.icon) : undefined,
+  );
+  const registeredElement = () => {
+    const icon = registeredIcon();
+    return isIconComponent(icon) ? undefined : icon;
+  };
+  const component = () => {
+    const icon = registeredIcon();
+    return isRegistered() && isIconComponent(icon) ? icon : props.icon;
+  };
+
+  return (
+    <Show
+      when={isRegistered() && registeredElement() !== undefined}
+      fallback={
+        <Dynamic
+          component={component()}
+          {...rest}
+          {...theme()}
+          aria-hidden={props["aria-hidden"] ?? "true"}
+          class={[theme().class, style().class, props.class]}
+          style={{ ...style().style, ...props.style }}
+          data-style-src={style()["data-style-src"]}
+        />
+      }
+    >
       <span
         {...theme()}
         data-testid={props["data-testid"]}
@@ -126,19 +170,9 @@ export function Icon(props: IconProps) {
         style={{ ...spanStyle().style, ...props.style }}
         data-style-src={spanStyle()["data-style-src"]}
       >
-        {getIcon(props.icon)}
+        {registeredElement()}
       </span>
-    );
-  return (
-    <Dynamic
-      component={props.icon}
-      {...rest}
-      {...theme()}
-      aria-hidden={props["aria-hidden"] ?? "true"}
-      class={[theme().class, style().class, props.class]}
-      style={{ ...style().style, ...props.style }}
-      data-style-src={style()["data-style-src"]}
-    />
+    </Show>
   );
 }
 export function renderIconSlot(

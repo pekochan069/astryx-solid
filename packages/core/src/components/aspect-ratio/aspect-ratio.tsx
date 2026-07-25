@@ -34,6 +34,7 @@ const styles = stylex.create({
 /** Maintains a ratio while positioning its content inside the box. */
 export function AspectRatio(props: AspectRatioProps) {
   const shape = () => props.shape ?? "rectangle";
+
   const rest = omit(props, "ratio", "shape", "fit", "xstyle", "class", "style", "children");
   const style = createMemo(() =>
     stylexProps(styles.root, shape() === "ellipse" && styles.ellipse, props.xstyle),

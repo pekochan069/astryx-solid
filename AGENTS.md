@@ -5,6 +5,7 @@
 - Make sure functions don't exceed more than 100 lines, and 150 lines for components
 - When creating new pr, use `./.github/pull_request_template.md`
 - Divide commits based on packages, and divide more when needed
+- use native `textContent` prop for dynamic text contents instead of putting it as children for optimization
 
 ## Agent skills
 

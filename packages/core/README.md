@@ -15,4 +15,6 @@ const theme = defineTheme({ name: "app", tokens: { "--color-accent": "#0064e0" }
 ```
 
 Public subpaths expose naming, StyleX merging, theme tokens and syntax themes,
-i18n, locale JSON, and CSS roles.
+i18n, locale JSON, interaction contexts/hooks, and CSS roles. See
+[`docs/core-reactive-substrate.md`](../../docs/core-reactive-substrate.md) for
+controlled state, events, refs, IDs, contexts, and lifecycle rules.

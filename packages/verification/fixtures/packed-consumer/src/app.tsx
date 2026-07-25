@@ -1,4 +1,7 @@
+import { useInteractiveRole } from "@astryx-solid/core/hooks";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
+import { InteractiveRoleContext } from "@astryx-solid/core/interactive-role-context";
+import { SizeContext, useSize } from "@astryx-solid/core/size-context";
 import { defineTheme, Theme, useTheme } from "@astryx-solid/core/theme";
 import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
 import { createSignal } from "solid-js";
@@ -20,6 +23,16 @@ export function createApp() {
         <p data-testid="consumer-state">
           <ConsumerState />
         </p>
+        <InteractiveRoleContext value={{ role: "button" }}>
+          <p data-testid="consumer-role">
+            <ConsumerRole />
+          </p>
+        </InteractiveRoleContext>
+        <SizeContext value={{ size: "sm" }}>
+          <p data-testid="consumer-size">
+            <ConsumerSize />
+          </p>
+        </SizeContext>
       </InternationalizationProvider>
     </Theme>
   );
@@ -33,4 +46,14 @@ function ConsumerState() {
       {theme.name}:{theme.mode}:{theme.token("--color-accent")}:{translate("greeting")}
     </>
   );
+}
+
+function ConsumerRole() {
+  const role = useInteractiveRole({});
+  return <>{role()}</>;
+}
+
+function ConsumerSize() {
+  const size = useSize();
+  return <>{size()}</>;
 }

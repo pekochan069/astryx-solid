@@ -15,7 +15,9 @@ if (
   first !== render() ||
   !first.includes("Close dialog") ||
   !first.includes("consumer-light") ||
-  !first.includes("Hello")
+  !first.includes("Hello") ||
+  !first.includes("button") ||
+  !first.includes("sm")
 ) {
   throw new Error(`Unexpected server output: ${first}`);
 }

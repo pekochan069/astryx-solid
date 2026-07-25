@@ -63,8 +63,28 @@
         "docs",
         "browser"
       ],
-      "requireCurrentExports": true,
       "issue": "https://github.com/pekochan069/astryx-solid/issues/18"
+    },
+    "core-reactive-interaction": {
+      "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": [
+        "=./InteractiveRoleContext",
+        "=./SizeContext",
+        "=./hooks",
+        "=./interactive-role-context",
+        "=./size-context",
+        "packages/core/src/InteractiveRoleContext/",
+        "packages/core/src/SizeContext/",
+        "=packages/core/src/hooks/index.ts",
+        "=packages/core/src/hooks/useInteractiveRole.ts",
+        "=packages/core/src/hooks/useIsomorphicLayoutEffect.ts",
+        "=packages/core/src/utils/index.ts",
+        "=packages/core/src/utils/composeEventHandlers.ts",
+        "=packages/core/src/utils/composeEventHandlers.test.ts",
+        "=packages/core/src/utils/mergeRefs.ts"
+      ],
+      "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/19"
     }
   },
   "dispositions": [
@@ -380,6 +400,96 @@
       ],
       "approval": "https://github.com/pekochan069/astryx-solid/issues/16",
       "surfaces": ["packages/build/src/vite.test.ts"]
+    },
+    {
+      "source": "@astryxdesign/core interaction contexts, hooks, and event composition",
+      "batch": "core-reactive-interaction",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "@astryx-solid/core lowercase interaction subpaths and root exports",
+      "rationale": "Solid-native contexts use getter-bearing values, roles resolve through accessors, and native event handlers preserve declared cancellation order.",
+      "evidence": [
+        "packages/core/src/interactions/index.ts",
+        "packages/core/src/interactions/compose-event-handlers.ts",
+        "packages/core/src/interactions/interactive-role-context.ts",
+        "packages/core/src/interactions/use-interactive-role.ts",
+        "packages/core/tests/interactions/compose-event-handlers.test.ts",
+        "packages/core/tests/interactions/interactive-role.test.tsx",
+        "packages/core/tests/components/button/button.test.ts",
+        "packages/verification/fixtures/packed-consumer/src/app.tsx",
+        "apps/docs/src/routes/core-substrate.tsx",
+        "apps/docs/tests/core-substrate.spec.ts-snapshots/core-substrate-dark-chromium-linux.png",
+        "docs/core-reactive-substrate.md"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/19#issuecomment-5077684114",
+      "surfaces": [
+        "./interactive-role-context",
+        "./size-context",
+        "packages/core/src/utils/composeEventHandlers.test.ts",
+        "packages/core/src/utils/composeEventHandlers.ts",
+        "packages/core/src/utils/index.ts"
+      ]
+    },
+    {
+      "source": "React context and synchronous hook contracts",
+      "batch": "core-reactive-interaction",
+      "package": "@astryx-solid/core",
+      "disposition": "approved-incompatible",
+      "replacement": "lowercase Solid context subpaths with getter-bearing values and accessor-returning hooks",
+      "rationale": "Solid context values and reactive reads cannot preserve React's primitive context, synchronous-hook contracts, or the generic useSize<T extends string> custom-size API without snapshots, top-level reactive reads, or an untyped context.",
+      "evidence": [
+        "packages/core/src/size-context/size-context.ts",
+        "packages/core/src/interactions/interactive-role-context.ts",
+        "packages/core/src/interactions/use-interactive-role.ts",
+        "packages/core/tests/components/button/button.test.ts",
+        "packages/core/tests/interactions/interactive-role.test.tsx",
+        "docs/core-reactive-substrate.md"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/14",
+      "surfaces": [
+        "./InteractiveRoleContext",
+        "./SizeContext",
+        "./hooks",
+        "packages/core/src/InteractiveRoleContext/InteractiveRoleContext.test.tsx",
+        "packages/core/src/SizeContext/SizeContext.test.tsx",
+        "packages/core/src/hooks/index.ts",
+        "packages/core/src/hooks/useInteractiveRole.ts"
+      ],
+      "classification": "solid-native-reactivity-contract",
+      "affectedSurfaces": [
+        "./InteractiveRoleContext",
+        "./SizeContext",
+        "./hooks",
+        "packages/core/src/InteractiveRoleContext/InteractiveRoleContext.test.tsx",
+        "packages/core/src/SizeContext/SizeContext.test.tsx",
+        "packages/core/src/hooks/index.ts",
+        "packages/core/src/hooks/useInteractiveRole.ts"
+      ],
+      "migrationGuidance": "Use lowercase context subpaths with `value` getter objects, `ElementSize` values, and call the accessors returned by useSize() and useInteractiveRole() in tracked scopes. Custom size unions need a component-local accessor."
+    },
+    {
+      "source": "React ref and isomorphic-layout helpers",
+      "batch": "core-reactive-interaction",
+      "package": "@astryx-solid/core",
+      "disposition": "approved-incompatible",
+      "replacement": "Solid assignable or array refs, ref directive factories, and onSettled cleanup",
+      "rationale": "Solid 2 directly provides ref assignment and lifecycle ownership, so React-shaped ref and layout-effect wrappers would be compatibility facades without behavior.",
+      "evidence": [
+        "docs/core-reactive-substrate.md",
+        "packages/core/tests/components/button/button.test.ts",
+        "packages/core/src/theme/theme.tsx"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/14",
+      "surfaces": [
+        "packages/core/src/hooks/useIsomorphicLayoutEffect.ts",
+        "packages/core/src/utils/mergeRefs.ts"
+      ],
+      "classification": "solid-native-lifecycle-and-ref-replacement",
+      "affectedSurfaces": [
+        "packages/core/src/hooks/useIsomorphicLayoutEffect.ts",
+        "packages/core/src/utils/mergeRefs.ts"
+      ],
+      "migrationGuidance": "Pass assignable or array refs directly, and start browser resources in ref directive factories or onSettled with scope-owned cleanup."
     }
   ]
 }

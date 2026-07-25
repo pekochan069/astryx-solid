@@ -1,3 +1,17 @@
+import {
+  AspectRatio,
+  Badge,
+  Blockquote,
+  Citation,
+  Code,
+  Divider,
+  Heading,
+  Icon,
+  Kbd,
+  Skeleton,
+  Spinner,
+  Text,
+} from "@astryx-solid/core";
 import { useInteractiveRole } from "@astryx-solid/core/hooks";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
 import { InteractiveRoleContext } from "@astryx-solid/core/interactive-role-context";
@@ -35,6 +49,25 @@ export function createApp() {
         </SizeContext>
       </InternationalizationProvider>
     </Theme>
+  );
+}
+
+export function ContentPrimitives() {
+  return (
+    <div data-testid="content-primitives">
+      <AspectRatio ratio={16 / 9}>Media</AspectRatio>
+      <Badge variant="success" label="Ready" />
+      <Blockquote cite="Source">Quote</Blockquote>
+      <Citation source={{ title: "Reference", url: "https://example.com" }} number={1} />
+      <Code>const value = 1</Code>
+      <Divider label="Section" />
+      <Heading level={2}>Heading</Heading>
+      <Icon icon="close" aria-label="Close" aria-hidden={false} />
+      <Kbd keys="ctrl+k" />
+      <Skeleton width={20} height={10} />
+      <Spinner label="Loading" />
+      <Text>Text</Text>
+    </div>
   );
 }
 

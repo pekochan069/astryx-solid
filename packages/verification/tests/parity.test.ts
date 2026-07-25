@@ -41,6 +41,22 @@ describe("root parity command", () => {
     ).toBe(true);
   });
 
+  it("tracks content primitive source tests and documentation", async () => {
+    const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).json();
+    const batch = ledger.batches["content-visibility"];
+    const disposition = ledger.dispositions.find(
+      (item: { source: string }) =>
+        item.source === "@astryxdesign/core content primitive source evidence",
+    );
+
+    expect(batch.inventoryPatterns).toContain(
+      "=packages/core/src/Icon/globalIconRegistry.test.tsx",
+    );
+    expect(batch.inventoryPatterns).toContain("=packages/core/src/Text/Text.doc.mjs");
+    expect(disposition.surfaces).toContain("packages/core/src/Icon/globalIconRegistry.test.tsx");
+    expect(disposition.surfaces).toContain("packages/core/src/Text/Text.doc.mjs");
+  });
+
   it("selects the control-plane batch", async () => {
     const result = await list("--batch", "control-plane");
 

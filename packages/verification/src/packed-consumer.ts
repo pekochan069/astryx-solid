@@ -19,6 +19,7 @@ try {
     resolve(root, "packages/core"),
   );
   await cp(resolve(import.meta.dirname, "../fixtures/packed-consumer"), temp, { recursive: true });
+  // SSR injects markup into index.html, so final client build must run after SSR.
   await writeFile(
     resolve(temp, "package.json"),
     `${JSON.stringify(
@@ -83,6 +84,7 @@ try {
     const hydration = await page.locator("#app").getAttribute("data-hydrated");
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
+    const contentPrimitives = await page.getByTestId("content-primitives").count();
     const initialContext = await page.locator("#app").getAttribute("data-server-context");
     const role = await page.getByTestId("consumer-role").textContent();
     const size = await page.getByTestId("consumer-size").textContent();
@@ -94,6 +96,7 @@ try {
       hydration !== "reused" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
+      contentPrimitives !== 1 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
       role !== "button" ||
@@ -101,7 +104,7 @@ try {
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, contentPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

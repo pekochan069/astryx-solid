@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createUniqueId } from "solid-js";
 
-import { createApp } from "./app";
+import { ContentPrimitives, createApp } from "./app";
 
 const render = () =>
   renderToString(() => {
@@ -11,13 +11,17 @@ const render = () =>
     return createApp();
   });
 const first = render();
+const primitives = renderToString(ContentPrimitives);
 if (
   first !== render() ||
   !first.includes("Close dialog") ||
   !first.includes("consumer-light") ||
   !first.includes("Hello") ||
   !first.includes("button") ||
-  !first.includes("sm")
+  !first.includes("sm") ||
+  !primitives.includes('data-testid="content-primitives"') ||
+  !primitives.includes("Reference") ||
+  !primitives.includes("Loading")
 ) {
   throw new Error(`Unexpected server output: ${first}`);
 }

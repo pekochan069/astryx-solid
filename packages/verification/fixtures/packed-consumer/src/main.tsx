@@ -12,7 +12,7 @@ import "@astryx-solid/core/reset.css";
 import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
-import { createApp } from "./app";
+import { ContentPrimitives, createApp } from "./app";
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -40,3 +40,4 @@ render(
   () => <RootVisuallyHidden>Root export works</RootVisuallyHidden>,
   document.getElementById("root-export")!,
 );
+render(ContentPrimitives, document.getElementById("content-primitives")!);

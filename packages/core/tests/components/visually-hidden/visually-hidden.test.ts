@@ -20,13 +20,13 @@ afterEach(() => {
 });
 
 describe("VisuallyHidden", () => {
-  it("renders hidden content in a div by default", () => {
+  it("renders hidden content in a span by default", () => {
     const container = mount(() =>
       createComponent(VisuallyHidden, { children: "Screen reader text" }),
     );
     const element = container.firstElementChild!;
 
-    expect(element.tagName).toBe("DIV");
+    expect(element.tagName).toBe("SPAN");
     expect(element.textContent).toBe("Screen reader text");
     expect(element.className).not.toBe("");
   });

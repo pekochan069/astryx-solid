@@ -8,6 +8,102 @@
       "docsPath": "/components/visually-hidden",
       "description": "Hides content visually while keeping it in the accessibility tree.",
       "states": ["default", "live-region", "structural-heading", "control-label"]
+    },
+    {
+      "name": "AspectRatio",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/aspect-ratio",
+      "docsPath": "/components/content-primitives",
+      "description": "Maintains a ratio for media and other content.",
+      "states": ["rectangle", "ellipse", "cover", "contain"]
+    },
+    {
+      "name": "Badge",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/badge",
+      "docsPath": "/components/content-primitives",
+      "description": "Displays compact status and category labels.",
+      "states": ["neutral", "success", "error"]
+    },
+    {
+      "name": "Blockquote",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/blockquote",
+      "docsPath": "/components/content-primitives",
+      "description": "Renders a semantic quote with optional attribution.",
+      "states": ["default", "citation"]
+    },
+    {
+      "name": "Citation",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/citation",
+      "docsPath": "/components/content-primitives",
+      "description": "Links inline source references.",
+      "states": ["label", "number", "unlinked"]
+    },
+    {
+      "name": "Code",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/code",
+      "docsPath": "/components/content-primitives",
+      "description": "Styles inline code content.",
+      "states": ["primary", "secondary", "inherit"]
+    },
+    {
+      "name": "Divider",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/divider",
+      "docsPath": "/components/content-primitives",
+      "description": "Separates content horizontally or vertically.",
+      "states": ["horizontal", "vertical", "label"]
+    },
+    {
+      "name": "Heading",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/heading",
+      "docsPath": "/components/content-primitives",
+      "description": "Renders semantic themed headings.",
+      "states": ["level", "display"]
+    },
+    {
+      "name": "Icon",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/icon",
+      "docsPath": "/components/content-primitives",
+      "description": "Renders supplied SVG icon components or registry icons.",
+      "states": ["component", "registry", "accessible"]
+    },
+    {
+      "name": "Kbd",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/kbd",
+      "docsPath": "/components/content-primitives",
+      "description": "Displays accessible keyboard shortcuts.",
+      "states": ["single-key", "modifiers"]
+    },
+    {
+      "name": "Skeleton",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/skeleton",
+      "docsPath": "/components/content-primitives",
+      "description": "Displays decorative loading placeholders.",
+      "states": ["default", "rounded", "reduced-motion"]
+    },
+    {
+      "name": "Spinner",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/spinner",
+      "docsPath": "/components/content-primitives",
+      "description": "Displays an accessible loading indicator.",
+      "states": ["inline", "label", "shades"]
+    },
+    {
+      "name": "Text",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/text",
+      "docsPath": "/components/content-primitives",
+      "description": "Renders themed semantic text.",
+      "states": ["body", "supporting", "display"]
     }
   ]
 }

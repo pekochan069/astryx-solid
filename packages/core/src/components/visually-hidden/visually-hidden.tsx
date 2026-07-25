@@ -15,7 +15,7 @@ export interface VisuallyHiddenProps extends Omit<BaseProps, "class" | "style"> 
   /** Content exposed to assistive technology while hidden visually. */
   children?: JSX.Element;
 
-  /** Element or component to render. @default "div" */
+  /** Element or component to render. @default "span" */
   as?: ValidComponent;
 }
 
@@ -57,7 +57,7 @@ const styles = stylex.create({
  * ```
  */
 export function VisuallyHidden(props: VisuallyHiddenProps) {
-  const merged = merge({ as: "div" }, props);
+  const merged = merge({ as: "span" }, props);
   const style = createMemo(() => {
     const stylexProps = stylex.props(styles.visuallyHidden);
     return {

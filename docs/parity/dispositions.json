@@ -85,9 +85,57 @@
       ],
       "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/19"
+    },
+    "content-visibility": {
+      "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": [
+        "=./AspectRatio",
+        "=./Badge",
+        "=./Blockquote",
+        "=./Citation",
+        "=./Code",
+        "=./Divider",
+        "=./Heading",
+        "=./Icon",
+        "=./Kbd",
+        "=./Skeleton",
+        "=./Spinner",
+        "=./Text"
+      ],
+      "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/20"
     }
   },
   "dispositions": [
+    {
+      "source": "@astryxdesign/core content and visibility primitives",
+      "batch": "content-visibility",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "@astryx-solid/core lowercase Solid component subpaths",
+      "rationale": "Solid-native primitives preserve semantic markup, accessibility contracts, styling tokens, and public component behavior.",
+      "evidence": [
+        "packages/core/src/components",
+        "packages/core/tests/components/content-primitives/content-primitives.test.tsx",
+        "apps/docs/src/routes/components/content-primitives.tsx",
+        "apps/docs/src/registry/components.json"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/20",
+      "surfaces": [
+        "./AspectRatio",
+        "./Badge",
+        "./Blockquote",
+        "./Citation",
+        "./Code",
+        "./Divider",
+        "./Heading",
+        "./Icon",
+        "./Kbd",
+        "./Skeleton",
+        "./Spinner",
+        "./Text"
+      ]
+    },
     {
       "source": "@astryx-solid/core styling and theme exports",
       "batch": "core-styling-theme",

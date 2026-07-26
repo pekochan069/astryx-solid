@@ -33,8 +33,9 @@ const styles = stylex.create({
 export function Blockquote(props: BlockquoteProps) {
   const rest = omit(props, "cite", "xstyle", "class", "style", "children");
 
-  const style = createMemo(() => stylexProps(styles.root, props.xstyle));
   const theme = createMemo(() => themeProps("blockquote"));
+  const style = createMemo(() => stylexProps(styles.root, props.xstyle));
+
   return (
     <blockquote
       {...rest}

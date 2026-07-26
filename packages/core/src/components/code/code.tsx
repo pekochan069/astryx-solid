@@ -39,9 +39,11 @@ const styles = stylex.create({
   inherit: { color: "inherit", fontSize: "inherit" },
 });
 export function Code(props: CodeProps) {
+  const rest = omit(props, "color", "size", "xstyle", "class", "style", "children");
+
   const color = () => props.color ?? "primary";
 
-  const rest = omit(props, "color", "size", "xstyle", "class", "style", "children");
+  const theme = createMemo(() => themeProps("code", { color: color() }));
   const style = createMemo(() =>
     stylexProps(
       styles.root,
@@ -50,7 +52,7 @@ export function Code(props: CodeProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps("code", { color: color() }));
+
   return (
     <code
       {...rest}

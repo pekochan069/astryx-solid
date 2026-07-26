@@ -124,19 +124,21 @@ export interface IconProps extends Omit<
   "data-testid"?: string;
 }
 export function Icon(props: IconProps) {
+  const rest = omit(props, "icon", "color", "size", "class", "style");
+
   const color = () => props.color ?? "inherit";
   const size = () => props.size ?? "md";
 
-  const rest = omit(props, "icon", "color", "size", "class", "style");
+  const theme = createMemo(() => themeProps("icon", { size: size(), color: color() }));
   const style = createMemo(() => stylexProps(styles.root, styles[color()], styles[size()]));
   const spanStyle = createMemo(() => stylexProps(styles.span, styles[color()], styles[size()]));
-  const theme = createMemo(() => themeProps("icon", { size: size(), color: color() }));
 
   const isRegistered = () => typeof props.icon === "string" && isIconName(props.icon);
   const registeredIcon = createMemo(() =>
     isRegistered() && typeof props.icon === "string" ? getIcon(props.icon) : undefined,
   );
-  const registeredElement = () => {
+
+  const RegisteredElement = () => {
     const icon = registeredIcon();
     return isIconComponent(icon) ? <Dynamic component={icon} /> : icon;
   };
@@ -166,7 +168,7 @@ export function Icon(props: IconProps) {
         style={{ ...spanStyle().style, ...props.style }}
         data-style-src={spanStyle()["data-style-src"]}
       >
-        {registeredElement()}
+        <RegisteredElement />
       </span>
     </Show>
   );

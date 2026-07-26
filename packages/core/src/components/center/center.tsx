@@ -31,7 +31,6 @@ const styles = stylex.create({
 
 /** Centers content along one or both flex axes. */
 export function Center(props: CenterProps) {
-  const axis = () => props.axis ?? "both";
   const rest = omit(
     props,
     "axis",
@@ -45,7 +44,11 @@ export function Center(props: CenterProps) {
     "style",
     "children",
   );
-  const root = createMemo(() =>
+
+  const axis = () => props.axis ?? "both";
+
+  const theme = createMemo(() => themeProps("center", { axis: axis() }));
+  const syle = createMemo(() =>
     stylexProps(
       props.isInline ? styles.inline : styles.base,
       (axis() === "both" || axis() === "horizontal") && styles.horizontal,
@@ -53,22 +56,21 @@ export function Center(props: CenterProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps("center", { axis: axis() }));
 
   return (
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, root().class, props.class]}
+      class={[theme().class, syle().class, props.class]}
       style={{
-        ...root().style,
+        ...syle().style,
         ...(props.width != null && { width: size(props.width) }),
         ...(props.height != null && { height: size(props.height) }),
         ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
         ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
         ...props.style,
       }}
-      data-style-src={root()["data-style-src"]}
+      data-style-src={syle()["data-style-src"]}
     >
       {props.children}
     </div>

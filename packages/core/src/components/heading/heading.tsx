@@ -113,14 +113,6 @@ function headingWrapStyle(textWrap: TextWrap | undefined) {
 }
 
 export function Heading(props: HeadingProps) {
-  const color = () => props.color ?? "primary";
-  const truncation = useTruncation({
-    maxLines: () => props.maxLines,
-    wordBreak: () => props.wordBreak,
-    ref: props.ref,
-  });
-  const { maxLines, wordBreak } = truncation;
-  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
   const rest = omit(
     props,
     "level",
@@ -140,6 +132,23 @@ export function Heading(props: HeadingProps) {
     "style",
     "children",
   );
+
+  const title = () =>
+    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+      ? truncation.fullText()
+      : undefined;
+  const color = () => props.color ?? "primary";
+  const truncation = useTruncation({
+    maxLines: () => props.maxLines,
+    wordBreak: () => props.wordBreak,
+    ref: props.ref,
+  });
+  const { maxLines, wordBreak } = truncation;
+  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
+
+  const theme = createMemo(() =>
+    themeProps("heading", { level: props.level, type: props.type, color: color() }),
+  );
   const style = createMemo(() =>
     stylexProps(
       styles[color()],
@@ -153,13 +162,7 @@ export function Heading(props: HeadingProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() =>
-    themeProps("heading", { level: props.level, type: props.type, color: color() }),
-  );
-  const title = () =>
-    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
-      ? truncation.fullText()
-      : undefined;
+
   return (
     <Dynamic
       component={tags[props.level]}

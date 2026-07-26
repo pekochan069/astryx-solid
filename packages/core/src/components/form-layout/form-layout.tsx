@@ -38,9 +38,17 @@ const styles = stylex.create({
 
 /** Arranges form fields and provides their layout direction. */
 export function FormLayout(props: FormLayoutProps) {
-  const direction = () => props.direction ?? "vertical";
   const rest = omit(props, "direction", "xstyle", "class", "style", "children");
-  const root = createMemo(() =>
+
+  const direction = () => props.direction ?? "vertical";
+  const value: FormLayoutContextValue = {
+    get direction() {
+      return direction();
+    },
+  };
+
+  const theme = createMemo(() => themeProps("form-layout", { direction: direction() }));
+  const style = createMemo(() =>
     stylexProps(
       styles.base,
       direction() === "horizontal" && styles.horizontal,
@@ -48,21 +56,15 @@ export function FormLayout(props: FormLayoutProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps("form-layout", { direction: direction() }));
-  const value: FormLayoutContextValue = {
-    get direction() {
-      return direction();
-    },
-  };
 
   return (
     <FormLayoutContext value={value}>
       <div
         {...rest}
         {...theme()}
-        class={[theme().class, root().class, props.class]}
-        style={{ ...root().style, ...props.style }}
-        data-style-src={root()["data-style-src"]}
+        class={[theme().class, style().class, props.class]}
+        style={{ ...style().style, ...props.style }}
+        data-style-src={style()["data-style-src"]}
       >
         {props.children}
       </div>

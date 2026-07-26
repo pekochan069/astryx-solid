@@ -78,8 +78,14 @@ const styles = stylex.create({
 });
 export function Citation(props: CitationProps) {
   const t = useTranslator();
+
+  const rest = omit(props, "source", "number", "variant", "xstyle", "class", "style");
+
   const variant = () => props.variant ?? "label";
   const title = () => props.source.title ?? String(props.number);
+
+  const theme = createMemo(() => themeProps("citation", { variant: variant() }));
+  const component = (): ValidComponent => (props.source.url ? "a" : "span");
   const style = createMemo(() =>
     stylexProps(
       variant() === "number" ? styles.number : styles.label,
@@ -87,9 +93,6 @@ export function Citation(props: CitationProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps("citation", { variant: variant() }));
-  const rest = omit(props, "source", "number", "variant", "xstyle", "class", "style");
-  const component = (): ValidComponent => (props.source.url ? "a" : "span");
 
   return (
     <Dynamic

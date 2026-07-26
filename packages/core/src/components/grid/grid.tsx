@@ -96,10 +96,20 @@ export function Grid(props: GridProps) {
     "style",
     "children",
   );
+
   const template = createMemo(() =>
     gridTemplate(props.columns, props.minChildWidth, props.gap, props.columnGap),
   );
-  const root = createMemo(() =>
+
+  const theme = createMemo(() =>
+    themeProps("grid", {
+      columns: typeof props.columns === "number" ? props.columns : undefined,
+      gap: props.gap,
+      align: props.align,
+      justify: props.justify,
+    }),
+  );
+  const style = createMemo(() =>
     stylexProps(
       styles.grid,
       styles.template(template()),
@@ -112,29 +122,21 @@ export function Grid(props: GridProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() =>
-    themeProps("grid", {
-      columns: typeof props.columns === "number" ? props.columns : undefined,
-      gap: props.gap,
-      align: props.align,
-      justify: props.justify,
-    }),
-  );
 
   return (
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, root().class, props.class]}
+      class={[theme().class, style().class, props.class]}
       style={{
-        ...root().style,
+        ...style().style,
         ...(props.width != null && { width: size(props.width) }),
         ...(props.height != null && { height: size(props.height) }),
         ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
         ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
         ...props.style,
       }}
-      data-style-src={root()["data-style-src"]}
+      data-style-src={style()["data-style-src"]}
     >
       {props.children}
     </div>

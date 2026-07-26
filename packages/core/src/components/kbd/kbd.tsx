@@ -82,14 +82,19 @@ export interface KbdProps extends BaseProps<HTMLSpanElement> {
   keys: string;
 }
 export function Kbd(props: KbdProps) {
+  const rest = omit(props, "keys", "xstyle", "class", "style");
+
   const [isMac, setIsMac] = createSignal(false);
+
   onSettled(() => {
     setIsMac(isMacPlatform());
   });
+
   const keys = createMemo(() => props.keys.split("+").map((key) => key.trim().toLowerCase()));
-  const rest = omit(props, "keys", "xstyle", "class", "style");
+
   const style = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const theme = createMemo(() => themeProps("kbd"));
+
   return (
     <span
       {...rest}

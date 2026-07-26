@@ -106,10 +106,13 @@ const styles = stylex.create({
 });
 
 export function Badge(props: BadgeProps) {
-  const variant = () => props.variant ?? "neutral";
   const rest = omit(props, "variant", "label", "icon", "xstyle", "class", "style");
-  const style = createMemo(() => stylexProps(styles.root, styles[variant()], props.xstyle));
+
+  const variant = () => props.variant ?? "neutral";
+
   const theme = createMemo(() => themeProps("badge", { variant: variant() }));
+  const style = createMemo(() => stylexProps(styles.root, styles[variant()], props.xstyle));
+
   return (
     <span
       {...rest}

@@ -81,7 +81,6 @@ const styles = stylex.create({
 
 /** Container with background variants, dividers, padding, and nested-section bleed. */
 export function Section(props: SectionProps) {
-  const variant = () => props.variant ?? "section";
   const rest = omit(
     props,
     "variant",
@@ -97,8 +96,12 @@ export function Section(props: SectionProps) {
     "style",
     "children",
   );
+
+  const variant = () => props.variant ?? "section";
   const outer = createMemo(() => stylexProps(styles.outer, props.xstyle));
-  const inner = createMemo(() =>
+
+  const theme = createMemo(() => themeProps("section", { variant: variant() }));
+  const style = createMemo(() =>
     stylexProps(
       styles.inner,
       props.padding == null && styles.defaultPadding,
@@ -117,7 +120,6 @@ export function Section(props: SectionProps) {
       props.dividers?.includes("end") && styles.end,
     ),
   );
-  const theme = createMemo(() => themeProps("section", { variant: variant() }));
 
   return (
     <div
@@ -135,9 +137,9 @@ export function Section(props: SectionProps) {
     >
       <div
         {...theme()}
-        class={[theme().class, inner().class]}
-        style={inner().style}
-        data-style-src={inner()["data-style-src"]}
+        class={[theme().class, style().class]}
+        style={style().style}
+        data-style-src={style()["data-style-src"]}
       >
         {props.children}
       </div>

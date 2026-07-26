@@ -41,7 +41,9 @@ export function StackItem(props: StackItemProps) {
     "class",
     "style",
   );
-  const root = createMemo(() =>
+
+  const theme = createMemo(() => themeProps("stack-item", { size: props.size }));
+  const style = createMemo(() =>
     stylexProps(
       styles.root,
       styles[props.size ?? "static"],
@@ -50,16 +52,15 @@ export function StackItem(props: StackItemProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps("stack-item", { size: props.size }));
 
   return (
     <Dynamic
       component={props.as ?? "div"}
       {...rest}
       {...theme()}
-      class={[theme().class, root().class, props.class]}
-      style={{ ...root().style, ...props.style }}
-      data-style-src={root()["data-style-src"]}
+      class={[theme().class, style().class, props.class]}
+      style={{ ...style().style, ...props.style }}
+      data-style-src={style()["data-style-src"]}
     />
   );
 }

@@ -33,12 +33,15 @@ export interface SkeletonProps extends BaseProps<HTMLDivElement> {
   index?: number;
 }
 export function Skeleton(props: SkeletonProps) {
-  const radius = () => props.radius ?? 3;
   const rest = omit(props, "width", "height", "radius", "index", "xstyle", "class", "style");
+
+  const radius = () => props.radius ?? 3;
+
+  const theme = createMemo(() => themeProps("skeleton"));
   const style = createMemo(() =>
     stylexProps(styles.root, styles.animate, styles[radius()], props.xstyle),
   );
-  const theme = createMemo(() => themeProps("skeleton"));
+
   return (
     <div
       {...rest}

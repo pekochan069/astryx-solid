@@ -13,6 +13,8 @@ import {
   LayoutHeader,
   LayoutPanel,
   Section,
+  Stack,
+  StackItem,
 } from "../../src";
 
 let dispose: VoidFunction | undefined;
@@ -51,7 +53,7 @@ describe("layout primitives", () => {
   });
 
   it("uses default Section padding and composes all Layout regions", () => {
-    const container = mount(() =>
+    const container = mount(() => [
       createComponent(Section, {
         children: createComponent(Layout, {
           header: createComponent(LayoutHeader, { children: "Header" }),
@@ -60,10 +62,23 @@ describe("layout primitives", () => {
           footer: createComponent(LayoutFooter, { children: "Footer" }),
         }),
       }),
-    );
-    const section = container.firstElementChild!;
+      createComponent(Section, { padding: 0 }),
+    ]);
+    const [section, unpaddedSection] = Array.from(container.children);
 
     expect(section.textContent).toBe("HeaderPanelContentFooter");
-    expect(section.firstElementChild?.className).toBeTruthy();
+    expect(section.firstElementChild?.className).not.toBe(
+      unpaddedSection.firstElementChild?.className,
+    );
+  });
+
+  it("renders StackItem through Stack's public composition seam", () => {
+    const container = mount(() => (
+      <Stack>
+        <StackItem size="fill">Item</StackItem>
+      </Stack>
+    ));
+
+    expect(container.textContent).toBe("Item");
   });
 });

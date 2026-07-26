@@ -207,6 +207,15 @@ export function Text(props: TextProps) {
     "style",
     "children",
   );
+
+  const title = () =>
+    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+      ? truncation.fullText()
+      : undefined;
+
+  const theme = createMemo(() =>
+    themeProps("text", { type: type(), size: props.size, color: color() }),
+  );
   const style = createMemo(() =>
     stylexProps(
       styles[color()],
@@ -223,13 +232,6 @@ export function Text(props: TextProps) {
       props.xstyle,
     ),
   );
-  const theme = createMemo(() =>
-    themeProps("text", { type: type(), size: props.size, color: color() }),
-  );
-  const title = () =>
-    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
-      ? truncation.fullText()
-      : undefined;
 
   return (
     <Dynamic

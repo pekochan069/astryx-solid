@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createContext, createMemo, omit, useContext } from "solid-js";
+import { createContext, createMemo, omit, Show, useContext } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
@@ -130,7 +130,8 @@ export function Layout(props: LayoutProps) {
       return props.end != null;
     },
   };
-  const tree = (
+
+  const Tree = () => (
     <LayoutSlotsContext value={slots}>
       <div
         {...rest}
@@ -153,18 +154,19 @@ export function Layout(props: LayoutProps) {
       </div>
     </LayoutSlotsContext>
   );
-  return props.defaultHasDividers == null ? (
-    tree
-  ) : (
-    <LayoutDividerContext
-      value={{
-        get defaultHasDividers() {
-          return props.defaultHasDividers ?? false;
-        },
-      }}
-    >
-      {tree}
-    </LayoutDividerContext>
+
+  return (
+    <Show when={props.defaultHasDividers != null} fallback={<Tree />}>
+      <LayoutDividerContext
+        value={{
+          get defaultHasDividers() {
+            return props.defaultHasDividers ?? false;
+          },
+        }}
+      >
+        <Tree />
+      </LayoutDividerContext>
+    </Show>
   );
 }
 
@@ -253,6 +255,7 @@ const areaStyles = stylex.create({
 /** Scrollable primary content region. */
 export function LayoutContent(props: LayoutContentProps) {
   const slots = useContext(LayoutSlotsContext);
+
   return (
     <LayoutAreaComponent
       component="layout-content"
@@ -266,14 +269,15 @@ export function LayoutContent(props: LayoutContentProps) {
 }
 /** Sidebar region; divider side follows its Layout slot. */
 export function LayoutPanel(props: LayoutPanelProps) {
+  const rest = omit(props, "resizable", "width");
   const area = useContext(LayoutAreaContext);
   const slots = useContext(LayoutSlotsContext);
-  const { resizable, width, ...rest } = props;
+
   return (
     <LayoutAreaComponent
       {...rest}
       component="layout-panel"
-      width={resizable?._size ?? width}
+      width={props.resizable?._size ?? props.width}
       hasDivider={props.hasDivider}
       isStartPanel={area === "start"}
       isEndPanel={area === "end"}
@@ -326,7 +330,9 @@ function LayoutAreaComponent(
     "style",
     "children",
   );
-  const root = createMemo(() =>
+
+  const theme = createMemo(() => themeProps(props.component));
+  const style = createMemo(() =>
     stylexProps(
       areaStyles.area,
       props.width != null && areaStyles.panel,
@@ -347,20 +353,20 @@ function LayoutAreaComponent(
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps(props.component));
+
   return (
     <div
       {...rest}
       {...theme()}
       role={props.role}
       aria-label={props.label}
-      class={[theme().class, root().class, props.class]}
+      class={[theme().class, style().class, props.class]}
       style={{
-        ...root().style,
+        ...style().style,
         ...(props.width != null && { width: size(props.width) }),
         ...props.style,
       }}
-      data-style-src={root()["data-style-src"]}
+      data-style-src={style()["data-style-src"]}
     >
       {props.children}
     </div>
@@ -373,7 +379,6 @@ function LayoutBar(
     divider: typeof areaStyles.headerDivider | typeof areaStyles.footerDivider;
   },
 ) {
-  const inherited = useContext(LayoutDividerContext);
   const rest = omit(
     props,
     "component",
@@ -388,8 +393,12 @@ function LayoutBar(
     "style",
     "children",
   );
+
+  const inherited = useContext(LayoutDividerContext);
   const hasDivider = () => props.hasDivider ?? inherited?.defaultHasDividers ?? false;
-  const root = createMemo(() =>
+
+  const theme = createMemo(() => themeProps(props.component));
+  const style = createMemo(() =>
     stylexProps(
       areaStyles.bar,
       hasDivider() && props.divider,
@@ -398,7 +407,7 @@ function LayoutBar(
       props.xstyle,
     ),
   );
-  const theme = createMemo(() => themeProps(props.component));
+
   return (
     <div
       {...rest}
@@ -406,13 +415,13 @@ function LayoutBar(
       role={props.role}
       aria-label={props.label}
       data-divider={hasDivider() || undefined}
-      class={[theme().class, root().class, props.class]}
+      class={[theme().class, style().class, props.class]}
       style={{
-        ...root().style,
+        ...style().style,
         ...(props.height != null && { height: size(props.height) }),
         ...props.style,
       }}
-      data-style-src={root()["data-style-src"]}
+      data-style-src={style()["data-style-src"]}
     >
       {props.children}
     </div>

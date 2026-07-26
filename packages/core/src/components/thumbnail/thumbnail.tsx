@@ -100,7 +100,7 @@ export function Thumbnail(props: ThumbnailProps) {
     stylexProps(styles.root, props.isDisabled && styles.disabled, props.xstyle),
   );
 
-  const content = () => (
+  const Content = () => (
     <>
       <Show
         when={props.src != null && failedSrc() !== props.src}
@@ -144,14 +144,14 @@ export function Thumbnail(props: ThumbnailProps) {
       data-style-src={style()["data-style-src"]}
     >
       <div {...stylexProps(styles.frame)}>
-        <Show when={interactive()} fallback={content()}>
+        <Show when={interactive()} fallback={<Content />}>
           <button
             type="button"
             {...stylexProps(styles.button)}
             aria-label={`Open ${name()}`}
             onClick={(event) => props.onClick?.(event)}
           >
-            {content()}
+            <Content />
           </button>
         </Show>
         <Show when={props.onRemove != null && !props.isDisabled}>

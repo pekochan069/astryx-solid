@@ -58,6 +58,8 @@ const styles = stylex.create({
  */
 export function VisuallyHidden(props: VisuallyHiddenProps) {
   const merged = merge({ as: "span" }, props);
+  const rest = omit(merged, "as");
+
   const style = createMemo(() => {
     const stylexProps = stylex.props(styles.visuallyHidden);
     return {
@@ -66,8 +68,6 @@ export function VisuallyHidden(props: VisuallyHiddenProps) {
       "data-stylex-src": stylexProps["data-style-src"],
     };
   });
-
-  const rest = omit(merged, "as");
 
   return <Dynamic component={merged.as} {...style()} {...rest} />;
 }

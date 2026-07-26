@@ -527,7 +527,9 @@ export function ResizeHandle(props: ResizeHandleProps) {
           horizontal() ? styles.hitAreaHorizontal : styles.hitAreaVertical,
         )}
       />
-      {props.children ?? <div {...pillStyle()} class={[pillTheme.class, pillStyle().class]} />}
+      <div {...pillStyle()} class={[pillTheme.class, pillStyle().class]}>
+        {props.children}
+      </div>
     </div>
   );
 }

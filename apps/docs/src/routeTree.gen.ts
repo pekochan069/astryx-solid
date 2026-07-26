@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CoreSubstrateRouteImport } from './routes/core-substrate'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComponentsVisuallyHiddenRouteImport } from './routes/components/visually-hidden'
+import { Route as ComponentsContentPrimitivesRouteImport } from './routes/components/content-primitives'
 
 const CoreSubstrateRoute = CoreSubstrateRouteImport.update({
   id: '/core-substrate',
@@ -29,34 +30,57 @@ const ComponentsVisuallyHiddenRoute =
     path: '/components/visually-hidden',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ComponentsContentPrimitivesRoute =
+  ComponentsContentPrimitivesRouteImport.update({
+    id: '/components/content-primitives',
+    path: '/components/content-primitives',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/core-substrate' | '/components/visually-hidden'
+  fullPaths:
+    | '/'
+    | '/core-substrate'
+    | '/components/content-primitives'
+    | '/components/visually-hidden'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/core-substrate' | '/components/visually-hidden'
-  id: '__root__' | '/' | '/core-substrate' | '/components/visually-hidden'
+  to:
+    | '/'
+    | '/core-substrate'
+    | '/components/content-primitives'
+    | '/components/visually-hidden'
+  id:
+    | '__root__'
+    | '/'
+    | '/core-substrate'
+    | '/components/content-primitives'
+    | '/components/visually-hidden'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoreSubstrateRoute: typeof CoreSubstrateRoute
+  ComponentsContentPrimitivesRoute: typeof ComponentsContentPrimitivesRoute
   ComponentsVisuallyHiddenRoute: typeof ComponentsVisuallyHiddenRoute
 }
 
@@ -83,12 +107,20 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof ComponentsVisuallyHiddenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/components/content-primitives': {
+      id: '/components/content-primitives'
+      path: '/components/content-primitives'
+      fullPath: '/components/content-primitives'
+      preLoaderRoute: typeof ComponentsContentPrimitivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoreSubstrateRoute: CoreSubstrateRoute,
+  ComponentsContentPrimitivesRoute: ComponentsContentPrimitivesRoute,
   ComponentsVisuallyHiddenRoute: ComponentsVisuallyHiddenRoute,
 }
 export const routeTree = rootRouteImport

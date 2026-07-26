@@ -19,6 +19,7 @@ try {
     resolve(root, "packages/core"),
   );
   await cp(resolve(import.meta.dirname, "../fixtures/packed-consumer"), temp, { recursive: true });
+  // SSR injects markup into index.html, so final client build must run after SSR.
   await writeFile(
     resolve(temp, "package.json"),
     `${JSON.stringify(
@@ -71,7 +72,10 @@ try {
     await page.goto(server.url.toString());
     try {
       await page.waitForFunction(
-        () => document.getElementById("app")?.dataset.hydrated,
+        () =>
+          document.getElementById("app")?.dataset.hydrated &&
+          document.getElementById("content-primitives")?.dataset.hydrated &&
+          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 5,
         undefined,
         {
           timeout: 5000,
@@ -81,8 +85,13 @@ try {
       throw new Error(`Packed consumer runtime failed: ${runtimeErrors.join("; ")}`);
     }
     const hydration = await page.locator("#app").getAttribute("data-hydrated");
+    const primitiveHydration = await page
+      .locator("#content-primitives")
+      .getAttribute("data-hydrated");
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
+    const contentPrimitives = await page.getByTestId("content-primitives").count();
+    const additionalPrimitives = await page.locator('[data-testid^="packed-"]').count();
     const initialContext = await page.locator("#app").getAttribute("data-server-context");
     const role = await page.getByTestId("consumer-role").textContent();
     const size = await page.getByTestId("consumer-size").textContent();
@@ -92,8 +101,11 @@ try {
     const updatedContext = await page.getByTestId("consumer-state").textContent();
     if (
       hydration !== "reused" ||
+      primitiveHydration !== "reused" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
+      contentPrimitives !== 1 ||
+      additionalPrimitives !== 5 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
       role !== "button" ||
@@ -101,7 +113,7 @@ try {
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

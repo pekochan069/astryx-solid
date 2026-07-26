@@ -12,7 +12,7 @@ import "@astryx-solid/core/reset.css";
 import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
-import { createApp } from "./app";
+import { ContentPrimitives, createApp, packedPrimitives } from "./app";
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -30,13 +30,31 @@ if (
 )
   throw new Error("Core styling and locale exports failed");
 
-const root = document.getElementById("app")!;
-const serverElement = root.firstElementChild;
+function requireRoot(id: string) {
+  const root = document.getElementById(id);
+  if (root === null) throw new Error(`Missing #${id} root`);
+  return root;
+}
+
+function hydrateAndRecord(root: HTMLElement, hydration: () => void) {
+  const serverElement = root.firstElementChild;
+  hydration();
+  root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "replaced";
+}
+
+const root = requireRoot("app");
 const serverContext = root.querySelector('[data-testid="consumer-state"]')?.textContent;
-hydrate(createApp, root);
-root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "replaced";
+hydrateAndRecord(root, () => hydrate(createApp, root));
 root.dataset.serverContext = serverContext;
 render(
   () => <RootVisuallyHidden>Root export works</RootVisuallyHidden>,
-  document.getElementById("root-export")!,
+  requireRoot("root-export"),
 );
+const primitiveRoot = requireRoot("content-primitives");
+hydrateAndRecord(primitiveRoot, () =>
+  hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" }),
+);
+for (const [name, component] of Object.entries(packedPrimitives)) {
+  const packedRoot = requireRoot(`packed-${name}`);
+  hydrateAndRecord(packedRoot, () => hydrate(component, packedRoot, { renderId: name }));
+}

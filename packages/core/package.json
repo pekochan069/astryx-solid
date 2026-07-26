@@ -36,6 +36,66 @@
       "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
+    "./aspect-ratio": {
+      "types": "./dist/aspect-ratio.d.ts",
+      "node": "./dist/server/aspect-ratio.js",
+      "default": "./dist/aspect-ratio.js"
+    },
+    "./badge": {
+      "types": "./dist/badge.d.ts",
+      "node": "./dist/server/badge.js",
+      "default": "./dist/badge.js"
+    },
+    "./blockquote": {
+      "types": "./dist/blockquote.d.ts",
+      "node": "./dist/server/blockquote.js",
+      "default": "./dist/blockquote.js"
+    },
+    "./citation": {
+      "types": "./dist/citation.d.ts",
+      "node": "./dist/server/citation.js",
+      "default": "./dist/citation.js"
+    },
+    "./code": {
+      "types": "./dist/code.d.ts",
+      "node": "./dist/server/code.js",
+      "default": "./dist/code.js"
+    },
+    "./divider": {
+      "types": "./dist/divider.d.ts",
+      "node": "./dist/server/divider.js",
+      "default": "./dist/divider.js"
+    },
+    "./heading": {
+      "types": "./dist/heading.d.ts",
+      "node": "./dist/server/heading.js",
+      "default": "./dist/heading.js"
+    },
+    "./icon": {
+      "types": "./dist/icon.d.ts",
+      "node": "./dist/server/icon.js",
+      "default": "./dist/icon.js"
+    },
+    "./kbd": {
+      "types": "./dist/kbd.d.ts",
+      "node": "./dist/server/kbd.js",
+      "default": "./dist/kbd.js"
+    },
+    "./skeleton": {
+      "types": "./dist/skeleton.d.ts",
+      "node": "./dist/server/skeleton.js",
+      "default": "./dist/skeleton.js"
+    },
+    "./spinner": {
+      "types": "./dist/spinner.d.ts",
+      "node": "./dist/server/spinner.js",
+      "default": "./dist/spinner.js"
+    },
+    "./text": {
+      "types": "./dist/text.d.ts",
+      "node": "./dist/server/text.js",
+      "default": "./dist/text.js"
+    },
     "./visually-hidden": {
       "types": "./dist/visually-hidden.d.ts",
       "node": "./dist/server/visually-hidden.js",

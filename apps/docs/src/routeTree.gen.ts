@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComponentsVisuallyHiddenRouteImport } from './routes/components/visually-hidden'
 import { Route as ComponentsLayoutPrimitivesRouteImport } from './routes/components/layout-primitives'
 import { Route as ComponentsContentPrimitivesRouteImport } from './routes/components/content-primitives'
+import { Route as ComponentsContainerStatusPrimitivesRouteImport } from './routes/components/container-status-primitives'
 
 const CoreSubstrateRoute = CoreSubstrateRouteImport.update({
   id: '/core-substrate',
@@ -43,10 +44,17 @@ const ComponentsContentPrimitivesRoute =
     path: '/components/content-primitives',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ComponentsContainerStatusPrimitivesRoute =
+  ComponentsContainerStatusPrimitivesRouteImport.update({
+    id: '/components/container-status-primitives',
+    path: '/components/container-status-primitives',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
   '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/layout-primitives': typeof ComponentsLayoutPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
@@ -54,6 +62,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
   '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/layout-primitives': typeof ComponentsLayoutPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
@@ -62,6 +71,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/core-substrate': typeof CoreSubstrateRoute
+  '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
   '/components/content-primitives': typeof ComponentsContentPrimitivesRoute
   '/components/layout-primitives': typeof ComponentsLayoutPrimitivesRoute
   '/components/visually-hidden': typeof ComponentsVisuallyHiddenRoute
@@ -71,6 +81,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/core-substrate'
+    | '/components/container-status-primitives'
     | '/components/content-primitives'
     | '/components/layout-primitives'
     | '/components/visually-hidden'
@@ -78,6 +89,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/core-substrate'
+    | '/components/container-status-primitives'
     | '/components/content-primitives'
     | '/components/layout-primitives'
     | '/components/visually-hidden'
@@ -85,6 +97,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/core-substrate'
+    | '/components/container-status-primitives'
     | '/components/content-primitives'
     | '/components/layout-primitives'
     | '/components/visually-hidden'
@@ -93,6 +106,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoreSubstrateRoute: typeof CoreSubstrateRoute
+  ComponentsContainerStatusPrimitivesRoute: typeof ComponentsContainerStatusPrimitivesRoute
   ComponentsContentPrimitivesRoute: typeof ComponentsContentPrimitivesRoute
   ComponentsLayoutPrimitivesRoute: typeof ComponentsLayoutPrimitivesRoute
   ComponentsVisuallyHiddenRoute: typeof ComponentsVisuallyHiddenRoute
@@ -135,12 +149,21 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof ComponentsContentPrimitivesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/components/container-status-primitives': {
+      id: '/components/container-status-primitives'
+      path: '/components/container-status-primitives'
+      fullPath: '/components/container-status-primitives'
+      preLoaderRoute: typeof ComponentsContainerStatusPrimitivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoreSubstrateRoute: CoreSubstrateRoute,
+  ComponentsContainerStatusPrimitivesRoute:
+    ComponentsContainerStatusPrimitivesRoute,
   ComponentsContentPrimitivesRoute: ComponentsContentPrimitivesRoute,
   ComponentsLayoutPrimitivesRoute: ComponentsLayoutPrimitivesRoute,
   ComponentsVisuallyHiddenRoute: ComponentsVisuallyHiddenRoute,

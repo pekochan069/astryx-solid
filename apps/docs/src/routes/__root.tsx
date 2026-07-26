@@ -22,7 +22,9 @@ function RootDocument(props: Readonly<{ children: JSX.Element }>) {
       <head />
       <body>
         <HeadContent />
+
         <div id="app">{props.children}</div>
+
         <Scripts />
       </body>
     </html>

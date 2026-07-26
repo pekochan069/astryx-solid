@@ -5,6 +5,7 @@ test("content primitives render semantic accessible examples", async ({ page }) 
   await page.goto("/components/content-primitives/");
 
   const main = page.getByRole("main");
+
   await expect(page.getByRole("heading", { name: "Content primitives" })).toBeVisible();
   await expect(page.getByRole("status", { name: "Loading preview" })).toBeVisible();
   await expect(page.getByRole("img", { name: "Ready" })).toBeVisible();
@@ -15,5 +16,6 @@ test("content primitives render semantic accessible examples", async ({ page }) 
   expect(
     accessibility.violations.filter(({ impact }) => impact === "critical" || impact === "serious"),
   ).toEqual([]);
+
   await expect(main).toHaveScreenshot("content-primitives-docs.png");
 });

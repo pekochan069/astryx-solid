@@ -216,6 +216,62 @@
       "docsPath": "/components/layout-primitives",
       "description": "Arranges content vertically.",
       "states": ["alignment", "wrap"]
+    },
+    {
+      "name": "Card",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/card",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Groups content on themed surfaces.",
+      "states": ["default", "muted", "transparent", "color"]
+    },
+    {
+      "name": "EmptyState",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/empty-state",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Announces an empty result with optional actions.",
+      "states": ["default", "compact", "actions"]
+    },
+    {
+      "name": "ProgressBar",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/progress-bar",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Communicates determinate or indeterminate progress.",
+      "states": ["determinate", "indeterminate", "disabled"]
+    },
+    {
+      "name": "Resizable",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/resizable",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Provides keyboard and pointer resize controls.",
+      "states": ["horizontal", "vertical", "collapsible"]
+    },
+    {
+      "name": "StatusDot",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/status-dot",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Displays an accessible status indicator.",
+      "states": ["success", "warning", "error", "pulsing"]
+    },
+    {
+      "name": "Thumbnail",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/thumbnail",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Displays uploadable media with optional controls.",
+      "states": ["placeholder", "loading", "interactive", "disabled"]
+    },
+    {
+      "name": "Timestamp",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/timestamp",
+      "docsPath": "/components/container-status-primitives",
+      "description": "Renders semantic relative or absolute dates.",
+      "states": ["relative", "auto", "absolute", "live"]
     }
   ]
 }

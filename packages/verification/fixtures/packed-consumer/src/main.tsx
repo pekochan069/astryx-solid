@@ -8,11 +8,12 @@ import { syntaxTokenDefaults } from "@astryx-solid/core/theme/syntax";
 import { colorDefaults } from "@astryx-solid/core/theme/tokens.stylex";
 import { mergeProps } from "@astryx-solid/core/utils";
 import { hydrate, render } from "@solidjs/web";
+import { createUniqueId } from "solid-js";
 import "@astryx-solid/core/reset.css";
 import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
-import { ContentPrimitives, createApp, packedPrimitives } from "./app";
+import { ContentPrimitives, createApp, PackedLayout, packedPrimitives } from "./app";
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -53,6 +54,17 @@ render(
 const primitiveRoot = requireRoot("content-primitives");
 hydrateAndRecord(primitiveRoot, () =>
   hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" }),
+);
+const layoutRoot = requireRoot("packed-layout");
+hydrateAndRecord(layoutRoot, () =>
+  hydrate(
+    () => {
+      createUniqueId();
+      return PackedLayout();
+    },
+    layoutRoot,
+    { renderId: "layout" },
+  ),
 );
 for (const [name, component] of Object.entries(packedPrimitives)) {
   const packedRoot = requireRoot(`packed-${name}`);

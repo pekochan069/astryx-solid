@@ -22,6 +22,7 @@ import {
   Skeleton,
   Spinner,
   Stack,
+  StackItem,
   Text,
   VStack,
 } from "@astryx-solid/core";
@@ -79,25 +80,32 @@ export function ContentPrimitives() {
   );
 }
 
-export function PackedLayout() {
+export function PackedLayoutPrimitives() {
   return (
-    <Stack data-testid="packed-layout" gap={2}>
+    <Stack>
       <Center>Centered</Center>
       <Grid columns={2}>
         <GridSpan columns={2}>Wide</GridSpan>
       </Grid>
-      <HStack gap={1}>Horizontal</HStack>
-      <VStack gap={1}>Vertical</VStack>
+      <HStack>Horizontal</HStack>
+      <VStack>Vertical</VStack>
+      <StackItem size="fill">Flexible</StackItem>
       <Section>
         <FormLayout>Form</FormLayout>
       </Section>
-      <Layout
-        header={<LayoutHeader>Header</LayoutHeader>}
-        start={<LayoutPanel>Panel</LayoutPanel>}
-        content={<LayoutContent>Content</LayoutContent>}
-        footer={<LayoutFooter>Footer</LayoutFooter>}
-      />
     </Stack>
+  );
+}
+
+export function PackedLayout() {
+  return (
+    <Layout
+      data-testid="packed-layout"
+      header={<LayoutHeader>Header</LayoutHeader>}
+      start={<LayoutPanel>Panel</LayoutPanel>}
+      content={<LayoutContent>Content</LayoutContent>}
+      footer={<LayoutFooter>Footer</LayoutFooter>}
+    />
   );
 }
 

@@ -279,8 +279,6 @@
         "packages/core/src/Button/Button.doc.mjs",
         "packages/core/src/Button/Button.test.tsx",
         "packages/core/src/README.md",
-        "packages/core/src/Stack/Stack.doc.mjs",
-        "packages/core/src/Stack/Stack.test.tsx",
         "packages/core/src/i18n/InternationalizationProvider.doc.mjs",
         "packages/core/src/i18n/__tests__/resolve.test.ts",
         "packages/core/src/i18n/useTranslator.doc.mjs",
@@ -315,7 +313,6 @@
       ],
       "approval": "https://github.com/pekochan069/astryx-solid/issues/18#issuecomment-5071949119",
       "surfaces": [
-        "packages/core/src/Stack/StackItem.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-pagination.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-powersearch.test.tsx",
         "packages/core/src/theme/MediaTheme.doc.mjs",
@@ -332,7 +329,6 @@
       ],
       "classification": "solid-scope-exclusion",
       "affectedSurfaces": [
-        "packages/core/src/Stack/StackItem.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-pagination.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-powersearch.test.tsx",
         "packages/core/src/theme/MediaTheme.doc.mjs",

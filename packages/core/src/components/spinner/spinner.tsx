@@ -82,38 +82,35 @@ export function Spinner(props: SpinnerProps) {
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
   const wrapperStyle = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const frame = () => sizes[size()];
-  const label = () => {
-    const label = props.label;
-    return typeof label === "string" ? (
-      <Text type="body" weight="bold" textContent={label} />
-    ) : (
-      label
-    );
-  };
   const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
-  const indicator = (isRoot: boolean) => (
+
+  const Indicator = (indicatorProps: { isRoot: boolean }) => (
     <span
-      {...(isRoot ? rest : {})}
-      {...(isRoot ? theme() : {})}
-      ref={isRoot ? rootRef : undefined}
+      {...(indicatorProps.isRoot ? rest : {})}
+      {...(indicatorProps.isRoot ? theme() : {})}
+      ref={indicatorProps.isRoot ? rootRef : undefined}
       role="status"
       aria-label={
         props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
       }
-      class={isRoot ? [theme().class, spinnerStyle().class, props.class] : spinnerStyle().class}
+      class={
+        indicatorProps.isRoot
+          ? [theme().class, spinnerStyle().class, props.class]
+          : spinnerStyle().class
+      }
       style={{
         ...spinnerStyle().style,
         width: `${frame()}px`,
         height: `${frame()}px`,
         "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-        ...(isRoot ? props.style : {}),
+        ...(indicatorProps.isRoot ? props.style : {}),
       }}
       data-style-src={spinnerStyle()["data-style-src"]}
     />
   );
 
   return (
-    <Show when={hasLabel()} fallback={indicator(true)}>
+    <Show when={hasLabel()} fallback={<Indicator isRoot={true} />}>
       <div
         {...rest}
         {...theme()}
@@ -121,8 +118,10 @@ export function Spinner(props: SpinnerProps) {
         class={[theme().class, wrapperStyle().class, props.class]}
         style={{ ...wrapperStyle().style, ...props.style }}
       >
-        {indicator(false)}
-        {label()}
+        <Indicator isRoot={false} />
+        <Show when={typeof props.label === "string"} fallback={props.label}>
+          <Text type="body" weight="bold" textContent={props.label as string} />
+        </Show>
       </div>
     </Show>
   );

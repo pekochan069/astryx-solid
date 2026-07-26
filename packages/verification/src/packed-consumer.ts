@@ -75,7 +75,7 @@ try {
         () =>
           document.getElementById("app")?.dataset.hydrated &&
           document.getElementById("content-primitives")?.dataset.hydrated &&
-          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 5,
+          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 6,
         undefined,
         {
           timeout: 5000,
@@ -88,6 +88,7 @@ try {
     const primitiveHydration = await page
       .locator("#content-primitives")
       .getAttribute("data-hydrated");
+    const layoutHydration = await page.locator("#packed-layout").getAttribute("data-hydrated");
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
     const contentPrimitives = await page.getByTestId("content-primitives").count();
@@ -102,10 +103,11 @@ try {
     if (
       hydration !== "reused" ||
       primitiveHydration !== "reused" ||
+      layoutHydration !== "reused" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
       contentPrimitives !== 1 ||
-      additionalPrimitives !== 5 ||
+      additionalPrimitives !== 6 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
       role !== "button" ||
@@ -113,7 +115,7 @@ try {
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, layoutHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

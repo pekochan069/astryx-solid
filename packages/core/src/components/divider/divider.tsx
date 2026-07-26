@@ -54,9 +54,6 @@ const styles = stylex.create({
   },
 });
 export function Divider(props: DividerProps) {
-  const orientation = () => props.orientation ?? "horizontal";
-  const variant = () => props.variant ?? "subtle";
-  const horizontal = () => orientation() === "horizontal";
   const rest = omit(
     props,
     "orientation",
@@ -67,18 +64,23 @@ export function Divider(props: DividerProps) {
     "class",
     "style",
   );
-  const root = createMemo(() =>
+
+  const orientation = () => props.orientation ?? "horizontal";
+  const variant = () => props.variant ?? "subtle";
+  const horizontal = () => orientation() === "horizontal";
+  const line = createMemo(() =>
+    stylexProps(horizontal() ? styles.horizontalLine : styles.verticalLine, styles[variant()]),
+  );
+
+  const theme = createMemo(() =>
+    themeProps("divider", { orientation: orientation(), variant: variant() }),
+  );
+  const style = createMemo(() =>
     stylexProps(
       horizontal() ? styles.horizontal : styles.vertical,
       props.isFullBleed && (horizontal() ? styles.fullBleedHorizontal : styles.fullBleedVertical),
       props.xstyle,
     ),
-  );
-  const line = createMemo(() =>
-    stylexProps(horizontal() ? styles.horizontalLine : styles.verticalLine, styles[variant()]),
-  );
-  const theme = createMemo(() =>
-    themeProps("divider", { orientation: orientation(), variant: variant() }),
   );
 
   return (
@@ -87,9 +89,9 @@ export function Divider(props: DividerProps) {
       {...theme()}
       role="separator"
       aria-orientation={orientation()}
-      class={[theme().class, root().class, props.class]}
-      style={{ ...root().style, ...props.style }}
-      data-style-src={root()["data-style-src"]}
+      class={[theme().class, style().class, props.class]}
+      style={{ ...style().style, ...props.style }}
+      data-style-src={style()["data-style-src"]}
     >
       <div {...line()} />
       <Show when={props.label != null}>

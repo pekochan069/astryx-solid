@@ -6,11 +6,25 @@ import {
   Code,
   Divider,
   Heading,
+  Center,
+  FormLayout,
+  Grid,
+  GridSpan,
+  HStack,
   Icon,
   Kbd,
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  LayoutPanel,
+  Section,
   Skeleton,
   Spinner,
+  Stack,
+  StackItem,
   Text,
+  VStack,
 } from "@astryx-solid/core";
 import { useInteractiveRole } from "@astryx-solid/core/hooks";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
@@ -63,6 +77,35 @@ export function ContentPrimitives() {
       <Kbd keys="ctrl+k" />
       <Skeleton width={20} height={10} />
     </div>
+  );
+}
+
+export function PackedLayoutPrimitives() {
+  return (
+    <Stack>
+      <Center>Centered</Center>
+      <Grid columns={2}>
+        <GridSpan columns={2}>Wide</GridSpan>
+      </Grid>
+      <HStack>Horizontal</HStack>
+      <VStack>Vertical</VStack>
+      <StackItem size="fill">Flexible</StackItem>
+      <Section>
+        <FormLayout>Form</FormLayout>
+      </Section>
+    </Stack>
+  );
+}
+
+export function PackedLayout() {
+  return (
+    <Layout
+      data-testid="packed-layout"
+      header={<LayoutHeader>Header</LayoutHeader>}
+      start={<LayoutPanel>Panel</LayoutPanel>}
+      content={<LayoutContent>Content</LayoutContent>}
+      footer={<LayoutFooter>Footer</LayoutFooter>}
+    />
   );
 }
 

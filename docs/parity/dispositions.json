@@ -129,6 +129,45 @@
       ],
       "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/20"
+    },
+    "layout-primitives": {
+      "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": [
+        "=./Center",
+        "=./FormLayout",
+        "=./Grid",
+        "=./HStack",
+        "=./Layout",
+        "=./Section",
+        "=./Stack",
+        "=./VStack",
+        "=packages/core/src/Center/Center.doc.mjs",
+        "=packages/core/src/Center/Center.test.tsx",
+        "=packages/core/src/FormLayout/FormLayout.doc.mjs",
+        "=packages/core/src/FormLayout/FormLayout.test.tsx",
+        "=packages/core/src/Grid/Grid.doc.mjs",
+        "=packages/core/src/Grid/Grid.test.tsx",
+        "=packages/core/src/Grid/GridSpan.doc.mjs",
+        "=packages/core/src/HStack/HStack.test.tsx",
+        "=packages/core/src/Layout/Layout.doc.mjs",
+        "=packages/core/src/Layout/Layout.test.tsx",
+        "=packages/core/src/Layout/LayoutContent.doc.mjs",
+        "=packages/core/src/Layout/LayoutFooter.doc.mjs",
+        "=packages/core/src/Layout/LayoutHeader.doc.mjs",
+        "=packages/core/src/Layout/LayoutPanel.doc.mjs",
+        "=packages/core/src/Layout/LayoutSlots.test.tsx",
+        "=packages/core/src/Layout/__tests__/childrenAsContent.test.tsx",
+        "=packages/core/src/Layout/__tests__/contentWidth.test.tsx",
+        "=packages/core/src/Layout/__tests__/edgeCompensation.test.tsx",
+        "=packages/core/src/Section/Section.doc.mjs",
+        "=packages/core/src/Section/Section.test.tsx",
+        "=packages/core/src/Stack/Stack.doc.mjs",
+        "=packages/core/src/Stack/Stack.test.tsx",
+        "=packages/core/src/Stack/StackItem.test.tsx",
+        "=packages/core/src/VStack/VStack.test.tsx"
+      ],
+      "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/21"
     }
   },
   "dispositions": [
@@ -240,8 +279,6 @@
         "packages/core/src/Button/Button.doc.mjs",
         "packages/core/src/Button/Button.test.tsx",
         "packages/core/src/README.md",
-        "packages/core/src/Stack/Stack.doc.mjs",
-        "packages/core/src/Stack/Stack.test.tsx",
         "packages/core/src/i18n/InternationalizationProvider.doc.mjs",
         "packages/core/src/i18n/__tests__/resolve.test.ts",
         "packages/core/src/i18n/useTranslator.doc.mjs",
@@ -276,7 +313,6 @@
       ],
       "approval": "https://github.com/pekochan069/astryx-solid/issues/18#issuecomment-5071949119",
       "surfaces": [
-        "packages/core/src/Stack/StackItem.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-pagination.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-powersearch.test.tsx",
         "packages/core/src/theme/MediaTheme.doc.mjs",
@@ -293,7 +329,6 @@
       ],
       "classification": "solid-scope-exclusion",
       "affectedSurfaces": [
-        "packages/core/src/Stack/StackItem.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-pagination.test.tsx",
         "packages/core/src/i18n/__tests__/e2e-powersearch.test.tsx",
         "packages/core/src/theme/MediaTheme.doc.mjs",
@@ -605,6 +640,57 @@
         "packages/core/src/utils/mergeRefs.ts"
       ],
       "migrationGuidance": "Pass assignable or array refs directly, and start browser resources in ref directive factories or onSettled with scope-owned cleanup."
+    },
+    {
+      "source": "@astryxdesign/core layout primitive exports and source evidence",
+      "batch": "layout-primitives",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "@astryx-solid/core lowercase Solid layout component subpaths",
+      "rationale": "Solid-native layout primitives preserve public DOM, responsive CSS, accessibility, SSR, hydration, packed-consumer, and documentation behavior.",
+      "evidence": [
+        "packages/core/src/components",
+        "packages/core/tests/components/layout-primitives.test.tsx",
+        "packages/core/tests/components/stack/stack.test.ts",
+        "packages/verification/fixtures/packed-consumer/src/app.tsx",
+        "apps/docs/src/routes/components/layout-primitives.tsx",
+        "apps/docs/src/registry/components.json"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/21",
+      "surfaces": [
+        "./Center",
+        "./FormLayout",
+        "./Grid",
+        "./HStack",
+        "./Layout",
+        "./Section",
+        "./Stack",
+        "./VStack",
+        "packages/core/src/Center/Center.doc.mjs",
+        "packages/core/src/Center/Center.test.tsx",
+        "packages/core/src/FormLayout/FormLayout.doc.mjs",
+        "packages/core/src/FormLayout/FormLayout.test.tsx",
+        "packages/core/src/Grid/Grid.doc.mjs",
+        "packages/core/src/Grid/Grid.test.tsx",
+        "packages/core/src/Grid/GridSpan.doc.mjs",
+        "packages/core/src/HStack/HStack.test.tsx",
+        "packages/core/src/Layout/Layout.doc.mjs",
+        "packages/core/src/Layout/Layout.test.tsx",
+        "packages/core/src/Layout/LayoutContent.doc.mjs",
+        "packages/core/src/Layout/LayoutPanel.doc.mjs",
+        "packages/core/src/Layout/LayoutFooter.doc.mjs",
+        "packages/core/src/Layout/LayoutHeader.doc.mjs",
+        "packages/core/src/Layout/LayoutSlots.test.tsx",
+        "packages/core/src/Layout/__tests__/childrenAsContent.test.tsx",
+        "packages/core/src/Layout/__tests__/contentWidth.test.tsx",
+        "packages/core/src/Layout/__tests__/edgeCompensation.test.tsx",
+        "packages/core/src/Section/Section.doc.mjs",
+        "packages/core/src/Section/Section.test.tsx",
+        "packages/core/src/Stack/Stack.doc.mjs",
+        "packages/core/src/Stack/Stack.test.tsx",
+        "packages/core/src/Stack/StackItem.test.tsx",
+        "packages/core/src/VStack/VStack.test.tsx"
+      ]
     }
   ]
 }

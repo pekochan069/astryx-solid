@@ -305,13 +305,6 @@ export function Button(props: ButtonProps) {
     },
     props,
   );
-  const inheritedSize = useSize();
-  const size = createMemo(() => merged.size ?? inheritedSize());
-  const variant = createMemo(() => merged.variant ?? "secondary");
-  const type = createMemo(() => merged.type ?? "button");
-  const loading = createMemo(() => merged.isLoading || merged.isPending);
-  const disabled = createMemo(() => merged.isDisabled || (loading() && !merged.isInterruptible));
-  const ariaDisabled = createMemo(() => merged.tooltip != null && disabled());
   const rest = omit(
     merged,
     "xstyle",
@@ -333,12 +326,15 @@ export function Button(props: ButtonProps) {
     "style",
   );
 
-  const onClick = composeEventHandlers<OnClickEventType<HTMLButtonElement>>((event) => {
-    if (disabled()) event.preventDefault();
-  }, props.onClick);
+  const inheritedSize = useSize();
+  const size = createMemo(() => merged.size ?? inheritedSize());
+  const variant = createMemo(() => merged.variant ?? "secondary");
+  const type = createMemo(() => merged.type ?? "button");
+  const loading = createMemo(() => merged.isLoading || merged.isPending);
+  const disabled = createMemo(() => merged.isDisabled || (loading() && !merged.isInterruptible));
+  const ariaDisabled = createMemo(() => merged.tooltip != null && disabled());
 
   const theme = createMemo(() => themeProps("button", { variant: variant(), size: size() }));
-
   const style = createMemo(() => {
     const s = size();
     const currentVariant = variant();
@@ -358,6 +354,10 @@ export function Button(props: ButtonProps) {
       merged.xstyle,
     );
   });
+
+  const onClick = composeEventHandlers<OnClickEventType<HTMLButtonElement>>((event) => {
+    if (disabled()) event.preventDefault();
+  }, props.onClick);
 
   return (
     <button

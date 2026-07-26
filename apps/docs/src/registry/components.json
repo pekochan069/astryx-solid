@@ -104,6 +104,118 @@
       "docsPath": "/components/content-primitives",
       "description": "Renders themed semantic text.",
       "states": ["body", "supporting", "display"]
+    },
+    {
+      "name": "Center",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/center",
+      "docsPath": "/components/layout-primitives",
+      "description": "Centers content on one or both axes.",
+      "states": ["both", "horizontal", "vertical"]
+    },
+    {
+      "name": "FormLayout",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/form-layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Arranges form controls and labels.",
+      "states": ["vertical", "horizontal", "horizontal-labels"]
+    },
+    {
+      "name": "Grid",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/grid",
+      "docsPath": "/components/layout-primitives",
+      "description": "Places content in fixed or responsive grids.",
+      "states": ["columns", "responsive", "spans"]
+    },
+    {
+      "name": "GridSpan",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/grid",
+      "docsPath": "/components/layout-primitives",
+      "description": "Spans grid rows or columns.",
+      "states": ["columns", "rows", "full"]
+    },
+    {
+      "name": "HStack",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/hstack",
+      "docsPath": "/components/layout-primitives",
+      "description": "Arranges content horizontally.",
+      "states": ["alignment", "wrap"]
+    },
+    {
+      "name": "Layout",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Composes header, panel, content, and footer regions.",
+      "states": ["header", "panel", "footer"]
+    },
+    {
+      "name": "LayoutContent",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Renders Layout's primary content region.",
+      "states": ["scrollable", "padded"]
+    },
+    {
+      "name": "LayoutFooter",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Renders Layout's footer region.",
+      "states": ["divider", "padded"]
+    },
+    {
+      "name": "LayoutHeader",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Renders Layout's header region.",
+      "states": ["divider", "padded"]
+    },
+    {
+      "name": "LayoutPanel",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/layout",
+      "docsPath": "/components/layout-primitives",
+      "description": "Renders Layout's start or end panel.",
+      "states": ["start", "end", "resizable"]
+    },
+    {
+      "name": "Section",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/section",
+      "docsPath": "/components/layout-primitives",
+      "description": "Groups content with themed surface and padding.",
+      "states": ["section", "muted", "transparent"]
+    },
+    {
+      "name": "Stack",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/stack",
+      "docsPath": "/components/layout-primitives",
+      "description": "Arranges content in flex stacks.",
+      "states": ["vertical", "horizontal", "scrollable"]
+    },
+    {
+      "name": "StackItem",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/stack",
+      "docsPath": "/components/layout-primitives",
+      "description": "Controls sizing and alignment for a Stack child.",
+      "states": ["auto", "fill", "aligned"]
+    },
+    {
+      "name": "VStack",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/vstack",
+      "docsPath": "/components/layout-primitives",
+      "description": "Arranges content vertically.",
+      "states": ["alignment", "wrap"]
     }
   ]
 }

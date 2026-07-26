@@ -56,10 +56,6 @@ const styles = stylex.create({
   },
 });
 export function Spinner(props: SpinnerProps) {
-  const size = () => props.size ?? "md";
-  const shade = () => props.shade ?? "default";
-  const hasLabel = () => props.label != null;
-
   const rest = omit(
     props,
     "size",
@@ -71,6 +67,11 @@ export function Spinner(props: SpinnerProps) {
     "aria-label",
     "ref",
   );
+
+  const size = () => props.size ?? "md";
+  const shade = () => props.shade ?? "default";
+  const hasLabel = () => props.label != null;
+
   const spinnerStyle = createMemo(() =>
     stylexProps(
       styles.spinner,
@@ -79,10 +80,11 @@ export function Spinner(props: SpinnerProps) {
       shade() === "inherit" && styles.inherit,
     ),
   );
-  const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
-  const wrapperStyle = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const frame = () => sizes[size()];
   const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
+
+  const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
+  const style = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
 
   const Indicator = (indicatorProps: { isRoot: boolean }) => (
     <span
@@ -115,8 +117,8 @@ export function Spinner(props: SpinnerProps) {
         {...rest}
         {...theme()}
         ref={rootRef}
-        class={[theme().class, wrapperStyle().class, props.class]}
-        style={{ ...wrapperStyle().style, ...props.style }}
+        class={[theme().class, style().class, props.class]}
+        style={{ ...style().style, ...props.style }}
       >
         <Indicator isRoot={false} />
         <Show

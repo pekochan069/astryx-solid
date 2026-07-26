@@ -119,8 +119,11 @@ export function Spinner(props: SpinnerProps) {
         style={{ ...wrapperStyle().style, ...props.style }}
       >
         <Indicator isRoot={false} />
-        <Show when={typeof props.label === "string"} fallback={props.label}>
-          <Text type="body" weight="bold" textContent={props.label as string} />
+        <Show
+          when={typeof props.label === "string" ? props.label : undefined}
+          fallback={props.label}
+        >
+          {(label) => <Text type="body" weight="bold" textContent={label()} />}
         </Show>
       </div>
     </Show>

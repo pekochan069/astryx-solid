@@ -2,7 +2,6 @@ import {
   Center,
   FormLayout,
   Grid,
-  GridSpan,
   HStack,
   Layout,
   LayoutContent,
@@ -15,6 +14,7 @@ import {
   VStack,
 } from "@astryx-solid/core";
 import { createFileRoute } from "@tanstack/solid-router";
+import { createSignal, onSettled, Show } from "solid-js";
 
 export const Route = createFileRoute("/components/layout-primitives")({
   component: LayoutPrimitivesDocs,
@@ -36,10 +36,7 @@ export function LayoutPrimitivesDocs() {
       <Center height={80} axis="both">
         Centered content
       </Center>
-      <Grid columns={2} gap={2} aria-label="Example grid">
-        <GridSpan columns={2}>Wide grid item</GridSpan>
-        <div>Grid item</div>
-      </Grid>
+      <ResponsiveGridExample />
       <Section variant="muted" dividers={["top", "bottom"]}>
         <FormLayout direction="horizontal-labels">
           <label for="layout-name">Name</label>
@@ -53,5 +50,24 @@ export function LayoutPrimitivesDocs() {
         footer={<LayoutFooter>Footer</LayoutFooter>}
       />
     </Stack>
+  );
+}
+
+function ResponsiveGridExample() {
+  const [isMounted, setIsMounted] = createSignal(false);
+  if (typeof window !== "undefined") {
+    onSettled(() => {
+      setIsMounted(true);
+    });
+  }
+
+  // ponytail: mount after hydration for WebKit; remove when Solid 2 preserves this SSR subtree.
+  return (
+    <Show when={isMounted()}>
+      <Grid minChildWidth={240} gap={2} aria-label="Example grid">
+        <div>First grid item</div>
+        <div>Second grid item</div>
+      </Grid>
+    </Show>
   );
 }

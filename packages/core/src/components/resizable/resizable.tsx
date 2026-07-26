@@ -52,6 +52,7 @@ export interface ResizableProps {
   readonly _snaps: number[];
   readonly _collapsedSize: number;
   readonly _collapsible: boolean;
+  readonly _direction?: "horizontal" | "vertical";
   readonly _isResizableProps: true;
   _onResizeStart(): void;
   _onResizeMove(delta: number): void;
@@ -123,7 +124,10 @@ function restoredSize(
   return value === undefined ? undefined : clampSize(value, min, max, snaps);
 }
 
-function createResizableRegion(config: UseResizableSingleConfig): ResizableRegion {
+function createResizableRegion(
+  config: UseResizableSingleConfig,
+  direction?: "horizontal" | "vertical",
+): ResizableRegion {
   const min = config.minSizePx ?? DEFAULT_MIN_SIZE;
   const max = config.maxSizePx ?? Infinity;
   const snaps = config.snaps ?? [];
@@ -203,6 +207,7 @@ function createResizableRegion(config: UseResizableSingleConfig): ResizableRegio
         _snaps: snaps,
         _collapsedSize: config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE,
         _collapsible: config.collapsible ?? false,
+        _direction: direction,
         _isResizableProps: true,
 
         _onResizeStart() {
@@ -235,10 +240,13 @@ export function useResizable(
   return Object.fromEntries(
     Object.entries(config.regions).map(([name, region]) => [
       name,
-      createResizableRegion({
-        ...region,
-        autoSaveId: config.autoSaveId === undefined ? undefined : `${config.autoSaveId}:${name}`,
-      }),
+      createResizableRegion(
+        {
+          ...region,
+          autoSaveId: config.autoSaveId === undefined ? undefined : `${config.autoSaveId}:${name}`,
+        },
+        config.direction,
+      ),
     ]),
   );
 }
@@ -396,7 +404,8 @@ export function ResizeHandle(props: ResizeHandleProps) {
   let element: HTMLDivElement | undefined;
   const setElement = (next: HTMLDivElement) => (element = setResizeHandleElement(props.ref, next));
 
-  const horizontal = () => (props.direction ?? "horizontal") === "horizontal";
+  const horizontal = () =>
+    (props.direction ?? props.resizable?._direction ?? "horizontal") === "horizontal";
   const multiplier = () =>
     (props.isReversed ? -1 : 1) *
     (horizontal() && element !== undefined && getComputedStyle(element).direction === "rtl"

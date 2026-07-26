@@ -29,7 +29,7 @@ describe("inventory patterns", () => {
   });
 });
 
-describe("root parity command", () => {
+describe("parity ledger", () => {
   it("assigns every disposition package to a batch", async () => {
     const ledger = await Bun.file(resolve(root, "docs/parity/dispositions.json")).json();
     const packages = new Set(
@@ -56,7 +56,9 @@ describe("root parity command", () => {
     expect(disposition.surfaces).toContain("packages/core/src/Icon/globalIconRegistry.test.tsx");
     expect(disposition.surfaces).toContain("packages/core/src/Text/Text.doc.mjs");
   });
+});
 
+describe("parity selection", () => {
   it("selects the control-plane batch", async () => {
     const result = await list("--batch", "control-plane");
 
@@ -100,6 +102,28 @@ describe("root parity command", () => {
     });
   });
 
+  it("rejects unknown selectors", async () => {
+    const packageResult = await list("--package", "@astryx-solid/unknown");
+    const batchResult = await list("--batch", "unknown");
+    const optionResult = await list("--bacth", "control-plane");
+
+    expect(packageResult.exitCode).toBe(2);
+    expect(packageResult.stderr).toContain("Unknown package");
+    expect(batchResult.exitCode).toBe(2);
+    expect(batchResult.stderr).toContain("Unknown batch");
+    expect(optionResult.exitCode).toBe(2);
+    expect(optionResult.stderr).toContain("Unknown option");
+  });
+
+  it("rejects duplicate selectors", async () => {
+    const result = await list("--batch", "control-plane", "--batch", "control-plane");
+
+    expect(result.exitCode).toBe(2);
+    expect(result.stderr).toContain("Duplicate option");
+  });
+});
+
+describe("parity artifacts", () => {
   it("retains subprocess output when a gate fails", async () => {
     const bin = await mkdtemp(resolve(tmpdir(), "astryx-fake-bun-"));
     const artifacts = await mkdtemp(resolve(tmpdir(), "astryx-parity-artifacts-"));
@@ -153,25 +177,5 @@ describe("root parity command", () => {
         rm(artifacts, { recursive: true, force: true }),
       ]);
     }
-  });
-
-  it("rejects unknown selectors", async () => {
-    const packageResult = await list("--package", "@astryx-solid/unknown");
-    const batchResult = await list("--batch", "unknown");
-    const optionResult = await list("--bacth", "control-plane");
-
-    expect(packageResult.exitCode).toBe(2);
-    expect(packageResult.stderr).toContain("Unknown package");
-    expect(batchResult.exitCode).toBe(2);
-    expect(batchResult.stderr).toContain("Unknown batch");
-    expect(optionResult.exitCode).toBe(2);
-    expect(optionResult.stderr).toContain("Unknown option");
-  });
-
-  it("rejects duplicate selectors", async () => {
-    const result = await list("--batch", "control-plane", "--batch", "control-plane");
-
-    expect(result.exitCode).toBe(2);
-    expect(result.stderr).toContain("Duplicate option");
   });
 });

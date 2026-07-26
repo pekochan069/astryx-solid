@@ -30,7 +30,13 @@ if (
 )
   throw new Error("Core styling and locale exports failed");
 
-const root = document.getElementById("app")!;
+function requireRoot(id: string) {
+  const root = document.getElementById(id);
+  if (root === null) throw new Error(`Missing #${id} root`);
+  return root;
+}
+
+const root = requireRoot("app");
 const serverElement = root.firstElementChild;
 const serverContext = root.querySelector('[data-testid="consumer-state"]')?.textContent;
 hydrate(createApp, root);
@@ -38,6 +44,10 @@ root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "r
 root.dataset.serverContext = serverContext;
 render(
   () => <RootVisuallyHidden>Root export works</RootVisuallyHidden>,
-  document.getElementById("root-export")!,
+  requireRoot("root-export"),
 );
-render(ContentPrimitives, document.getElementById("content-primitives")!);
+const primitiveRoot = requireRoot("content-primitives");
+const serverPrimitives = primitiveRoot.firstElementChild;
+hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" });
+primitiveRoot.dataset.hydrated =
+  serverPrimitives === primitiveRoot.firstElementChild ? "reused" : "replaced";

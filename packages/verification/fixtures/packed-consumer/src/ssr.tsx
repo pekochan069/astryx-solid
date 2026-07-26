@@ -11,7 +11,13 @@ const render = () =>
     return createApp();
   });
 const first = render();
-const primitives = renderToString(ContentPrimitives);
+const primitives = renderToString(
+  () => {
+    createUniqueId();
+    return ContentPrimitives();
+  },
+  { renderId: "primitives" },
+);
 if (
   first !== render() ||
   !first.includes("Close dialog") ||
@@ -21,7 +27,7 @@ if (
   !first.includes("sm") ||
   !primitives.includes('data-testid="content-primitives"') ||
   !primitives.includes("Reference") ||
-  !primitives.includes("Loading")
+  !primitives.includes("Ready")
 ) {
   throw new Error(`Unexpected server output: ${first}`);
 }
@@ -31,6 +37,10 @@ await writeFile(
   index,
   (await readFile(index, "utf8"))
     .replace("</head>", `${generateHydrationScript()}</head>`)
-    .replace('<div id="app"></div>', `<div id="app">${first}</div>`),
+    .replace('<div id="app"></div>', `<div id="app">${first}</div>`)
+    .replace(
+      '<div id="content-primitives"></div>',
+      `<div id="content-primitives">${primitives}</div>`,
+    ),
 );
 console.log(first);

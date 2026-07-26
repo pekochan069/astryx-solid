@@ -72,7 +72,9 @@ try {
     await page.goto(server.url.toString());
     try {
       await page.waitForFunction(
-        () => document.getElementById("app")?.dataset.hydrated,
+        () =>
+          document.getElementById("app")?.dataset.hydrated &&
+          document.getElementById("content-primitives")?.dataset.hydrated,
         undefined,
         {
           timeout: 5000,
@@ -82,6 +84,9 @@ try {
       throw new Error(`Packed consumer runtime failed: ${runtimeErrors.join("; ")}`);
     }
     const hydration = await page.locator("#app").getAttribute("data-hydrated");
+    const primitiveHydration = await page
+      .locator("#content-primitives")
+      .getAttribute("data-hydrated");
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
     const contentPrimitives = await page.getByTestId("content-primitives").count();
@@ -94,6 +99,7 @@ try {
     const updatedContext = await page.getByTestId("consumer-state").textContent();
     if (
       hydration !== "reused" ||
+      primitiveHydration !== "reused" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
       contentPrimitives !== 1 ||
@@ -104,7 +110,7 @@ try {
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, closeLabels, rootExports, contentPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, closeLabels, rootExports, contentPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

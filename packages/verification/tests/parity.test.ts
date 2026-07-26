@@ -81,6 +81,17 @@ describe("parity selection", () => {
     });
   });
 
+  it("selects the container and status batch", async () => {
+    const result = await list("--batch", "container-status");
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      batch: "container-status",
+      package: null,
+      gates: ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+    });
+  });
+
   it("defaults to the aggregate selection", async () => {
     const result = await list();
 
@@ -165,14 +176,17 @@ describe("parity artifacts", () => {
           stderr: "pipe",
         },
       );
+
       const [exitCode, stdout, stderr] = await Promise.all([
         child.exited,
         new Response(child.stdout).text(),
         new Response(child.stderr).text(),
       ]);
+
       expect(exitCode).toBe(1);
       expect(stdout).toContain("useful-stdout");
       expect(stderr).toContain("useful-stderr");
+
       expect(await readFile(resolve(artifacts, "packed-build.stdout.log"), "utf8")).toContain(
         "useful-stdout",
       );

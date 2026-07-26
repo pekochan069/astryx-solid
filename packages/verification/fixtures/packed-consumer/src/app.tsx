@@ -2,14 +2,16 @@ import {
   AspectRatio,
   Badge,
   Blockquote,
+  Card,
+  Center,
   Citation,
   Code,
   Divider,
-  Heading,
-  Center,
+  EmptyState,
   FormLayout,
   Grid,
   GridSpan,
+  Heading,
   HStack,
   Icon,
   Kbd,
@@ -18,12 +20,18 @@ import {
   LayoutFooter,
   LayoutHeader,
   LayoutPanel,
+  ProgressBar,
+  ResizeHandle,
   Section,
   Skeleton,
   Spinner,
   Stack,
   StackItem,
+  StatusDot,
   Text,
+  Thumbnail,
+  Timestamp,
+  useResizable,
   VStack,
 } from "@astryx-solid/core";
 import { useInteractiveRole } from "@astryx-solid/core/hooks";
@@ -36,6 +44,7 @@ import { createSignal } from "solid-js";
 
 const lightTheme = defineTheme({ name: "consumer-light", tokens: { "--color-accent": "a" } });
 const darkTheme = defineTheme({ name: "consumer-dark", tokens: { "--color-accent": "b" } });
+
 const messages = {
   en: { greeting: { defaultMessage: "Hello" } },
   fr: { greeting: { defaultMessage: "Bonjour" } },
@@ -43,7 +52,9 @@ const messages = {
 
 export function createApp() {
   const [alternate, setAlternate] = createSignal(false);
+
   if (typeof window !== "undefined") queueMicrotask(() => setAlternate(true));
+
   return (
     <Theme theme={alternate() ? darkTheme : lightTheme} mode={alternate() ? "dark" : "light"}>
       <InternationalizationProvider locale={alternate() ? "fr" : "en"} messages={messages}>
@@ -97,6 +108,21 @@ export function PackedLayoutPrimitives() {
   );
 }
 
+export function PackedContainerStatus() {
+  const region = useResizable({ defaultSize: 160, minSizePx: 100, maxSizePx: 240 });
+
+  return (
+    <Card data-testid="packed-container-status">
+      <EmptyState title="No files" description="Upload a file to begin." />
+      <ProgressBar value={50} label="Upload" hasValueLabel />
+      <StatusDot variant="success" label="Ready" />
+      <Thumbnail label="upload" isLoading />
+      <Timestamp value="2025-01-01T00:00:00Z" format="system_date" />
+      <ResizeHandle label="Resize panel" resizable={region.props} />
+    </Card>
+  );
+}
+
 export function PackedLayout() {
   return (
     <Layout
@@ -126,6 +152,7 @@ export const packedPrimitives = {
 function ConsumerState() {
   const theme = useTheme();
   const translate = useTranslator();
+
   return (
     <>
       {theme.name}:{theme.mode}:{theme.token("--color-accent")}:{translate("greeting")}
@@ -135,10 +162,12 @@ function ConsumerState() {
 
 function ConsumerRole() {
   const role = useInteractiveRole({});
+
   return <>{role()}</>;
 }
 
 function ConsumerSize() {
   const size = useSize();
+
   return <>{size()}</>;
 }

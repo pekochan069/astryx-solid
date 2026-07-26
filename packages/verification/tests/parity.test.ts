@@ -70,6 +70,17 @@ describe("parity selection", () => {
     });
   });
 
+  it("selects the layout primitives batch", async () => {
+    const result = await list("--batch", "layout-primitives");
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      batch: "layout-primitives",
+      package: null,
+      gates: ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+    });
+  });
+
   it("defaults to the aggregate selection", async () => {
     const result = await list();
 

@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createUniqueId } from "solid-js";
 
-import { ContentPrimitives, createApp, packedPrimitives } from "./app";
+import { ContentPrimitives, createApp, PackedLayout, packedPrimitives } from "./app";
 
 const render = () =>
   renderToString(() => {
@@ -30,6 +30,11 @@ if (
   !primitives.includes("Ready")
 ) {
   throw new Error(`Unexpected server output: ${first}`);
+}
+
+const layout = renderToString(PackedLayout, { renderId: "layout" });
+if (!layout.includes("Centered") || !layout.includes("Panel") || !layout.includes("Content")) {
+  throw new Error(`Unexpected layout server output: ${layout}`);
 }
 
 const index = resolve(process.cwd(), "index.html");

@@ -42,6 +42,14 @@ const styles = stylex.create({
   outer: {
     marginInlineStart: "calc(-1 * var(--container-padding-inline-start, 0px))",
     marginInlineEnd: "calc(-1 * var(--container-padding-inline-end, 0px))",
+    marginBlockStart: {
+      default: null,
+      ":first-child": "calc(-1 * var(--container-padding-block-start, 0px))",
+    },
+    marginBlockEnd: {
+      default: null,
+      ":last-child": "calc(-1 * var(--container-padding-block-end, 0px))",
+    },
   },
   inner: { height: "100%" },
   defaultPadding: {

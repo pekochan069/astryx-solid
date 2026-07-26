@@ -77,6 +77,7 @@ const styles = stylex.create({
   middle: { display: "flex", flex: 1, minHeight: 0 },
   content: { flex: 1, minWidth: 0, minHeight: 0 },
   constrained: (width: string) => ({ width: "100%", maxWidth: width, marginInline: "auto" }),
+  contentWidth: (width: string) => ({ "--layout-content-width": width }),
 });
 
 /** Page shell with explicit header, panel, content, and footer slots. */
@@ -108,6 +109,7 @@ export function Layout(props: LayoutProps) {
       height() === "fill" ? styles.fill : styles.auto,
       props.padding != null && layoutPaddingOuterXVarStyles[props.padding],
       props.padding != null && layoutPaddingOuterYVarStyles[props.padding],
+      props.contentWidth != null && styles.contentWidth(size(props.contentWidth)),
     ),
   );
   const middle = createMemo(() =>
@@ -240,6 +242,27 @@ const areaStyles = stylex.create({
     borderInlineStartColor: colorVars["--color-border"],
   },
   bar: { flexShrink: 0 },
+  barInner: {
+    boxSizing: "border-box",
+    width: "100%",
+    maxWidth: "var(--layout-content-width, none)",
+    marginInline: "auto",
+    paddingInline: `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-start": `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-end": `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+  },
+  headerInner: {
+    paddingBlockStart: `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+    paddingBlockEnd: `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-start": `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-end": `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+  },
+  footerInner: {
+    paddingBlockStart: `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+    paddingBlockEnd: `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-start": `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-end": `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+  },
   headerDivider: {
     borderBlockEndWidth: 1,
     borderBlockEndStyle: "solid",
@@ -399,12 +422,17 @@ function LayoutBar(
 
   const theme = createMemo(() => themeProps(props.component));
   const style = createMemo(() =>
+    stylexProps(areaStyles.bar, hasDivider() && props.divider, props.xstyle),
+  );
+  const innerStyle = createMemo(() =>
     stylexProps(
-      areaStyles.bar,
-      hasDivider() && props.divider,
+      areaStyles.barInner,
+      props.component === "layout-header" ? areaStyles.headerInner : areaStyles.footerInner,
       props.padding === 0 && areaStyles.fullBleed,
       props.padding != null && paddingStyles[props.padding],
-      props.xstyle,
+      props.padding != null && containerPaddingInlineVarStyles[props.padding],
+      props.padding != null && containerPaddingBlockStartVarStyles[props.padding],
+      props.padding != null && containerPaddingBlockEndVarStyles[props.padding],
     ),
   );
 
@@ -423,7 +451,7 @@ function LayoutBar(
       }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      <div {...innerStyle()}>{props.children}</div>
     </div>
   );
 }

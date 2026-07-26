@@ -33,7 +33,9 @@ export interface GridProps extends BaseProps<HTMLDivElement> {
 
 const styles = stylex.create({
   grid: { display: "grid" },
-  template: (value: string) => ({ gridTemplateColumns: value }),
+  responsive: {
+    gridTemplateColumns: "repeat(auto-fit, minmax(var(--grid-min-child-width), 1fr))",
+  },
   rows: (value: number) => ({ gridAutoRows: `${value}px` }),
   alignStart: { alignItems: "start" },
   alignCenter: { alignItems: "center" },
@@ -97,6 +99,7 @@ export function Grid(props: GridProps) {
     "children",
   );
 
+  const isUncappedResponsive = () => props.columns == null && props.minChildWidth != null;
   const template = createMemo(() =>
     gridTemplate(props.columns, props.minChildWidth, props.gap, props.columnGap),
   );
@@ -112,7 +115,7 @@ export function Grid(props: GridProps) {
   const style = createMemo(() =>
     stylexProps(
       styles.grid,
-      styles.template(template()),
+      isUncappedResponsive() && styles.responsive,
       props.rowHeight != null && styles.rows(props.rowHeight),
       props.gap != null && styles.gap(spacing[props.gap]),
       props.rowGap != null && styles.rowGap(spacing[props.rowGap]),
@@ -130,6 +133,8 @@ export function Grid(props: GridProps) {
       class={[theme().class, style().class, props.class]}
       style={{
         ...style().style,
+        ...(!isUncappedResponsive() && { "grid-template-columns": template() }),
+        ...(isUncappedResponsive() && { "--grid-min-child-width": `${props.minChildWidth}px` }),
         ...(props.width != null && { width: size(props.width) }),
         ...(props.height != null && { height: size(props.height) }),
         ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),

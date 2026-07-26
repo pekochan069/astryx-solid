@@ -48,27 +48,41 @@ describe("layout primitives", () => {
     ));
 
     expect(container.querySelector('[data-testid="center"]')?.textContent).toBe("Centered");
-    expect(container.querySelector('[aria-label="Grid"]')?.textContent).toBe("Wide");
+    const grid = container.querySelector<HTMLElement>('[aria-label="Grid"]');
+    expect(grid?.textContent).toBe("Wide");
+    expect(grid?.style.gridTemplateColumns).toBe("repeat(2, 1fr)");
     expect(container.querySelector("label")?.htmlFor).toBe("name");
   });
 
-  it("uses default Section padding and composes all Layout regions", () => {
+  it("preserves Section edge compensation and Layout bar shells", () => {
     const container = mount(() => [
       createComponent(Section, {
         children: createComponent(Layout, {
-          header: createComponent(LayoutHeader, { children: "Header" }),
+          contentWidth: 640,
+          header: createComponent(LayoutHeader, {
+            children: <span data-testid="header-content">Header</span>,
+          }),
           start: createComponent(LayoutPanel, { children: "Panel" }),
           content: createComponent(LayoutContent, { children: "Content" }),
-          footer: createComponent(LayoutFooter, { children: "Footer" }),
+          footer: createComponent(LayoutFooter, {
+            children: <span data-testid="footer-content">Footer</span>,
+          }),
         }),
       }),
       createComponent(Section, { padding: 0 }),
     ]);
-    const [section, unpaddedSection] = Array.from(container.children);
+    const [section] = Array.from(container.children);
+    const headerContent = container.querySelector('[data-testid="header-content"]');
+    const footerContent = container.querySelector('[data-testid="footer-content"]');
 
     expect(section.textContent).toBe("HeaderPanelContentFooter");
-    expect(section.firstElementChild?.className).not.toBe(
-      unpaddedSection.firstElementChild?.className,
+    expect(headerContent?.parentElement?.className).not.toContain("astryx-solid-layout-header");
+    expect(headerContent?.parentElement?.parentElement?.className).toContain(
+      "astryx-solid-layout-header",
+    );
+    expect(footerContent?.parentElement?.className).not.toContain("astryx-solid-layout-footer");
+    expect(footerContent?.parentElement?.parentElement?.className).toContain(
+      "astryx-solid-layout-footer",
     );
   });
 

@@ -48,7 +48,7 @@ export function Center(props: CenterProps) {
   const axis = () => props.axis ?? "both";
 
   const theme = createMemo(() => themeProps("center", { axis: axis() }));
-  const syle = createMemo(() =>
+  const style = createMemo(() =>
     stylexProps(
       props.isInline ? styles.inline : styles.base,
       (axis() === "both" || axis() === "horizontal") && styles.horizontal,
@@ -61,16 +61,16 @@ export function Center(props: CenterProps) {
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, syle().class, props.class]}
+      class={[theme().class, style().class, props.class]}
       style={{
-        ...syle().style,
+        ...style().style,
         ...(props.width != null && { width: size(props.width) }),
         ...(props.height != null && { height: size(props.height) }),
         ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
         ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
         ...props.style,
       }}
-      data-style-src={syle()["data-style-src"]}
+      data-style-src={style()["data-style-src"]}
     >
       {props.children}
     </div>

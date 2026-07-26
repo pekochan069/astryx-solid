@@ -2,6 +2,7 @@
 
 - DO NOT modify any package versions or install new packages without confirmation
 - Avoid type assertion whenever possible
+  - Due to the limition of solid.js, using type assertion inside of `Show` and `Switch` components for type narrowing are allowed
 - Make sure functions don't exceed more than 100 lines, and 150 lines for components
 - When creating new pr, use `./.github/pull_request_template.md`
 - Divide commits based on packages, and divide more when needed

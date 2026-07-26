@@ -74,7 +74,8 @@ try {
       await page.waitForFunction(
         () =>
           document.getElementById("app")?.dataset.hydrated &&
-          document.getElementById("content-primitives")?.dataset.hydrated,
+          document.getElementById("content-primitives")?.dataset.hydrated &&
+          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 5,
         undefined,
         {
           timeout: 5000,
@@ -90,6 +91,7 @@ try {
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
     const contentPrimitives = await page.getByTestId("content-primitives").count();
+    const additionalPrimitives = await page.locator('[data-testid^="packed-"]').count();
     const initialContext = await page.locator("#app").getAttribute("data-server-context");
     const role = await page.getByTestId("consumer-role").textContent();
     const size = await page.getByTestId("consumer-size").textContent();
@@ -103,6 +105,7 @@ try {
       closeLabels !== 1 ||
       rootExports !== 1 ||
       contentPrimitives !== 1 ||
+      additionalPrimitives !== 5 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
       role !== "button" ||
@@ -110,7 +113,7 @@ try {
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, closeLabels, rootExports, contentPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
       );
     }
   } finally {

@@ -12,7 +12,7 @@ import "@astryx-solid/core/reset.css";
 import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
-import { ContentPrimitives, createApp } from "./app";
+import { ContentPrimitives, createApp, packedPrimitives } from "./app";
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -36,18 +36,25 @@ function requireRoot(id: string) {
   return root;
 }
 
+function hydrateAndRecord(root: HTMLElement, hydration: () => void) {
+  const serverElement = root.firstElementChild;
+  hydration();
+  root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "replaced";
+}
+
 const root = requireRoot("app");
-const serverElement = root.firstElementChild;
 const serverContext = root.querySelector('[data-testid="consumer-state"]')?.textContent;
-hydrate(createApp, root);
-root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "replaced";
+hydrateAndRecord(root, () => hydrate(createApp, root));
 root.dataset.serverContext = serverContext;
 render(
   () => <RootVisuallyHidden>Root export works</RootVisuallyHidden>,
   requireRoot("root-export"),
 );
 const primitiveRoot = requireRoot("content-primitives");
-const serverPrimitives = primitiveRoot.firstElementChild;
-hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" });
-primitiveRoot.dataset.hydrated =
-  serverPrimitives === primitiveRoot.firstElementChild ? "reused" : "replaced";
+hydrateAndRecord(primitiveRoot, () =>
+  hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" }),
+);
+for (const [name, component] of Object.entries(packedPrimitives)) {
+  const packedRoot = requireRoot(`packed-${name}`);
+  hydrateAndRecord(packedRoot, () => hydrate(component, packedRoot, { renderId: name }));
+}

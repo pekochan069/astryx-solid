@@ -1,4 +1,17 @@
-import { AspectRatio, Badge, Blockquote, Citation, Code, Kbd, Skeleton } from "@astryx-solid/core";
+import {
+  AspectRatio,
+  Badge,
+  Blockquote,
+  Citation,
+  Code,
+  Divider,
+  Heading,
+  Icon,
+  Kbd,
+  Skeleton,
+  Spinner,
+  Text,
+} from "@astryx-solid/core";
 import { useInteractiveRole } from "@astryx-solid/core/hooks";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
 import { InteractiveRoleContext } from "@astryx-solid/core/interactive-role-context";
@@ -52,6 +65,20 @@ export function ContentPrimitives() {
     </div>
   );
 }
+
+export const packedPrimitives = {
+  divider: () => <Divider data-testid="packed-divider" label="More" />,
+  heading: () => (
+    <Heading data-testid="packed-heading" level={2}>
+      Packed heading
+    </Heading>
+  ),
+  icon: () => (
+    <Icon data-testid="packed-icon" icon="close" aria-label="Close" aria-hidden={false} />
+  ),
+  spinner: () => <Spinner data-testid="packed-spinner" aria-label="Loading packed content" />,
+  text: () => <Text data-testid="packed-text" textContent="Packed text" />,
+};
 
 function ConsumerState() {
   const theme = useTheme();

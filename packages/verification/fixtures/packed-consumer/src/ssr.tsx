@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createUniqueId } from "solid-js";
 
-import { ContentPrimitives, createApp } from "./app";
+import { ContentPrimitives, createApp, packedPrimitives } from "./app";
 
 const render = () =>
   renderToString(() => {
@@ -33,14 +33,19 @@ if (
 }
 
 const index = resolve(process.cwd(), "index.html");
-await writeFile(
-  index,
-  (await readFile(index, "utf8"))
-    .replace("</head>", `${generateHydrationScript()}</head>`)
-    .replace('<div id="app"></div>', `<div id="app">${first}</div>`)
-    .replace(
-      '<div id="content-primitives"></div>',
-      `<div id="content-primitives">${primitives}</div>`,
-    ),
-);
+let html = (await readFile(index, "utf8"))
+  .replace("</head>", `${generateHydrationScript()}</head>`)
+  .replace('<div id="app"></div>', `<div id="app">${first}</div>`)
+  .replace(
+    '<div id="content-primitives"></div>',
+    `<div id="content-primitives">${primitives}</div>`,
+  );
+for (const [name, component] of Object.entries(packedPrimitives)) {
+  const output = renderToString(component, { renderId: name });
+  html = html.replace(
+    `<div id="packed-${name}"></div>`,
+    `<div id="packed-${name}">${output}</div>`,
+  );
+}
+await writeFile(index, html);
 console.log(first);

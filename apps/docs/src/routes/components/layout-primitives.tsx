@@ -11,6 +11,7 @@ import {
   LayoutPanel,
   Section,
   Stack,
+  StackItem,
   VStack,
 } from "@astryx-solid/core";
 import { createFileRoute } from "@tanstack/solid-router";
@@ -29,8 +30,8 @@ export function LayoutPrimitivesDocs() {
         <button type="button">Secondary action</button>
       </HStack>
       <VStack gap={2} padding={2}>
-        <span>Vertical item</span>
-        <span>Another vertical item</span>
+        <StackItem>Vertical item</StackItem>
+        <StackItem>Another vertical item</StackItem>
       </VStack>
       <Center height={80} axis="both">
         Centered content

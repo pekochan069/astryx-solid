@@ -2,6 +2,8 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("layout primitives render accessible responsive examples", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/components/layout-primitives/");
 
   const main = page.getByRole("main");
@@ -13,4 +15,5 @@ test("layout primitives render accessible responsive examples", async ({ page })
     accessibility.violations.filter(({ impact }) => impact === "critical" || impact === "serious"),
   ).toEqual([]);
   await expect(main).toHaveScreenshot("layout-primitives-docs.png");
+  expect(errors).toEqual([]);
 });

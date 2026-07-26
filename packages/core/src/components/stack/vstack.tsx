@@ -1,4 +1,4 @@
-import { createComponent } from "solid-js";
+import { createComponent, merge } from "solid-js";
 
 import type { StackProps } from "./stack";
 import type { StackCrossAlignment, StackMainAlignment } from "./stack.stylex";
@@ -14,8 +14,7 @@ export interface VStackProps extends Omit<StackProps, "direction" | "hAlign" | "
 
 /** Vertical Stack shortcut. Explicit axis props override aliases. */
 export function VStack(props: VStackProps) {
-  return createComponent(Stack, {
-    ...props,
+  const stackProps = {
     direction: "vertical",
     get hAlign() {
       return props.hAlign ?? props.align;
@@ -23,5 +22,7 @@ export function VStack(props: VStackProps) {
     get vAlign() {
       return props.vAlign ?? props.justify;
     },
-  });
+  } satisfies Pick<StackProps, "direction" | "hAlign" | "vAlign">;
+
+  return createComponent(Stack, merge(props, stackProps));
 }

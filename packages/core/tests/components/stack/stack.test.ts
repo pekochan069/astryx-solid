@@ -4,7 +4,9 @@ import { render, type JSX } from "@solidjs/web";
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { createComponent, createSignal } from "solid-js";
 
+import { HStack } from "../../../src/components/stack/hstack";
 import { Stack } from "../../../src/components/stack/stack";
+import { VStack } from "../../../src/components/stack/vstack";
 
 const customStyles = {
   backgroundColor: "test-consumer-style",
@@ -110,5 +112,30 @@ describe("Stack", () => {
     setDirection("horizontal");
     await Promise.resolve();
     expect(stack.getAttribute("data-direction")).toBe("horizontal");
+  });
+
+  it("keeps HStack and VStack aliases reactive", async () => {
+    const [alignment, setAlignment] = createSignal<"start" | "center">("start");
+    const container = mount(() => [
+      createComponent(HStack, {
+        get justify() {
+          return alignment();
+        },
+      }),
+      createComponent(VStack, {
+        get justify() {
+          return alignment();
+        },
+      }),
+    ]);
+    const [horizontal, vertical] = Array.from(container.children);
+    const horizontalClass = horizontal.className;
+    const verticalClass = vertical.className;
+
+    setAlignment("center");
+    await Promise.resolve();
+
+    expect(horizontal.className).not.toBe(horizontalClass);
+    expect(vertical.className).not.toBe(verticalClass);
   });
 });

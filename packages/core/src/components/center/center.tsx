@@ -7,6 +7,7 @@ import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
 
 import { stylexProps } from "../../stylex";
+import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export type CenterAxis = "both" | "horizontal" | "vertical";
@@ -72,8 +73,4 @@ export function Center(props: CenterProps) {
       {props.children}
     </div>
   );
-}
-
-function size(value: SizeValue) {
-  return typeof value === "number" ? `${value}px` : value;
 }

@@ -8,12 +8,16 @@ import type { SizeValue } from "../../types/size-value.types";
 import type { SpacingStep } from "../../types/spacing-steps.types";
 
 import {
+  containerPaddingBlockEndVarStyles,
+  containerPaddingBlockStartVarStyles,
+  containerPaddingInlineVarStyles,
   paddingBlockStyles,
   paddingStyles,
   sectionPaddingPropagationStyles,
 } from "../../layout/padding.stylex";
 import { stylexProps } from "../../stylex";
-import { colorVars } from "../../theme/tokens.stylex";
+import { colorVars, spacingVars } from "../../theme/tokens.stylex";
+import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export interface SectionVariantMap {
@@ -39,12 +43,16 @@ const styles = stylex.create({
     marginInlineStart: "calc(-1 * var(--container-padding-inline-start, 0px))",
     marginInlineEnd: "calc(-1 * var(--container-padding-inline-end, 0px))",
   },
-  inner: {
-    height: "100%",
-    "--container-padding-inline-start": "0px",
-    "--container-padding-inline-end": "0px",
-    "--container-padding-block-start": "0px",
-    "--container-padding-block-end": "0px",
+  inner: { height: "100%" },
+  defaultPadding: {
+    paddingInlineStart: `var(--astryx-section-padding-inline-start, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    paddingInlineEnd: `var(--astryx-section-padding-inline-end, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    paddingBlockStart: `var(--astryx-section-padding-block-start, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    paddingBlockEnd: `var(--astryx-section-padding-block-end, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    "--container-padding-inline-start": `var(--astryx-section-padding-inline-start, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    "--container-padding-inline-end": `var(--astryx-section-padding-inline-end, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    "--container-padding-block-start": `var(--astryx-section-padding-block-start, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    "--container-padding-block-end": `var(--astryx-section-padding-block-end, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
   },
   section: { backgroundColor: colorVars["--color-background-surface"] },
   transparent: { backgroundColor: "transparent" },
@@ -93,10 +101,16 @@ export function Section(props: SectionProps) {
   const inner = createMemo(() =>
     stylexProps(
       styles.inner,
+      props.padding == null && styles.defaultPadding,
       styles[variant()],
       props.padding != null && paddingStyles[props.padding],
+      props.padding != null && containerPaddingInlineVarStyles[props.padding],
+      props.padding != null && containerPaddingBlockStartVarStyles[props.padding],
+      props.padding != null && containerPaddingBlockEndVarStyles[props.padding],
       props.padding != null && sectionPaddingPropagationStyles[props.padding],
       props.paddingBlock != null && paddingBlockStyles[props.paddingBlock],
+      props.paddingBlock != null && containerPaddingBlockStartVarStyles[props.paddingBlock],
+      props.paddingBlock != null && containerPaddingBlockEndVarStyles[props.paddingBlock],
       props.dividers?.includes("top") && styles.top,
       props.dividers?.includes("bottom") && styles.bottom,
       props.dividers?.includes("start") && styles.start,
@@ -129,8 +143,4 @@ export function Section(props: SectionProps) {
       </div>
     </div>
   );
-}
-
-function size(value: SizeValue) {
-  return typeof value === "number" ? `${value}px` : value;
 }

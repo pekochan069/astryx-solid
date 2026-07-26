@@ -9,6 +9,7 @@ import type { SpacingStep } from "../../types/spacing-steps.types";
 
 import { stylexProps } from "../../stylex";
 import { spacingVars } from "../../theme/tokens.stylex";
+import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export type GridAlignment = "start" | "center" | "end" | "stretch";
@@ -178,8 +179,4 @@ function cappedTemplate(
       ? `calc(100% / ${max})`
       : `calc((100% - ${max - 1} * var(--spacing-${String(chosenGap).replace(".", "-")})) / ${max})`;
   return `repeat(${repeat}, minmax(min(100%, max(${minWidth}px, ${perColumn})), 1fr))`;
-}
-
-function size(value: SizeValue) {
-  return typeof value === "number" ? `${value}px` : value;
 }

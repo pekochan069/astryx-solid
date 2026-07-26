@@ -17,6 +17,7 @@ import {
 } from "../../layout/padding.stylex";
 import { stylexProps } from "../../stylex";
 import { colorVars, spacingVars } from "../../theme/tokens.stylex";
+import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export type LayoutHeight = "fill" | "auto";
@@ -416,8 +417,4 @@ function LayoutBar(
       {props.children}
     </div>
   );
-}
-
-function size(value: SizeValue) {
-  return typeof value === "number" ? `${value}px` : value;
 }

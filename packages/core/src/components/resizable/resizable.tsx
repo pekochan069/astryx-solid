@@ -124,6 +124,45 @@ function restoredSize(
   return value === undefined ? undefined : clampSize(value, min, max, snaps);
 }
 
+function createResizableProps(
+  config: UseResizableSingleConfig,
+  direction: "horizontal" | "vertical" | undefined,
+  min: number,
+  max: number,
+  snaps: number[],
+  size: () => number,
+  collapsed: () => boolean,
+  collapse: () => void,
+  commit: (next: number) => void,
+): ResizableProps {
+  let dragStart = size();
+
+  return {
+    get _size() {
+      return collapsed() ? 0 : size();
+    },
+    get _isCollapsed() {
+      return collapsed();
+    },
+    _minSizePx: min,
+    _maxSizePx: max,
+    _snaps: snaps,
+    _collapsedSize: config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE,
+    _collapsible: config.collapsible ?? false,
+    _direction: direction,
+    _isResizableProps: true,
+    _onResizeStart() {
+      dragStart = collapsed() ? 0 : size();
+    },
+    _onResizeMove(delta: number) {
+      const next = dragStart + delta;
+      if (config.collapsible && next < (config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE)) collapse();
+      else commit(next);
+    },
+    _onResizeEnd() {},
+  };
+}
+
 function createResizableRegion(
   config: UseResizableSingleConfig,
   direction?: "horizontal" | "vertical",
@@ -138,7 +177,6 @@ function createResizableRegion(
 
   let previousSize = initial;
   let collapsedState = false;
-  let dragStart = initial;
 
   const commit = (next: number) => {
     const value = clampSize(next, min, max, snaps);
@@ -169,7 +207,6 @@ function createResizableRegion(
     () => config.autoSaveId,
     (key) => {
       const restored = restoredSize(config, key, min, max, snaps);
-
       if (restored === undefined) return;
 
       if (restored === 0 && config.collapsible) {
@@ -195,35 +232,17 @@ function createResizableRegion(
     expand,
     resize,
     get props() {
-      const props: ResizableProps = {
-        get _size() {
-          return collapsed() ? 0 : size();
-        },
-        get _isCollapsed() {
-          return collapsed();
-        },
-        _minSizePx: min,
-        _maxSizePx: max,
-        _snaps: snaps,
-        _collapsedSize: config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE,
-        _collapsible: config.collapsible ?? false,
-        _direction: direction,
-        _isResizableProps: true,
-
-        _onResizeStart() {
-          dragStart = collapsedState ? 0 : size();
-        },
-
-        _onResizeMove(delta: number) {
-          const next = dragStart + delta;
-          if (config.collapsible && next < (config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE))
-            collapse();
-          else commit(next);
-        },
-
-        _onResizeEnd() {},
-      };
-      return props;
+      return createResizableProps(
+        config,
+        direction,
+        min,
+        max,
+        snaps,
+        size,
+        collapsed,
+        collapse,
+        commit,
+      );
     },
   };
 }

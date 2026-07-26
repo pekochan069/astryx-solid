@@ -70,7 +70,7 @@ export default defineConfig([
     output: { cleanDir: true },
     plugins: [
       clientStylex,
-      solid(),
+      solid({ jsx: { hydratable: true } }),
       dts(),
       {
         name: "copy-css-files",

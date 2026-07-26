@@ -13,7 +13,15 @@ import {
 } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 
-export type ProgressBarVariant = "accent" | "success" | "warning" | "neutral" | "error";
+export interface ProgressBarVariantMap {
+  accent: true;
+  success: true;
+  warning: true;
+  neutral: true;
+  error: true;
+}
+
+export type ProgressBarVariant = keyof ProgressBarVariantMap;
 
 export interface ProgressBarProps extends BaseProps<HTMLDivElement> {
   value?: number;

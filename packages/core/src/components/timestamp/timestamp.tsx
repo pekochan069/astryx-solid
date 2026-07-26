@@ -2,6 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import { createMemo, createSignal, omit, onCleanup, onSettled, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
+import type { TextColor, TextSize, TextType, TextWeight } from "../text/text";
 
 import { stylexProps } from "../../stylex";
 import { colorVars } from "../../theme/tokens.stylex";
@@ -20,6 +21,10 @@ export type TimestampFormat =
 export interface TimestampProps extends BaseProps<HTMLTimeElement> {
   value: string | number;
   format?: TimestampFormat;
+  type?: TextType;
+  size?: TextSize;
+  color?: TextColor;
+  weight?: TextWeight;
   autoThreshold?: number;
   hasTooltip?: boolean;
   isTimezoneShown?: boolean;
@@ -89,6 +94,10 @@ export function Timestamp(props: TimestampProps) {
     props,
     "value",
     "format",
+    "type",
+    "size",
+    "color",
+    "weight",
     "autoThreshold",
     "hasTooltip",
     "isTimezoneShown",
@@ -119,7 +128,15 @@ export function Timestamp(props: TimestampProps) {
     onCleanup(() => clearInterval(timer));
   });
 
-  const theme = createMemo(() => themeProps("timestamp", { format: effective() }));
+  const theme = createMemo(() =>
+    themeProps("timestamp", {
+      format: effective(),
+      type: props.type,
+      size: props.size,
+      color: props.color,
+      weight: props.weight,
+    }),
+  );
   const style = createMemo(() =>
     stylexProps(
       styles.root,

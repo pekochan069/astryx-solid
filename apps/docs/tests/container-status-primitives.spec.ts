@@ -2,7 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("container and status primitives render accessible states", async ({ page }) => {
-  await page.goto("/components/container-status-primitives/");
+  await page.goto("/components/container-status-primitives/", { waitUntil: "domcontentloaded" });
 
   const resizeHandle = page.getByRole("separator", { name: "Resize panel", exact: true });
   const disabledHandle = page.getByRole("separator", { name: "Disabled resize panel" });
@@ -21,8 +21,15 @@ test("container and status primitives render accessible states", async ({ page }
     "horizontal",
   );
   await expect(page.getByRole("img", { name: "Online" })).toBeVisible();
-  await expect(page.getByRole("img", { name: "Needs attention" })).toBeVisible();
+  const attentionDot = page.getByRole("img", { name: "Needs attention" });
+  await expect(attentionDot).toBeVisible();
   await expect(page.getByRole("img", { name: "Offline" })).toBeVisible();
+  await attentionDot.focus();
+  const tooltip = page.locator('[role="tooltip"]');
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveText("Service needs attention");
+  await attentionDot.press("Escape");
+  await expect(tooltip).toBeHidden();
   await expect(page.getByRole("progressbar", { name: "Loading progress" })).not.toHaveAttribute(
     "aria-valuenow",
   );

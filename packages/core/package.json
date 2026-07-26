@@ -36,6 +36,11 @@
       "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
+    "./center": {
+      "types": "./dist/center.d.ts",
+      "node": "./dist/server/center.js",
+      "default": "./dist/center.js"
+    },
     "./aspect-ratio": {
       "types": "./dist/aspect-ratio.d.ts",
       "node": "./dist/server/aspect-ratio.js",
@@ -66,6 +71,16 @@
       "node": "./dist/server/divider.js",
       "default": "./dist/divider.js"
     },
+    "./form-layout": {
+      "types": "./dist/form-layout.d.ts",
+      "node": "./dist/server/form-layout.js",
+      "default": "./dist/form-layout.js"
+    },
+    "./grid": {
+      "types": "./dist/grid.d.ts",
+      "node": "./dist/server/grid.js",
+      "default": "./dist/grid.js"
+    },
     "./heading": {
       "types": "./dist/heading.d.ts",
       "node": "./dist/server/heading.js",
@@ -81,6 +96,21 @@
       "node": "./dist/server/kbd.js",
       "default": "./dist/kbd.js"
     },
+    "./hstack": {
+      "types": "./dist/hstack.d.ts",
+      "node": "./dist/server/hstack.js",
+      "default": "./dist/hstack.js"
+    },
+    "./layout": {
+      "types": "./dist/layout.d.ts",
+      "node": "./dist/server/layout.js",
+      "default": "./dist/layout.js"
+    },
+    "./section": {
+      "types": "./dist/section.d.ts",
+      "node": "./dist/server/section.js",
+      "default": "./dist/section.js"
+    },
     "./skeleton": {
       "types": "./dist/skeleton.d.ts",
       "node": "./dist/server/skeleton.js",
@@ -91,10 +121,20 @@
       "node": "./dist/server/spinner.js",
       "default": "./dist/spinner.js"
     },
+    "./stack": {
+      "types": "./dist/stack.d.ts",
+      "node": "./dist/server/stack.js",
+      "default": "./dist/stack.js"
+    },
     "./text": {
       "types": "./dist/text.d.ts",
       "node": "./dist/server/text.js",
       "default": "./dist/text.js"
+    },
+    "./vstack": {
+      "types": "./dist/vstack.d.ts",
+      "node": "./dist/server/vstack.js",
+      "default": "./dist/vstack.js"
     },
     "./visually-hidden": {
       "types": "./dist/visually-hidden.d.ts",

@@ -9,6 +9,7 @@ import { stylexProps } from "../../stylex";
 import { colorVars, durationVars, spacingVars } from "../../theme/tokens.stylex";
 import { setElementRef } from "../../utils/set-element-ref";
 import { themeProps } from "../../utils/theme-props";
+import { Text } from "../text/text";
 
 const rotation = stylex.keyframes({
   "0%": { transform: "rotate(0deg)" },
@@ -81,6 +82,14 @@ export function Spinner(props: SpinnerProps) {
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
   const wrapperStyle = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const frame = () => sizes[size()];
+  const label = () => {
+    const label = props.label;
+    return typeof label === "string" ? (
+      <Text type="body" weight="bold" textContent={label} />
+    ) : (
+      label
+    );
+  };
   const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
   const indicator = (isRoot: boolean) => (
     <span
@@ -113,7 +122,7 @@ export function Spinner(props: SpinnerProps) {
         style={{ ...wrapperStyle().style, ...props.style }}
       >
         {indicator(false)}
-        {props.label}
+        {label()}
       </div>
     </Show>
   );

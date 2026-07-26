@@ -149,6 +149,9 @@ describe("content feedback and icons", () => {
     expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe(
       "Loading records",
     );
+    const spinnerLabel = container.querySelector('[role="status"]')?.nextElementSibling;
+    expect(spinnerLabel?.className.includes("astryx-solid-text")).toBe(true);
+    expect(spinnerLabel?.getAttribute("data-type")).toBe("body");
     expect(container.querySelector("a")?.getAttribute("href")).toBe("https://example.com");
   });
 

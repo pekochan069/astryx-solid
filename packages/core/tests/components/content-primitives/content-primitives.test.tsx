@@ -34,7 +34,7 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe("content primitives", () => {
+describe("content structure", () => {
   it("renders semantic text, heading, code, quote, and divider content", () => {
     const container = mount(() => (
       <>
@@ -55,33 +55,29 @@ describe("content primitives", () => {
     );
   });
 
-  it("renders feedback, icon, keyboard, and citation accessibility contracts", () => {
+  it("omits absent divider labels and citation icons", () => {
     const container = mount(() => (
       <>
-        <Badge variant="success" label="Ready" />
-        <Icon icon={TestIcon} aria-label="Success" aria-hidden={false} />
-        <Kbd keys="ctrl+enter" />
-        <Skeleton width={20} height={10} />
-        <Spinner label="Loading records" />
-        <Citation source={{ title: "Reference", url: "https://example.com" }} number={4} />
+        <Divider data-testid="divider" />
+        <Citation data-testid="citation" source={{ title: "Reference" }} number={1} />
       </>
     ));
 
-    expect(container.textContent).toContain("Ready");
-    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe("Success");
-    expect(container.querySelector("svg")?.hasAttribute("iconValue")).toBe(false);
-    expect(container.querySelector("kbd")?.textContent).toBe("⌃");
-    expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
-    expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe(
-      "Loading records",
-    );
-    expect(container.querySelector("a")?.getAttribute("href")).toBe("https://example.com");
-  });
+    const divider = container.querySelector('[data-testid="divider"]');
+    const citation = container.querySelector('[data-testid="citation"]');
 
-  it("forwards measured text refs", () => {
+    expect(divider?.children).toHaveLength(1);
+    expect(citation?.querySelector("img")).toBeNull();
+    expect(citation?.textContent).toBe("Reference");
+  });
+});
+
+describe("content reactivity and refs", () => {
+  it("forwards measured and conditional root refs", () => {
     let textRef: HTMLElement | undefined;
     let headingRef: HTMLHeadingElement | undefined;
-    let spinnerRef: HTMLSpanElement | undefined;
+    let labelledSpinnerRef: HTMLSpanElement | HTMLDivElement | undefined;
+    let spinnerRef: HTMLSpanElement | HTMLDivElement | undefined;
 
     mount(() => (
       <>
@@ -89,12 +85,14 @@ describe("content primitives", () => {
         <Heading ref={(element) => (headingRef = element)} level={2}>
           Heading
         </Heading>
-        <Spinner ref={(element) => (spinnerRef = element)} label="Loading" />
+        <Spinner ref={(element) => (labelledSpinnerRef = element)} label="Loading" />
+        <Spinner ref={(element) => (spinnerRef = element)} />
       </>
     ));
 
     expect(textRef?.tagName).toBe("SPAN");
     expect(headingRef?.tagName).toBe("H2");
+    expect(labelledSpinnerRef?.tagName).toBe("DIV");
     expect(spinnerRef?.tagName).toBe("SPAN");
   });
 
@@ -128,8 +126,33 @@ describe("content primitives", () => {
 
     expect(text.getAttribute("title")).toBe("Long text");
   });
+});
 
-  it("renders built-in icons and only titles measured truncation", () => {
+describe("content feedback and icons", () => {
+  it("renders feedback accessibility contracts", () => {
+    const container = mount(() => (
+      <>
+        <Badge variant="success" label="Ready" />
+        <Icon icon={TestIcon} aria-label="Success" aria-hidden={false} />
+        <Kbd keys="ctrl+enter" />
+        <Skeleton width={20} height={10} />
+        <Spinner label="Loading records" />
+        <Citation source={{ title: "Reference", url: "https://example.com" }} number={4} />
+      </>
+    ));
+
+    expect(container.textContent).toContain("Ready");
+    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe("Success");
+    expect(container.querySelector("svg")?.hasAttribute("iconValue")).toBe(false);
+    expect(container.querySelector("kbd")?.textContent).toBe("⌃");
+    expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
+    expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe(
+      "Loading records",
+    );
+    expect(container.querySelector("a")?.getAttribute("href")).toBe("https://example.com");
+  });
+
+  it("renders wrapped built-in icons and only titles measured truncation", () => {
     const container = mount(() => (
       <>
         <Icon icon="menu" aria-label="Menu" aria-hidden={false} data-testid="built-in-icon" />
@@ -148,10 +171,10 @@ describe("content primitives", () => {
     );
 
     expect(getIcon("close")).toBeDefined();
-    expect(builtInIcon?.tagName).toBe("svg");
+    expect(builtInIcon?.tagName).toBe("SPAN");
     expect(builtInIcon?.getAttribute("aria-label")).toBe("Menu");
     expect(builtInIcon?.getAttribute("aria-hidden")).not.toBe("true");
-    expect(builtInIcon?.getAttribute("stroke-width")).toBe("2");
+    expect(builtInIcon?.querySelector("svg")?.getAttribute("stroke-width")).toBe("2");
     expect(intrinsicIcon?.tagName).toBe("svg");
     expect(text?.getAttribute("title")).toBeNull();
     expect(container.querySelector("h2")?.getAttribute("title")).toBeNull();
@@ -169,21 +192,5 @@ describe("content primitives", () => {
     expect(wrapper?.hasAttribute("viewBox")).toBe(false);
     expect(wrapper?.hasAttribute("iconValue")).toBe(false);
     expect(wrapper?.querySelector('[data-testid="registered-value"]')).not.toBeNull();
-  });
-
-  it("omits absent divider labels and citation icons", () => {
-    const container = mount(() => (
-      <>
-        <Divider data-testid="divider" />
-        <Citation data-testid="citation" source={{ title: "Reference" }} number={1} />
-      </>
-    ));
-
-    const divider = container.querySelector('[data-testid="divider"]');
-    const citation = container.querySelector('[data-testid="citation"]');
-
-    expect(divider?.children).toHaveLength(1);
-    expect(citation?.querySelector("img")).toBeNull();
-    expect(citation?.textContent).toBe("Reference");
   });
 });

@@ -14,7 +14,7 @@ import {
 } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 import { truncationStyles } from "./truncation.stylex";
-import { setElementRef, useTruncation } from "./use-truncation";
+import { useTruncation } from "./use-truncation";
 
 export type TextType =
   | "body"
@@ -178,14 +178,13 @@ function textWrapStyle(textWrap: TextWrap | undefined) {
 export function Text(props: TextProps) {
   const type = () => props.type ?? "body";
   const color = () => props.color ?? (type() === "supporting" ? "secondary" : "primary");
-  const maxLines = () => props.maxLines ?? 0;
+  const truncation = useTruncation({
+    maxLines: () => props.maxLines,
+    wordBreak: () => props.wordBreak,
+    ref: props.ref,
+  });
+  const { maxLines, wordBreak } = truncation;
   const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
-  const wordBreak = () => props.wordBreak ?? (maxLines() === 1 ? "break-all" : "break-word");
-  const truncation = useTruncation(maxLines);
-  const ref = (element: HTMLElement) => {
-    truncation.ref(element);
-    setElementRef(props.ref, element);
-  };
 
   const rest = omit(
     props,
@@ -238,7 +237,7 @@ export function Text(props: TextProps) {
       {...rest}
       {...theme()}
       class={[theme().class, style().class, props.class]}
-      ref={ref}
+      ref={truncation.ref}
       title={title()}
       style={{
         ...style().style,

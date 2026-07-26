@@ -138,19 +138,15 @@ export function Icon(props: IconProps) {
   );
   const registeredElement = () => {
     const icon = registeredIcon();
-    return isIconComponent(icon) ? undefined : icon;
-  };
-  const component = () => {
-    const icon = registeredIcon();
-    return isRegistered() && isIconComponent(icon) ? icon : props.icon;
+    return isIconComponent(icon) ? <Dynamic component={icon} /> : icon;
   };
 
   return (
     <Show
-      when={isRegistered() && registeredElement() !== undefined}
+      when={isRegistered()}
       fallback={
         <Dynamic
-          component={component()}
+          component={props.icon}
           {...rest}
           {...theme()}
           aria-hidden={props["aria-hidden"] ?? "true"}

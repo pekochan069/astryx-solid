@@ -9,7 +9,7 @@ import { stylexProps } from "../../stylex";
 import { colorVars, typeScaleVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 import { truncationStyles } from "../text/truncation.stylex";
-import { setElementRef, useTruncation } from "../text/use-truncation";
+import { useTruncation } from "../text/use-truncation";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingType = "display-1" | "display-2" | "display-3";
@@ -114,14 +114,13 @@ function headingWrapStyle(textWrap: TextWrap | undefined) {
 
 export function Heading(props: HeadingProps) {
   const color = () => props.color ?? "primary";
-  const maxLines = () => props.maxLines ?? 0;
+  const truncation = useTruncation({
+    maxLines: () => props.maxLines,
+    wordBreak: () => props.wordBreak,
+    ref: props.ref,
+  });
+  const { maxLines, wordBreak } = truncation;
   const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
-  const wordBreak = () => props.wordBreak ?? (maxLines() === 1 ? "break-all" : "break-word");
-  const truncation = useTruncation(maxLines);
-  const ref = (element: HTMLHeadingElement) => {
-    truncation.ref(element);
-    setElementRef(props.ref, element);
-  };
   const rest = omit(
     props,
     "level",
@@ -168,7 +167,7 @@ export function Heading(props: HeadingProps) {
       {...theme()}
       aria-level={props.accessibilityLevel !== props.level ? props.accessibilityLevel : undefined}
       class={[theme().class, style().class, props.class]}
-      ref={ref}
+      ref={truncation.ref}
       title={title()}
       style={{
         ...style().style,

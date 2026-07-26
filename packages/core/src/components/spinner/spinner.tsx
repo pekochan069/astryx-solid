@@ -7,6 +7,7 @@ import type { BaseProps } from "../../base-props";
 
 import { stylexProps } from "../../stylex";
 import { colorVars, durationVars, spacingVars } from "../../theme/tokens.stylex";
+import { setElementRef } from "../../utils/set-element-ref";
 import { themeProps } from "../../utils/theme-props";
 
 const rotation = stylex.keyframes({
@@ -17,7 +18,7 @@ const sizes = { sm: 14, md: 20, lg: 24, xl: 36 };
 
 export type SpinnerSize = keyof typeof sizes;
 export type SpinnerShade = "default" | "onMedia" | "subtle" | "inherit";
-export interface SpinnerProps extends BaseProps<HTMLSpanElement> {
+export interface SpinnerProps extends BaseProps<HTMLSpanElement | HTMLDivElement> {
   size?: SpinnerSize;
   shade?: SpinnerShade;
   label?: JSX.Element;
@@ -58,7 +59,17 @@ export function Spinner(props: SpinnerProps) {
   const shade = () => props.shade ?? "default";
   const hasLabel = () => props.label != null;
 
-  const rest = omit(props, "size", "shade", "label", "xstyle", "class", "style", "aria-label");
+  const rest = omit(
+    props,
+    "size",
+    "shade",
+    "label",
+    "xstyle",
+    "class",
+    "style",
+    "aria-label",
+    "ref",
+  );
   const spinnerStyle = createMemo(() =>
     stylexProps(
       styles.spinner,
@@ -70,50 +81,40 @@ export function Spinner(props: SpinnerProps) {
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
   const wrapperStyle = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
   const frame = () => sizes[size()];
+  const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
+  const indicator = (isRoot: boolean) => (
+    <span
+      {...(isRoot ? rest : {})}
+      {...(isRoot ? theme() : {})}
+      ref={isRoot ? rootRef : undefined}
+      role="status"
+      aria-label={
+        props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
+      }
+      class={isRoot ? [theme().class, spinnerStyle().class, props.class] : spinnerStyle().class}
+      style={{
+        ...spinnerStyle().style,
+        width: `${frame()}px`,
+        height: `${frame()}px`,
+        "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
+        ...(isRoot ? props.style : {}),
+      }}
+      data-style-src={spinnerStyle()["data-style-src"]}
+    />
+  );
 
   return (
-    <Show
-      when={hasLabel()}
-      fallback={
-        <span
-          {...rest}
-          {...theme()}
-          class={[theme().class, spinnerStyle().class, props.class]}
-          style={{
-            ...spinnerStyle().style,
-            width: `${frame()}px`,
-            height: `${frame()}px`,
-            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-            ...props.style,
-          }}
-          role="status"
-          aria-label={props["aria-label"] ?? "Loading"}
-          data-style-src={spinnerStyle()["data-style-src"]}
-        />
-      }
-    >
-      <span
+    <Show when={hasLabel()} fallback={indicator(true)}>
+      <div
         {...rest}
         {...theme()}
+        ref={rootRef}
         class={[theme().class, wrapperStyle().class, props.class]}
         style={{ ...wrapperStyle().style, ...props.style }}
       >
-        <span
-          role="status"
-          aria-label={
-            props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
-          }
-          class={spinnerStyle().class}
-          style={{
-            ...spinnerStyle().style,
-            width: `${frame()}px`,
-            height: `${frame()}px`,
-            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-          }}
-          data-style-src={spinnerStyle()["data-style-src"]}
-        />
+        {indicator(false)}
         {props.label}
-      </span>
+      </div>
     </Show>
   );
 }

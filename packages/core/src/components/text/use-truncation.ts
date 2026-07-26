@@ -2,12 +2,7 @@ import type { JSX } from "@solidjs/web";
 
 import { createEffect, createSignal, onCleanup } from "solid-js";
 
-export function setElementRef<T extends HTMLElement>(ref: JSX.Ref<T> | undefined, element: T) {
-  if (typeof ref === "function") ref(element);
-  else if (Array.isArray(ref)) {
-    for (const nestedRef of ref) setElementRef(nestedRef, element);
-  }
-}
+import { setElementRef } from "../../utils/set-element-ref";
 
 function multiLineIsTruncated(element: HTMLElement) {
   try {
@@ -23,7 +18,15 @@ function isTruncated(element: HTMLElement, maxLines: number) {
   return maxLines === 1 ? element.scrollWidth > element.offsetWidth : multiLineIsTruncated(element);
 }
 
-export function useTruncation(maxLines: () => number) {
+interface TruncationOptions<T extends HTMLElement> {
+  maxLines: () => number | undefined;
+  wordBreak: () => "break-word" | "break-all" | undefined;
+  ref?: JSX.Ref<T>;
+}
+
+export function useTruncation<T extends HTMLElement>(options: TruncationOptions<T>) {
+  const maxLines = () => options.maxLines() ?? 0;
+  const wordBreak = () => options.wordBreak() ?? (maxLines() === 1 ? "break-all" : "break-word");
   const [truncated, setTruncated] = createSignal(false);
   let element: HTMLElement | undefined;
   let resizeObserver: ResizeObserver | undefined;
@@ -51,8 +54,9 @@ export function useTruncation(maxLines: () => number) {
       mutationObserver.observe(element, { childList: true, characterData: true, subtree: true });
     }
   };
-  const ref = (next: HTMLElement) => {
+  const ref = (next: T) => {
     element = next;
+    setElementRef(options.ref, next);
     observe(maxLines());
   };
 
@@ -62,5 +66,11 @@ export function useTruncation(maxLines: () => number) {
     mutationObserver?.disconnect();
   });
 
-  return { ref, isTruncated: truncated, fullText: () => element?.textContent ?? "" };
+  return {
+    ref,
+    maxLines,
+    wordBreak,
+    isTruncated: truncated,
+    fullText: () => element?.textContent ?? "",
+  };
 }

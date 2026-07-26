@@ -36,6 +36,11 @@
       "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "node": "./dist/server/card.js",
+      "default": "./dist/card.js"
+    },
     "./center": {
       "types": "./dist/center.d.ts",
       "node": "./dist/server/center.js",
@@ -70,6 +75,11 @@
       "types": "./dist/divider.d.ts",
       "node": "./dist/server/divider.js",
       "default": "./dist/divider.js"
+    },
+    "./empty-state": {
+      "types": "./dist/empty-state.d.ts",
+      "node": "./dist/server/empty-state.js",
+      "default": "./dist/empty-state.js"
     },
     "./form-layout": {
       "types": "./dist/form-layout.d.ts",
@@ -111,6 +121,16 @@
       "node": "./dist/server/section.js",
       "default": "./dist/section.js"
     },
+    "./progress-bar": {
+      "types": "./dist/progress-bar.d.ts",
+      "node": "./dist/server/progress-bar.js",
+      "default": "./dist/progress-bar.js"
+    },
+    "./resizable": {
+      "types": "./dist/resizable.d.ts",
+      "node": "./dist/server/resizable.js",
+      "default": "./dist/resizable.js"
+    },
     "./skeleton": {
       "types": "./dist/skeleton.d.ts",
       "node": "./dist/server/skeleton.js",
@@ -125,6 +145,21 @@
       "types": "./dist/stack.d.ts",
       "node": "./dist/server/stack.js",
       "default": "./dist/stack.js"
+    },
+    "./status-dot": {
+      "types": "./dist/status-dot.d.ts",
+      "node": "./dist/server/status-dot.js",
+      "default": "./dist/status-dot.js"
+    },
+    "./thumbnail": {
+      "types": "./dist/thumbnail.d.ts",
+      "node": "./dist/server/thumbnail.js",
+      "default": "./dist/thumbnail.js"
+    },
+    "./timestamp": {
+      "types": "./dist/timestamp.d.ts",
+      "node": "./dist/server/timestamp.js",
+      "default": "./dist/timestamp.js"
     },
     "./text": {
       "types": "./dist/text.d.ts",

@@ -8,6 +8,7 @@ export function toLightDark(value: LightDarkValue): string {
 function splitTopLevel(value: string): [string, string] | null {
   let depth = 0;
   let quote = "";
+
   for (let index = 0; index < value.length; index++) {
     const char = value[index];
     if (quote) {
@@ -18,13 +19,16 @@ function splitTopLevel(value: string): [string, string] | null {
     else if (char === "," && depth === 0)
       return [value.slice(0, index).trim(), value.slice(index + 1).trim()];
   }
+
   return null;
 }
 
 /** Resolve a CSS light-dark() expression or an already resolved value. */
 export function resolveLightDark(value: string | LightDarkValue, mode: "light" | "dark"): string {
   if (typeof value !== "string") return value[mode === "dark" ? 1 : 0];
+
   const match = value.trim().match(/^light-dark\((.*)\)$/);
   const sides = match && splitTopLevel(match[1]);
+
   return sides ? sides[mode === "dark" ? 1 : 0] : value;
 }

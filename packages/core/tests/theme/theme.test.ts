@@ -55,6 +55,7 @@ describe("theme substrate", () => {
 
   it("defines syntax themes with mode-aware values", () => {
     const theme = defineSyntaxTheme({ name: "test", tokens: syntaxTokens });
+
     expect(theme.tokens.keyword).toBe("light-dark(light, dark)");
     expect(resolveSyntaxTokenForMode(["day", "night"], "dark")).toBe("night");
     expect(resolveSyntaxTokenForMode("light-dark(rgb(1, 2, 3), blue)", "light")).toBe(
@@ -70,14 +71,17 @@ describe("theme substrate", () => {
     const Probe = () => {
       const current = useTheme();
       const node = document.createElement("span");
+
       createEffect(
         () => `${current.name}:${current.mode}:${current.token("--color-accent")}`,
         (text) => {
           node.textContent = text;
         },
       );
+
       return node;
     };
+
     const container = document.createElement("div");
     document.body.append(container);
     const dispose = render(
@@ -95,11 +99,15 @@ describe("theme substrate", () => {
         }),
       container,
     );
+
     expect(container.textContent).toBe("one:light:red");
+
     setMode("dark");
     setTheme(defineTheme({ name: "two", tokens: { "--color-accent": "blue" } }));
     await Promise.resolve();
+
     expect(container.textContent).toBe("two:dark:blue");
+
     dispose();
   });
 
@@ -110,10 +118,14 @@ describe("theme substrate", () => {
       () => createComponent(Theme, { theme: defineTheme({ name: "app" }), mode: "dark" }),
       container,
     );
+
     await Promise.resolve();
+
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(container.firstElementChild?.getAttribute("data-astryx-solid-theme")).toBe("app");
+
     dispose();
+
     expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
   });
 });

@@ -19,11 +19,13 @@ const sizes = { sm: 14, md: 20, lg: 24, xl: 36 };
 
 export type SpinnerSize = keyof typeof sizes;
 export type SpinnerShade = "default" | "onMedia" | "subtle" | "inherit";
+
 export interface SpinnerProps extends BaseProps<HTMLSpanElement | HTMLDivElement> {
   size?: SpinnerSize;
   shade?: SpinnerShade;
   label?: JSX.Element;
 }
+
 const styles = stylex.create({
   wrapper: {
     display: "inline-flex",
@@ -55,6 +57,7 @@ const styles = stylex.create({
     borderTopColor: "currentColor",
   },
 });
+
 export function Spinner(props: SpinnerProps) {
   const rest = omit(
     props,
@@ -81,6 +84,7 @@ export function Spinner(props: SpinnerProps) {
     ),
   );
   const frame = () => sizes[size()];
+
   const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
 
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));

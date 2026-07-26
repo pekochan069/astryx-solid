@@ -25,7 +25,9 @@ export interface SectionVariantMap {
   transparent: true;
   muted: true;
 }
+
 export type SectionVariant = keyof SectionVariantMap;
+
 export interface SectionProps extends BaseProps<HTMLDivElement> {
   variant?: SectionVariant;
   width?: SizeValue;

@@ -22,5 +22,6 @@ export function useSize(
   defaultSize: ElementSize = "md",
 ): Accessor<ElementSize> {
   const context = useContext(SizeContext);
+
   return createMemo(() => sizeProp?.() ?? context.size ?? defaultSize);
 }

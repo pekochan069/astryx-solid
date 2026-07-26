@@ -76,10 +76,13 @@ function mergeComponents(
   override?: ComponentStyleMap,
 ): ComponentStyleMap | undefined {
   if (!base && !override) return undefined;
+
   const result: ComponentStyleMap = {};
+
   for (const [component, rules] of Object.entries(base ?? {})) {
     result[component] = { ...rules };
   }
+
   for (const [component, rules] of Object.entries(override ?? {})) {
     result[component] ??= {};
     for (const [selector, styles] of Object.entries(rules)) {
@@ -89,20 +92,25 @@ function mergeComponents(
       };
     }
   }
+
   return result;
 }
 
 function fontFamily(role?: { family?: string; fallbacks?: string }): string | undefined {
   if (!role?.family) return undefined;
+
   const family = role.family.includes(" ") ? `"${role.family}"` : role.family;
+
   return role.fallbacks ? `${family}, ${role.fallbacks}` : family;
 }
 
 function typographyTokens(config?: TypographyConfig): Record<string, string> {
   if (!config) return {};
+
   const body = fontFamily(config.body);
   const heading = fontFamily(config.heading) ?? body;
   const code = fontFamily(config.code);
+
   return {
     ...(body ? { "--font-family-body": body } : {}),
     ...(heading ? { "--font-family-heading": heading } : {}),
@@ -115,10 +123,13 @@ export function defineTheme(input: DefineThemeInput): DefinedTheme {
   if (!/^[A-Za-z0-9_-]+$/.test(input.name)) {
     throw new Error(`Invalid theme name: ${input.name}`);
   }
+
   const tokens = { ...input.extends?.tokens, ...typographyTokens(input.typography) };
+
   for (const [name, value] of Object.entries(input.tokens ?? {})) {
     if (value !== undefined) tokens[name] = resolveToken(value);
   }
+
   return {
     name: input.name,
     tokens,
@@ -137,11 +148,14 @@ function cssValue(value: string | Record<string, string>): string {
 
 function selectorForRule(component: string, rule: string): string {
   const root = `.astryx-solid-${component}`;
+
   if (rule === "base") return root;
+
   const attrs = rule.split("+").map((part) => {
     const [name, value] = part.split(":");
     return `[data-${cssName(name)}="${value.replaceAll('"', '\\"')}"]`;
   });
+
   return `${root}${attrs.join("")}`;
 }
 
@@ -150,6 +164,7 @@ function ruleText(selector: string, styles: StyleOverrides): string {
     .filter(([, value]) => typeof value === "string")
     .map(([name, value]) => `  ${cssName(name)}: ${cssValue(value)};`)
     .join("\n");
+
   return declarations ? `${selector} {\n${declarations}\n}` : "";
 }
 
@@ -172,6 +187,7 @@ export function generateThemeCSS(theme: DefinedTheme): string {
       return [base, ...pseudoRules].filter(Boolean);
     }),
   );
+
   return [`[data-astryx-solid-theme="${theme.name}"] {\n${tokenRules}\n}`, ...componentRules]
     .filter(Boolean)
     .join("\n");

@@ -22,6 +22,7 @@ import { themeProps } from "../../utils/theme-props";
 
 export type LayoutHeight = "fill" | "auto";
 export type LayoutArea = "header" | "footer" | "content" | "start" | "end" | null;
+
 export interface LayoutSlots {
   readonly hasHeader: boolean;
   readonly hasFooter: boolean;
@@ -31,6 +32,7 @@ export interface LayoutSlots {
 export interface LayoutDividerContextValue {
   readonly defaultHasDividers: boolean;
 }
+
 export const LayoutAreaContext = createContext<LayoutArea>(null);
 export const LayoutSlotsContext = createContext<LayoutSlots>({
   hasHeader: false,
@@ -187,11 +189,13 @@ export interface LayoutContentProps extends BaseProps<HTMLDivElement> {
 export interface LayoutPanelResizable {
   readonly _size?: SizeValue;
 }
+
 export interface LayoutPanelProps extends LayoutContentProps {
   width?: SizeValue;
   hasDivider?: boolean;
   resizable?: LayoutPanelResizable;
 }
+
 export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
   hasDivider?: boolean;
   height?: SizeValue;
@@ -199,6 +203,7 @@ export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
   label?: string;
   children?: JSX.Element;
 }
+
 export type LayoutHeaderProps = LayoutBarProps;
 export type LayoutFooterProps = LayoutBarProps;
 
@@ -290,6 +295,7 @@ export function LayoutContent(props: LayoutContentProps) {
     />
   );
 }
+
 /** Sidebar region; divider side follows its Layout slot. */
 export function LayoutPanel(props: LayoutPanelProps) {
   const rest = omit(props, "resizable", "width");
@@ -311,10 +317,12 @@ export function LayoutPanel(props: LayoutPanelProps) {
     />
   );
 }
+
 /** Header region with optional bottom divider. */
 export function LayoutHeader(props: LayoutHeaderProps) {
   return <LayoutBar component="layout-header" divider={areaStyles.headerDivider} {...props} />;
 }
+
 /** Footer region with optional top divider. */
 export function LayoutFooter(props: LayoutFooterProps) {
   return <LayoutBar component="layout-footer" divider={areaStyles.footerDivider} {...props} />;

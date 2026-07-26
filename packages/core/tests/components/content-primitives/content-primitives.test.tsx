@@ -103,11 +103,15 @@ describe("content reactivity and refs", () => {
     ));
 
     expect(container.firstElementChild?.tagName).toBe("SPAN");
+
     setUrl("https://example.com");
     await Promise.resolve();
+
     expect(container.firstElementChild?.tagName).toBe("A");
+
     setUrl(undefined);
     await Promise.resolve();
+
     expect(container.firstElementChild?.tagName).toBe("SPAN");
   });
 
@@ -149,7 +153,9 @@ describe("content feedback and icons", () => {
     expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe(
       "Loading records",
     );
+
     const spinnerLabel = container.querySelector('[role="status"]')?.nextElementSibling;
+
     expect(spinnerLabel?.className.includes("astryx-solid-text")).toBe(true);
     expect(spinnerLabel?.getAttribute("data-type")).toBe("body");
     expect(container.querySelector("a")?.getAttribute("href")).toBe("https://example.com");
@@ -188,6 +194,7 @@ describe("content feedback and icons", () => {
     const container = mount(() => (
       <Icon icon="close" aria-label="Close" viewBox="0 0 24 24" data-testid="icon-root" />
     ));
+
     const wrapper = container.querySelector('[data-testid="icon-root"]');
 
     expect(wrapper?.tagName).toBe("SPAN");

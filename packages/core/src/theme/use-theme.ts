@@ -26,17 +26,21 @@ function systemMode(): "light" | "dark" {
   ) {
     return "dark";
   }
+
   return "light";
 }
 
 /** Resolve the current theme for non-CSS consumers. */
 export function useTheme(): UseThemeReturn {
   const context = useContext(ThemeContext);
+
   const mode = createMemo(() => {
     const requested = context?.mode ?? "system";
     return requested === "system" ? systemMode() : requested;
   });
+
   const tokens = createMemo(() => resolveThemeTokens(context?.theme, { mode: mode() }));
+
   return {
     get name() {
       return context?.theme.name ?? "default";

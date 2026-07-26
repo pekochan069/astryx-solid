@@ -1,0 +1,151 @@
+import * as stylex from "@stylexjs/stylex";
+import { createMemo, createUniqueId, merge, omit, Show } from "solid-js";
+
+import type { BaseProps } from "../../base-props";
+
+import { stylexProps } from "../../stylex";
+import {
+  colorVars,
+  durationVars,
+  easeVars,
+  radiusVars,
+  spacingVars,
+} from "../../theme/tokens.stylex";
+import { themeProps } from "../../utils/theme-props";
+
+export type ProgressBarVariant = "accent" | "success" | "warning" | "neutral" | "error";
+
+export interface ProgressBarProps extends BaseProps<HTMLDivElement> {
+  value?: number;
+  max?: number;
+  label: string;
+  isLabelHidden?: boolean;
+  hasValueLabel?: boolean;
+  formatValueLabel?: (value: number, max: number) => string;
+  variant?: ProgressBarVariant;
+  isIndeterminate?: boolean;
+  isDisabled?: boolean;
+}
+
+const slide = stylex.keyframes({
+  "0%": { transform: "translateX(-100%)" },
+  "100%": { transform: "translateX(250%)" },
+});
+
+const styles = stylex.create({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacingVars["--spacing-1"],
+    width: "100%",
+  },
+  header: { display: "flex", justifyContent: "space-between" },
+  hidden: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    overflow: "hidden",
+    clip: "rect(0, 0, 0, 0)",
+  },
+  track: {
+    height: 8,
+    backgroundColor: colorVars["--color-background-muted"],
+    borderRadius: radiusVars["--radius-full"],
+    overflow: "hidden",
+  },
+  fill: {
+    height: "100%",
+    borderRadius: radiusVars["--radius-full"],
+    transitionProperty: "width",
+    transitionDuration: durationVars["--duration-medium"],
+    transitionTimingFunction: easeVars["--ease-standard"],
+  },
+  indeterminate: {
+    width: "40%",
+    animationName: slide,
+    animationDuration: { default: "1.5s", "@media (prefers-reduced-motion: reduce)": "3s" },
+    animationIterationCount: "infinite",
+  },
+  accent: { backgroundColor: colorVars["--color-accent"] },
+  success: { backgroundColor: colorVars["--color-success"] },
+  warning: { backgroundColor: colorVars["--color-warning"] },
+  error: { backgroundColor: colorVars["--color-error"] },
+  neutral: { backgroundColor: colorVars["--color-text-disabled"] },
+});
+
+export function ProgressBar(props: ProgressBarProps) {
+  const merged = merge(props);
+  const rest = omit(
+    merged,
+    "value",
+    "max",
+    "label",
+    "isLabelHidden",
+    "hasValueLabel",
+    "formatValueLabel",
+    "variant",
+    "isIndeterminate",
+    "isDisabled",
+    "xstyle",
+    "class",
+    "style",
+  );
+
+  const max = createMemo(() =>
+    merged.max == null ? 100 : Number.isFinite(merged.max) && merged.max > 0 ? merged.max : 0,
+  );
+  const value = createMemo(() =>
+    Math.min(Math.max(0, Number.isFinite(merged.value) ? (merged.value ?? 0) : 0), max()),
+  );
+  const variant = () => (merged.isDisabled ? "neutral" : (merged.variant ?? "accent"));
+  const text = () =>
+    merged.formatValueLabel?.(value(), max()) ??
+    `${max() > 0 ? Math.round((value() / max()) * 100) : 0}%`;
+  const labelId = createUniqueId();
+
+  const theme = createMemo(() => themeProps("progressbar", { variant: variant() }));
+  const root = createMemo(() => stylexProps(styles.root, props.xstyle));
+
+  return (
+    <div
+      {...rest}
+      {...theme()}
+      class={[theme().class, root().class, props.class]}
+      style={{ ...root().style, ...props.style }}
+      data-style-src={root()["data-style-src"]}
+    >
+      <div {...stylexProps(styles.header)}>
+        <span
+          id={labelId}
+          class={props.isLabelHidden ? stylexProps(styles.hidden).class : undefined}
+          textContent={props.label}
+        />
+        <Show when={props.hasValueLabel && !props.isIndeterminate}>
+          <span textContent={text()} />
+        </Show>
+      </div>
+      <div
+        role="progressbar"
+        aria-labelledby={labelId}
+        aria-valuenow={props.isIndeterminate ? undefined : value()}
+        aria-valuemin={props.isIndeterminate ? undefined : 0}
+        aria-valuemax={props.isIndeterminate ? undefined : max()}
+        aria-valuetext={props.isIndeterminate ? undefined : text()}
+        {...stylexProps(styles.track)}
+      >
+        <div
+          {...stylexProps(
+            styles.fill,
+            props.isIndeterminate && styles.indeterminate,
+            styles[variant()],
+          )}
+          style={
+            props.isIndeterminate
+              ? undefined
+              : { width: `${max() > 0 ? (value() / max()) * 100 : 0}%` }
+          }
+        />
+      </div>
+    </div>
+  );
+}

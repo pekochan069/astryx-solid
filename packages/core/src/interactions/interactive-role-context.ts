@@ -17,5 +17,6 @@ export const InteractiveRoleContext = createContext<InteractiveRoleContextValue 
 /** Return an accessor for nearest interaction-role override, if one exists. */
 export function useInteractiveRoleContext(): Accessor<InteractiveRole | undefined> {
   const context = useContext(InteractiveRoleContext);
+
   return () => context?.role;
 }

@@ -76,6 +76,7 @@ describe("Button", () => {
     );
     const button = buttonIn(container);
     const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+
     button.dispatchEvent(event);
 
     expect(button.disabled).toBe(false);
@@ -102,8 +103,10 @@ describe("Button", () => {
     const button = container.querySelector("button");
 
     expect(button?.getAttribute("data-size")).toBe("sm");
+
     setSize("lg");
     await Promise.resolve();
+
     expect(button?.getAttribute("data-size")).toBe("lg");
   });
 

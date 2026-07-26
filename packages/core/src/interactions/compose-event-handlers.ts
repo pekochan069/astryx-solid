@@ -5,6 +5,7 @@ export function composeEventHandlers<EventType extends Event>(
   return (event) => {
     for (const handler of handlers) {
       handler?.(event);
+
       if (event.defaultPrevented) return;
     }
   };

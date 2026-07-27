@@ -141,6 +141,20 @@ describe("container and status primitives", () => {
     expect(window.localStorage.getItem("astryx-resizable:workspace:inspector")).toBe("0");
   });
 
+  it("uses multi-region direction for resize handles", () => {
+    const container = mount(() => {
+      const regions = useResizable({
+        direction: "vertical",
+        regions: { panel: { defaultSize: 200 } },
+      });
+      return <ResizeHandle label="Resize panel" resizable={regions.panel.props} />;
+    });
+
+    expect(container.querySelector('[role="separator"]')?.getAttribute("aria-orientation")).toBe(
+      "horizontal",
+    );
+  });
+
   it("restores persisted collapsed regions after mount", async () => {
     window.localStorage.setItem("astryx-resizable:sidebar", "0");
     let region: ResizableRegion | undefined;

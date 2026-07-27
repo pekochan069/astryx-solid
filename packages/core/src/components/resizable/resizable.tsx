@@ -202,6 +202,10 @@ function createResizableRegion(
 
   const expand = () => commit(previousSize || initial);
   const resize = (next: number) => commit(next);
+  const isCollapsed = () => {
+    collapsed();
+    return collapsedState;
+  };
 
   createEffect(
     () => config.autoSaveId,
@@ -223,10 +227,10 @@ function createResizableRegion(
 
   return {
     get size() {
-      return collapsed() ? 0 : size();
+      return isCollapsed() ? 0 : size();
     },
     get isCollapsed() {
-      return collapsed();
+      return isCollapsed();
     },
     collapse,
     expand,
@@ -239,7 +243,7 @@ function createResizableRegion(
         max,
         snaps,
         size,
-        collapsed,
+        isCollapsed,
         collapse,
         commit,
       );
@@ -389,11 +393,6 @@ function resizeFromKey(
   }
 }
 
-function setResizeHandleElement(ref: JSX.Ref<HTMLDivElement> | undefined, element: HTMLDivElement) {
-  setElementRef(ref, element);
-  return element;
-}
-
 function resizeHandleRest(props: ResizeHandleProps) {
   return omit(
     props,
@@ -421,7 +420,10 @@ export function ResizeHandle(props: ResizeHandleProps) {
   const [interacting, setInteracting] = createSignal(false);
 
   let element: HTMLDivElement | undefined;
-  const setElement = (next: HTMLDivElement) => (element = setResizeHandleElement(props.ref, next));
+  const setElement = (next: HTMLDivElement) => {
+    element = next;
+    setElementRef(props.ref, next);
+  };
 
   const horizontal = () =>
     (props.direction ?? props.resizable?._direction ?? "horizontal") === "horizontal";

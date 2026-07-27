@@ -8,10 +8,13 @@ import {
   colorVars,
   durationVars,
   easeVars,
+  fontWeightVars,
   radiusVars,
   spacingVars,
+  typeScaleVars,
 } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
+import { VisuallyHidden } from "../visually-hidden/visually-hidden";
 
 export interface ProgressBarVariantMap {
   accent: true;
@@ -47,14 +50,20 @@ const styles = stylex.create({
     gap: spacingVars["--spacing-1"],
     width: "100%",
   },
-  header: { display: "flex", justifyContent: "space-between" },
-  hidden: {
-    position: "absolute",
-    width: 1,
-    height: 1,
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
+  header: { display: "flex", justifyContent: "space-between", alignItems: "baseline" },
+  label: {
+    fontSize: typeScaleVars["--text-body-size"],
+    lineHeight: typeScaleVars["--text-body-leading"],
+    fontWeight: fontWeightVars["--font-weight-medium"],
+    color: colorVars["--color-text-primary"],
   },
+  valueLabel: {
+    fontSize: typeScaleVars["--text-body-size"],
+    lineHeight: typeScaleVars["--text-body-leading"],
+    fontWeight: fontWeightVars["--font-weight-normal"],
+    color: colorVars["--color-text-secondary"],
+  },
+  disabledText: { color: colorVars["--color-text-disabled"] },
   track: {
     height: 8,
     backgroundColor: colorVars["--color-background-muted"],
@@ -122,16 +131,29 @@ export function ProgressBar(props: ProgressBarProps) {
       style={{ ...root().style, ...props.style }}
       data-style-src={root()["data-style-src"]}
     >
-      <div {...stylexProps(styles.header)}>
-        <span
-          id={labelId}
-          class={props.isLabelHidden ? stylexProps(styles.hidden).class : undefined}
-          textContent={props.label}
-        />
-        <Show when={props.hasValueLabel && !props.isIndeterminate}>
-          <span textContent={text()} />
-        </Show>
-      </div>
+      <Show
+        when={!props.isLabelHidden || (props.hasValueLabel && !props.isIndeterminate)}
+        fallback={<VisuallyHidden id={labelId} textContent={props.label} />}
+      >
+        <div {...stylexProps(styles.header)}>
+          <Show
+            when={!props.isLabelHidden}
+            fallback={<VisuallyHidden id={labelId} textContent={props.label} />}
+          >
+            <span
+              id={labelId}
+              {...stylexProps(styles.label, props.isDisabled && styles.disabledText)}
+              textContent={props.label}
+            />
+          </Show>
+          <Show when={props.hasValueLabel && !props.isIndeterminate}>
+            <span
+              {...stylexProps(styles.valueLabel, props.isDisabled && styles.disabledText)}
+              textContent={text()}
+            />
+          </Show>
+        </div>
+      </Show>
       <div
         role="progressbar"
         aria-labelledby={labelId}
@@ -139,6 +161,7 @@ export function ProgressBar(props: ProgressBarProps) {
         aria-valuemin={props.isIndeterminate ? undefined : 0}
         aria-valuemax={props.isIndeterminate ? undefined : max()}
         aria-valuetext={props.isIndeterminate ? undefined : text()}
+        aria-disabled={props.isDisabled ? "true" : undefined}
         {...stylexProps(styles.track)}
       >
         <div

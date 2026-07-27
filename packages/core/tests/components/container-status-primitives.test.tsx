@@ -80,7 +80,9 @@ describe("container and status primitives", () => {
     await Promise.resolve();
     expect(container.querySelector('[role="tooltip"]')).toBeNull();
   });
+});
 
+describe("progress bar", () => {
   it("clamps progress and exposes indeterminate progress without values", () => {
     const container = mount(() => (
       <>
@@ -100,6 +102,29 @@ describe("container and status primitives", () => {
     expect(indeterminate?.hasAttribute("aria-valuenow")).toBe(false);
   });
 
+  it("styles disabled progress labels and values", () => {
+    const container = mount(() => (
+      <>
+        <ProgressBar value={32} label="Active" hasValueLabel />
+        <ProgressBar value={32} label="Disabled" hasValueLabel isDisabled />
+      </>
+    ));
+    const activeLabel = Array.from(container.querySelectorAll("span")).find(
+      (element) => element.textContent === "Active",
+    );
+    const disabledLabel = Array.from(container.querySelectorAll("span")).find(
+      (element) => element.textContent === "Disabled",
+    );
+    const [activeValue, disabledValue] = Array.from(container.querySelectorAll("span")).filter(
+      (element) => element.textContent === "32%",
+    );
+    const [, disabledProgress] = container.querySelectorAll('[role="progressbar"]');
+
+    expect(disabledProgress?.getAttribute("aria-disabled")).toBe("true");
+    expect(disabledLabel?.className).not.toBe(activeLabel?.className);
+    expect(disabledValue?.className).not.toBe(activeValue?.className);
+  });
+
   it("updates progress from reactive props", async () => {
     const [value, setValue] = createSignal(25);
     const container = mount(() => <ProgressBar value={value()} max={100} label="Upload" />);
@@ -109,6 +134,111 @@ describe("container and status primitives", () => {
     setValue(75);
     await Promise.resolve();
     expect(progress?.getAttribute("aria-valuenow")).toBe("75");
+  });
+});
+
+describe("empty state", () => {
+  it("applies compact title, description, and action layout", () => {
+    const container = mount(() => (
+      <>
+        <EmptyState
+          title="Regular"
+          description="Regular description"
+          actions={<button>Go</button>}
+        />
+        <EmptyState
+          title="Compact"
+          description="Compact description"
+          actions={<button>Go compact</button>}
+          isCompact
+        />
+      </>
+    ));
+    const [regularTitle, compactTitle] = Array.from(container.querySelectorAll("h3"));
+    const regularDescription = Array.from(container.querySelectorAll("div")).find(
+      (element) => element.textContent === "Regular description",
+    );
+    const compactDescription = Array.from(container.querySelectorAll("div")).find(
+      (element) => element.textContent === "Compact description",
+    );
+
+    expect(compactTitle?.className).not.toBe(regularTitle?.className);
+    expect(compactDescription?.className).not.toBe(regularDescription?.className);
+    expect(container.getElementsByTagName("button")[1]?.parentElement?.className).not.toBe(
+      container.getElementsByTagName("button")[0]?.parentElement?.className,
+    );
+  });
+});
+
+describe("timestamp", () => {
+  it("renders documented wording, formats, and text styles", () => {
+    const container = mount(() => (
+      <>
+        <Timestamp
+          data-testid="default-timestamp"
+          value={Date.now() / 1000 - 100_000}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
+          data-testid="past-timestamp"
+          value={Date.now() / 1000 - 10}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
+          data-testid="future-timestamp"
+          value={Date.now() / 1000 + 20}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
+          data-testid="styled-timestamp"
+          value="2026-02-19T17:00:00Z"
+          format="date_long"
+          type="label"
+          size="lg"
+          color="accent"
+          weight="bold"
+        />
+        <Timestamp value="2026-02-19T17:00:00Z" format="date_weekday" />
+        <Timestamp
+          data-testid="date-timezone"
+          value="2026-02-19T17:00:00Z"
+          format="date"
+          isTimezoneShown
+        />
+        <Timestamp data-testid="system-time" value="2026-02-19T17:00:00Z" format="system_time" />
+        <Timestamp
+          data-testid="system-time-timezone"
+          value="2026-02-19T17:00:00Z"
+          format="system_time"
+          isTimezoneShown
+        />
+      </>
+    ));
+    const defaultTimestamp = container.querySelector<HTMLElement>(
+      '[data-testid="default-timestamp"]',
+    );
+    const styledTimestamp = container.querySelector<HTMLElement>(
+      '[data-testid="styled-timestamp"]',
+    );
+
+    expect(defaultTimestamp?.textContent).toBe("yesterday");
+    expect(container.querySelector('[data-testid="past-timestamp"]')?.textContent).toBe(
+      "10 seconds ago",
+    );
+    expect(container.querySelector('[data-testid="future-timestamp"]')?.textContent).toBe("now");
+    expect(styledTimestamp?.textContent).toContain("February");
+    expect(styledTimestamp?.className).not.toBe(defaultTimestamp?.className);
+    expect(container.textContent).toMatch(/Mon|Tue|Wed|Thu|Fri|Sat|Sun/);
+    expect(container.querySelector('[data-testid="date-timezone"]')?.textContent).not.toMatch(
+      /\b(?:GMT|UTC)[+-]?\d*\b/,
+    );
+    const systemTime = container.querySelector('[data-testid="system-time"]')?.textContent;
+    expect(container.querySelector('[data-testid="system-time-timezone"]')?.textContent).toMatch(
+      new RegExp(`^${systemTime}\\s\\S+`),
+    );
   });
 });
 
@@ -144,7 +274,7 @@ describe("resizable regions", () => {
 });
 
 describe("resizable state restoration", () => {
-  it("persists named regions independently", async () => {
+  it("returns named regions directly and persists them independently", () => {
     let regions: Record<string, ResizableRegion> | undefined;
     mount(() => {
       regions = useResizable({

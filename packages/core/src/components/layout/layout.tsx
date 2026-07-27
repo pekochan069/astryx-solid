@@ -135,32 +135,33 @@ export function Layout(props: LayoutProps) {
     },
   };
 
-  const Tree = () => (
-    <LayoutSlotsContext value={slots}>
-      <div
-        {...rest}
-        {...themeProps("layout", { height: height() })}
-        class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
-        style={{ ...root().style, ...props.style }}
-        data-style-src={root()["data-style-src"]}
-      >
-        <div {...inner()}>
-          <Area area="header">{props.header}</Area>
-          <div {...middle()}>
-            <Area area="start">{props.start}</Area>
-            <div {...stylexProps(styles.content)}>
-              <Area area="content">{content()}</Area>
-            </div>
-            <Area area="end">{props.end}</Area>
-          </div>
-          <Area area="footer">{props.footer}</Area>
-        </div>
-      </div>
-    </LayoutSlotsContext>
-  );
-
   return (
-    <Show when={props.defaultHasDividers != null} fallback={<Tree />}>
+    <Show
+      when={props.defaultHasDividers != null}
+      fallback={
+        <LayoutSlotsContext value={slots}>
+          <div
+            {...rest}
+            {...themeProps("layout", { height: height() })}
+            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
+            style={{ ...root().style, ...props.style }}
+            data-style-src={root()["data-style-src"]}
+          >
+            <div {...inner()}>
+              <Area area="header">{props.header}</Area>
+              <div {...middle()}>
+                <Area area="start">{props.start}</Area>
+                <div {...stylexProps(styles.content)}>
+                  <Area area="content">{content()}</Area>
+                </div>
+                <Area area="end">{props.end}</Area>
+              </div>
+              <Area area="footer">{props.footer}</Area>
+            </div>
+          </div>
+        </LayoutSlotsContext>
+      }
+    >
       <LayoutDividerContext
         value={{
           get defaultHasDividers() {
@@ -168,7 +169,27 @@ export function Layout(props: LayoutProps) {
           },
         }}
       >
-        <Tree />
+        <LayoutSlotsContext value={slots}>
+          <div
+            {...rest}
+            {...themeProps("layout", { height: height() })}
+            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
+            style={{ ...root().style, ...props.style }}
+            data-style-src={root()["data-style-src"]}
+          >
+            <div {...inner()}>
+              <Area area="header">{props.header}</Area>
+              <div {...middle()}>
+                <Area area="start">{props.start}</Area>
+                <div {...stylexProps(styles.content)}>
+                  <Area area="content">{content()}</Area>
+                </div>
+                <Area area="end">{props.end}</Area>
+              </div>
+              <Area area="footer">{props.footer}</Area>
+            </div>
+          </div>
+        </LayoutSlotsContext>
       </LayoutDividerContext>
     </Show>
   );

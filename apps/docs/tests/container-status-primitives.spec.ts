@@ -2,7 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("container and status primitives render accessible states", async ({ page }) => {
-  await page.goto("/components/container-status-primitives/", { waitUntil: "domcontentloaded" });
+  await page.goto("/components/container-status-primitives");
 
   const resizeHandle = page.getByRole("separator", { name: "Resize panel", exact: true });
   const disabledHandle = page.getByRole("separator", { name: "Disabled resize panel" });

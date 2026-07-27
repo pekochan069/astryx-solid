@@ -38,18 +38,34 @@ const styles = stylex.create({
   title: {
     margin: 0,
     fontSize: typeScaleVars["--text-large-size"],
+    lineHeight: typeScaleVars["--text-large-leading"],
     fontWeight: fontWeightVars["--font-weight-semibold"],
     color: colorVars["--color-text-primary"],
   },
-  description: { margin: 0, color: colorVars["--color-text-secondary"] },
-  actions: { display: "flex", alignItems: "center", gap: spacingVars["--spacing-2"] },
+  titleCompact: { fontSize: typeScaleVars["--text-label-size"] },
+  description: {
+    margin: 0,
+    fontSize: typeScaleVars["--text-body-size"],
+    lineHeight: typeScaleVars["--text-body-leading"],
+    fontWeight: fontWeightVars["--font-weight-normal"],
+    color: colorVars["--color-text-secondary"],
+  },
+  descriptionCompact: { fontSize: typeScaleVars["--text-supporting-size"] },
+  actions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacingVars["--spacing-2"],
+    marginTop: spacingVars["--spacing-1"],
+  },
+  actionsCompact: { flexDirection: "column" },
 });
 
 function EmptyStateHeading(props: {
   level: NonNullable<EmptyStateProps["headingLevel"]>;
   title: string;
+  isCompact: boolean;
 }) {
-  const style = stylexProps(styles.title);
+  const style = stylexProps(styles.title, props.isCompact && styles.titleCompact);
   if (props.level === 1) return <h1 {...style} textContent={props.title} />;
   if (props.level === 2) return <h2 {...style} textContent={props.title} />;
   if (props.level === 4) return <h4 {...style} textContent={props.title} />;
@@ -92,13 +108,22 @@ export function EmptyState(props: EmptyStateProps) {
         <div aria-hidden="true">{props.icon}</div>
       </Show>
       <div {...stylexProps(styles.text)}>
-        <EmptyStateHeading level={props.headingLevel ?? 3} title={props.title} />
+        <EmptyStateHeading
+          level={props.headingLevel ?? 3}
+          title={props.title}
+          isCompact={props.isCompact ?? false}
+        />
         <Show when={props.description != null}>
-          <div {...stylexProps(styles.description)} textContent={props.description} />
+          <div
+            {...stylexProps(styles.description, props.isCompact && styles.descriptionCompact)}
+            textContent={props.description}
+          />
         </Show>
       </div>
       <Show when={props.actions != null}>
-        <div {...stylexProps(styles.actions)}>{props.actions}</div>
+        <div {...stylexProps(styles.actions, props.isCompact && styles.actionsCompact)}>
+          {props.actions}
+        </div>
       </Show>
     </div>
   );

@@ -69,7 +69,7 @@ export function ContainerStatusPrimitivesDocs() {
 
       <div>
         <Thumbnail
-          src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=128"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
           alt="Landscape"
           label="Cover image"
           onClick={() => {}}

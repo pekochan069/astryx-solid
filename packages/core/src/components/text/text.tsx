@@ -45,6 +45,7 @@ export type TextDisplay = "inline" | "block";
 export type TextJustify = "start" | "center" | "end";
 export type WordBreak = "break-word" | "break-all";
 export type TextWrap = "wrap" | "nowrap" | "balance" | "pretty";
+
 export interface TextProps extends BaseProps {
   children?: JSX.Element;
   type?: TextType;
@@ -62,6 +63,7 @@ export interface TextProps extends BaseProps {
   hasTabularNumbers?: boolean;
   as?: ValidComponent;
 }
+
 const styles = stylex.create({
   primary: { color: colorVars["--color-text-primary"] },
   secondary: { color: colorVars["--color-text-secondary"] },
@@ -126,6 +128,7 @@ const styles = stylex.create({
   balance: { textWrap: "balance" },
   pretty: { textWrap: "pretty" },
 });
+
 const sizeStyles = stylex.create({
   "4xs": { fontSize: textSizeVars["--font-size-4xs"] },
   "3xs": { fontSize: textSizeVars["--font-size-3xs"] },
@@ -139,6 +142,7 @@ const sizeStyles = stylex.create({
   "3xl": { fontSize: textSizeVars["--font-size-3xl"] },
   "4xl": { fontSize: textSizeVars["--font-size-4xl"] },
 });
+
 function typeStyle(type: TextType) {
   switch (type) {
     case "large":
@@ -184,6 +188,7 @@ export function Text(props: TextProps) {
     ref: props.ref,
   });
   const { maxLines, wordBreak } = truncation;
+
   const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
 
   const rest = omit(

@@ -13,6 +13,7 @@ import { useTruncation } from "../text/use-truncation";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingType = "display-1" | "display-2" | "display-3";
+
 export interface HeadingProps extends BaseProps<HTMLHeadingElement> {
   children?: JSX.Element;
   level: HeadingLevel;
@@ -28,6 +29,7 @@ export interface HeadingProps extends BaseProps<HTMLHeadingElement> {
   hasCapsize?: boolean;
   hasStrikethrough?: boolean;
 }
+
 const tags: Record<HeadingLevel, ValidComponent> = {
   1: "h1",
   2: "h2",
@@ -36,6 +38,7 @@ const tags: Record<HeadingLevel, ValidComponent> = {
   5: "h5",
   6: "h6",
 };
+
 const styles = stylex.create({
   primary: { color: colorVars["--color-text-primary"] },
   secondary: { color: colorVars["--color-text-secondary"] },
@@ -99,6 +102,7 @@ const styles = stylex.create({
   balance: { textWrap: "balance" },
   pretty: { textWrap: "pretty" },
 });
+
 function headingWrapStyle(textWrap: TextWrap | undefined) {
   switch (textWrap) {
     case "nowrap":

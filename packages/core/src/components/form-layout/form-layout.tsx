@@ -10,9 +10,11 @@ import { spacingVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 
 export type FormLayoutDirection = "vertical" | "horizontal" | "horizontal-labels";
+
 export interface FormLayoutContextValue {
   readonly direction: FormLayoutDirection;
 }
+
 export const FormLayoutContext = createContext<FormLayoutContextValue>({ direction: "vertical" });
 
 export interface FormLayoutProps extends BaseProps<HTMLDivElement> {

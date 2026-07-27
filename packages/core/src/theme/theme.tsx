@@ -17,10 +17,14 @@ export interface ThemeProps {
 
 function applyRootAttributes(mode: ThemeMode, name: string): VoidFunction | undefined {
   if (typeof document === "undefined") return undefined;
+
   const root = document.documentElement;
+
   if (mode === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", mode);
+
   root.setAttribute("data-astryx-solid-theme", name);
+
   return () => {
     root.removeAttribute("data-theme");
     root.removeAttribute("data-astryx-solid-theme");
@@ -29,16 +33,19 @@ function applyRootAttributes(mode: ThemeMode, name: string): VoidFunction | unde
 
 function injectThemeCSS(theme: DefinedTheme): VoidFunction | undefined {
   if (theme.__built || typeof document === "undefined") return undefined;
+
   const style = document.createElement("style");
   style.setAttribute("data-astryx-solid-theme", theme.name);
   style.textContent = `@layer astryx-theme {\n${generateThemeCSS(theme)}\n}`;
   document.head.append(style);
+
   return () => style.remove();
 }
 
 /** Apply a Solid theme with deterministic SSR markup and browser cleanup. */
 export function Theme(props: ThemeProps) {
   const mode = createMemo(() => props.mode ?? "system");
+
   const context: ThemeContextValue = {
     get theme() {
       return props.theme;
@@ -47,7 +54,9 @@ export function Theme(props: ThemeProps) {
       return mode();
     },
   };
+
   const isNested = useContext(ThemeNestingContext);
+
   if (typeof document !== "undefined") {
     createEffect(
       () => ({ mode: mode(), theme: props.theme, isNested }),
@@ -61,6 +70,7 @@ export function Theme(props: ThemeProps) {
       },
     );
   }
+
   return (
     <ThemeNestingContext value={true}>
       <ThemeContext value={context}>

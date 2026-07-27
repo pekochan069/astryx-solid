@@ -1,5 +1,3 @@
-export { syntaxTokenDefaults } from "./tokens";
-export type { SyntaxTokenName } from "./tokens";
 export {
   ALL_SYNTAX_KEYS,
   defineSyntaxTheme,
@@ -14,5 +12,9 @@ export type {
   SyntaxThemeTokenInput,
   SyntaxTokenValue,
 } from "./define-syntax-theme";
+
 export { SyntaxTheme, useSyntaxTheme } from "./syntax-theme";
 export type { SyntaxThemeDefinition } from "./syntax-theme";
+
+export { syntaxTokenDefaults } from "./tokens";
+export type { SyntaxTokenName } from "./tokens";

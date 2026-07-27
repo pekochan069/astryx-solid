@@ -12,6 +12,7 @@ export function resolveLocaleChain(locale: Locale): Locale[] {
   } catch {
     // Keep malformed input usable; lookup still falls back to English.
   }
+
   const parts = canonical.split("-").filter(Boolean);
   return parts.map((_, index) => parts.slice(0, parts.length - index).join("-"));
 }
@@ -26,10 +27,12 @@ function lookup(
     const override = overrides?.[tag]?.[key];
     if (override !== undefined) return override;
   }
+
   for (const tag of resolveLocaleChain(locale)) {
     const message = messages[tag]?.[key];
     if (message) return message.defaultMessage;
   }
+
   return fallbackCatalog[key]?.defaultMessage;
 }
 
@@ -55,6 +58,7 @@ function splitArgument(argument: string): string[] {
     }
   }
   parts.push(argument.slice(start).trim());
+
   return parts;
 }
 
@@ -67,6 +71,7 @@ function selectOption(body: string, selector: string, exact?: string): string {
     options.set(match[1], body.slice(pattern.lastIndex, end));
     pattern.lastIndex = end + 1;
   }
+
   return (
     options.get(`=${exact}`) ??
     options.get(`=${selector}`) ??
@@ -79,6 +84,7 @@ function selectOption(body: string, selector: string, exact?: string): string {
 function formatArgument(argument: string, values: Record<string, unknown>, locale: Locale): string {
   const parts = splitArgument(argument);
   const value = values[parts[0]];
+
   if (parts[1] === "number") return new Intl.NumberFormat(locale).format(Number(value));
   if (parts[1] === "date" || parts[1] === "time") {
     const formatter = new Intl.DateTimeFormat(
@@ -87,12 +93,14 @@ function formatArgument(argument: string, values: Record<string, unknown>, local
     );
     return formatter.format(value instanceof Date ? value : new Date(Number(value)));
   }
+
   if (parts[1] !== "plural" && parts[1] !== "selectordinal" && parts[1] !== "select") {
     if (value == null) return `{${argument}}`;
     return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
       ? `${value}`
       : JSON.stringify(value);
   }
+
   const selected =
     parts[1] === "select"
       ? String(value)
@@ -118,6 +126,7 @@ function formatMessage(message: string, values: Record<string, unknown>, locale:
     result += formatArgument(message.slice(index + 1, end), values, locale);
     index = end;
   }
+
   return result;
 }
 
@@ -137,8 +146,10 @@ export function resolve(
       warned.add(key);
       console.warn(`[astryx-i18n] missing key: ${key}`);
     }
+
     return key;
   }
+
   return values ? formatMessage(message, values, locale) : message;
 }
 

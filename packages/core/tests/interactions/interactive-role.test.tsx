@@ -50,8 +50,10 @@ describe("interactive role context", () => {
     ));
 
     expect(container.querySelector('[data-testid="role"]')?.textContent).toBe("button");
+
     setContextRole("link");
     await Promise.resolve();
+
     expect(container.querySelector('[data-testid="role"]')?.textContent).toBe("link");
   });
 
@@ -70,8 +72,10 @@ describe("interactive role context", () => {
     ));
 
     expect(container.querySelector('[data-testid="role"]')?.textContent).toBe("button");
+
     setContextRole("link");
     await Promise.resolve();
+
     expect(container.querySelector('[data-testid="role"]')?.textContent).toBe("link");
   });
 });

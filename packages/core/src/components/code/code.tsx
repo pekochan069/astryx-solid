@@ -17,11 +17,13 @@ import { themeProps } from "../../utils/theme-props";
 
 export type CodeColor = "primary" | "secondary" | "inherit";
 export type CodeSize = "inherit";
+
 export interface CodeProps extends BaseProps<HTMLElement> {
   children?: JSX.Element;
   color?: CodeColor;
   size?: CodeSize;
 }
+
 const styles = stylex.create({
   root: {
     fontFamily: typographyVars["--font-family-code"],
@@ -38,6 +40,7 @@ const styles = stylex.create({
   secondary: { color: colorVars["--color-text-secondary"] },
   inherit: { color: "inherit", fontSize: "inherit" },
 });
+
 export function Code(props: CodeProps) {
   const rest = omit(props, "color", "size", "xstyle", "class", "style", "children");
 

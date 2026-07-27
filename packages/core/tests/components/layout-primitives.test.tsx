@@ -48,7 +48,9 @@ describe("layout primitives", () => {
     ));
 
     expect(container.querySelector('[data-testid="center"]')?.textContent).toBe("Centered");
+
     const grid = container.querySelector<HTMLElement>('[aria-label="Grid"]');
+
     expect(grid?.textContent).toBe("Wide");
     expect(grid?.style.gridTemplateColumns).toBe("repeat(2, 1fr)");
     expect(container.querySelector("label")?.htmlFor).toBe("name");

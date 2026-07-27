@@ -27,6 +27,7 @@ export interface CitationProps extends BaseProps<HTMLElement> {
   number: number;
   variant?: "label" | "number";
 }
+
 const styles = stylex.create({
   label: {
     display: "inline-flex",
@@ -76,6 +77,7 @@ const styles = stylex.create({
   icon: { width: spacingVars["--spacing-3"], height: spacingVars["--spacing-3"] },
   labelText: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 },
 });
+
 export function Citation(props: CitationProps) {
   const t = useTranslator();
 

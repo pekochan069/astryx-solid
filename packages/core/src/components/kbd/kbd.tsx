@@ -28,6 +28,7 @@ const displayNames: Record<string, string> = {
   right: "→",
   plus: "+",
 };
+
 const spokenNames: Record<string, string> = {
   ctrl: "Control",
   alt: "Alt",
@@ -69,18 +70,23 @@ const styles = stylex.create({
     userSelect: "none",
   },
 });
+
 function isMacPlatform() {
   return typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform ?? "");
 }
+
 function display(key: string, mac: boolean) {
   return key === "mod" ? (mac ? "⌘" : "Ctrl") : (displayNames[key] ?? key.toUpperCase());
 }
+
 function spoken(key: string, mac: boolean) {
   return key === "mod" ? (mac ? "Command" : "Control") : (spokenNames[key] ?? key.toUpperCase());
 }
+
 export interface KbdProps extends BaseProps<HTMLSpanElement> {
   keys: string;
 }
+
 export function Kbd(props: KbdProps) {
   const rest = omit(props, "keys", "xstyle", "class", "style");
 

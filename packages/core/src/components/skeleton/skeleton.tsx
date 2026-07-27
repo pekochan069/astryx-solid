@@ -8,6 +8,7 @@ import { colorVars, durationVars, radiusVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 
 const pulse = stylex.keyframes({ "0%": { opacity: 0.25 }, "100%": { opacity: 1 } });
+
 const styles = stylex.create({
   root: { backgroundColor: colorVars["--color-skeleton"], opacity: 0.25 },
   animate: {
@@ -25,13 +26,16 @@ const styles = stylex.create({
   4: { borderRadius: radiusVars["--radius-container"] },
   rounded: { borderRadius: radiusVars["--radius-full"] },
 });
+
 export type SkeletonRadius = keyof typeof styles;
+
 export interface SkeletonProps extends BaseProps<HTMLDivElement> {
   width?: number | string;
   height?: number | string;
   radius?: SkeletonRadius;
   index?: number;
 }
+
 export function Skeleton(props: SkeletonProps) {
   const rest = omit(props, "width", "height", "radius", "index", "xstyle", "class", "style");
 

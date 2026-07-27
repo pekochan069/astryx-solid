@@ -22,6 +22,7 @@ export interface DividerProps extends BaseProps<HTMLDivElement> {
   variant?: DividerVariant;
   isFullBleed?: boolean;
 }
+
 const styles = stylex.create({
   horizontal: { display: "flex", alignItems: "center", width: "100%" },
   vertical: {
@@ -53,6 +54,7 @@ const styles = stylex.create({
       "calc(100% + var(--container-padding-block-start, 0px) + var(--container-padding-block-end, 0px))",
   },
 });
+
 export function Divider(props: DividerProps) {
   const rest = omit(
     props,

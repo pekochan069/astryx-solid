@@ -13,7 +13,13 @@ import "@astryx-solid/core/reset.css";
 import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
-import { ContentPrimitives, createApp, PackedLayout, packedPrimitives } from "./app";
+import {
+  ContentPrimitives,
+  createApp,
+  PackedContainerStatus,
+  PackedLayout,
+  packedPrimitives,
+} from "./app";
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -28,18 +34,23 @@ if (
   !colorDefaults["--color-accent"] ||
   !stylexProps ||
   !mergeProps
-)
+) {
   throw new Error("Core styling and locale exports failed");
+}
 
 function requireRoot(id: string) {
   const root = document.getElementById(id);
+
   if (root === null) throw new Error(`Missing #${id} root`);
+
   return root;
 }
 
 function hydrateAndRecord(root: HTMLElement, hydration: () => void) {
   const serverElement = root.firstElementChild;
+
   hydration();
+
   root.dataset.hydrated = serverElement === root.firstElementChild ? "reused" : "replaced";
 }
 
@@ -47,14 +58,22 @@ const root = requireRoot("app");
 const serverContext = root.querySelector('[data-testid="consumer-state"]')?.textContent;
 hydrateAndRecord(root, () => hydrate(createApp, root));
 root.dataset.serverContext = serverContext;
+
 render(
   () => <RootVisuallyHidden>Root export works</RootVisuallyHidden>,
   requireRoot("root-export"),
 );
+
 const primitiveRoot = requireRoot("content-primitives");
 hydrateAndRecord(primitiveRoot, () =>
   hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" }),
 );
+
+const containerStatusRoot = requireRoot("packed-container-status");
+hydrateAndRecord(containerStatusRoot, () =>
+  hydrate(PackedContainerStatus, containerStatusRoot, { renderId: "container-status" }),
+);
+
 const layoutRoot = requireRoot("packed-layout");
 hydrateAndRecord(layoutRoot, () =>
   hydrate(
@@ -66,6 +85,7 @@ hydrateAndRecord(layoutRoot, () =>
     { renderId: "layout" },
   ),
 );
+
 for (const [name, component] of Object.entries(packedPrimitives)) {
   const packedRoot = requireRoot(`packed-${name}`);
   hydrateAndRecord(packedRoot, () => hydrate(component, packedRoot, { renderId: name }));

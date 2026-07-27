@@ -61,6 +61,26 @@ describe("container and status primitives", () => {
     expect(container.querySelector('[data-testid="timestamp"]')?.tagName).toBe("TIME");
   });
 
+  it("opens status dot tooltip on focus and closes on Escape", async () => {
+    const container = mount(() => (
+      <StatusDot variant="warning" label="Needs attention" tooltip="Service needs attention" />
+    ));
+    const dot = container.querySelector<HTMLElement>('[role="img"]');
+    if (dot === null) throw new Error("Expected status dot");
+
+    dot.focus();
+    await Promise.resolve();
+    const tooltip = container.querySelector('[role="tooltip"]');
+    if (tooltip === null) throw new Error("Expected status dot tooltip");
+
+    expect(dot.getAttribute("aria-describedby")).toBe(tooltip.id);
+    expect(dot.hasAttribute("title")).toBe(false);
+
+    dot.dispatchEvent(dispatch("keydown", { key: "Escape" }));
+    await Promise.resolve();
+    expect(container.querySelector('[role="tooltip"]')).toBeNull();
+  });
+
   it("clamps progress and exposes indeterminate progress without values", () => {
     const container = mount(() => (
       <>
@@ -90,7 +110,9 @@ describe("container and status primitives", () => {
     await Promise.resolve();
     expect(progress?.getAttribute("aria-valuenow")).toBe("75");
   });
+});
 
+describe("resizable regions", () => {
   it("renders loading thumbnails without an image", () => {
     const container = mount(() => <Thumbnail isLoading label="Upload" />);
 
@@ -119,7 +141,9 @@ describe("container and status primitives", () => {
     expect(region.size).toBe(200);
     expect(changes).toEqual(["collapsed:true", "size:0", "collapsed:false", "size:200"]);
   });
+});
 
+describe("resizable state restoration", () => {
   it("persists named regions independently", async () => {
     let regions: Record<string, ResizableRegion> | undefined;
     mount(() => {
@@ -169,7 +193,9 @@ describe("container and status primitives", () => {
     expect(region.isCollapsed).toBe(true);
     expect(region.size).toBe(0);
   });
+});
 
+describe("resizable handle interactions", () => {
   it("collapses from double-click and ignores disabled handles", async () => {
     let region: ResizableRegion | undefined;
     const container = mount(() => {
@@ -211,7 +237,9 @@ describe("container and status primitives", () => {
 
     expect(region.size).toBe(100);
   });
+});
 
+describe("resizable keyboard and pointer input", () => {
   it("resizes through the focusable separator keyboard seam", async () => {
     let handle: HTMLDivElement | undefined;
     const container = mount(() => {

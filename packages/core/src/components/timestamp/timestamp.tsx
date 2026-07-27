@@ -52,7 +52,7 @@ function relative(date: Date, now: Date) {
   const future = seconds < 0;
   const absoluteSeconds = Math.abs(seconds);
 
-  if (absoluteSeconds <= 30) return "now";
+  if ((!future && absoluteSeconds < 10) || (future && absoluteSeconds <= 30)) return "now";
 
   const units: Array<[number, string]> = [
     [365 * day, "year"],

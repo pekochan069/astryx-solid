@@ -143,6 +143,18 @@ describe("container and status primitives", () => {
           hasTooltip={false}
         />
         <Timestamp
+          data-testid="past-timestamp"
+          value={Date.now() / 1000 - 10}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
+          data-testid="future-timestamp"
+          value={Date.now() / 1000 + 20}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
           data-testid="styled-timestamp"
           value="2026-02-19T17:00:00Z"
           format="date_long"
@@ -162,6 +174,10 @@ describe("container and status primitives", () => {
     );
 
     expect(defaultTimestamp?.textContent).toBe("yesterday");
+    expect(container.querySelector('[data-testid="past-timestamp"]')?.textContent).toBe(
+      "10 seconds ago",
+    );
+    expect(container.querySelector('[data-testid="future-timestamp"]')?.textContent).toBe("now");
     expect(styledTimestamp?.textContent).toContain("February");
     expect(styledTimestamp?.className).not.toBe(defaultTimestamp?.className);
     expect(container.textContent).toMatch(/Mon|Tue|Wed|Thu|Fri|Sat|Sun/);

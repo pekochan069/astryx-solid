@@ -73,6 +73,48 @@ function Placeholder() {
   );
 }
 
+type ThumbnailContentsProps = {
+  src?: string;
+  failedSrc?: string;
+  isLoading?: boolean;
+  alt?: string;
+  setFailedSrc: (src: string | undefined) => void;
+};
+
+function ThumbnailContents(props: ThumbnailContentsProps) {
+  return (
+    <>
+      <Show
+        when={props.src != null && props.failedSrc !== props.src}
+        fallback={
+          <Show
+            when={props.isLoading}
+            fallback={
+              <div {...stylexProps(styles.placeholder)}>
+                <Placeholder />
+              </div>
+            }
+          >
+            <Skeleton width="100%" height="100%" radius={2} />
+          </Show>
+        }
+      >
+        <img
+          {...stylexProps(styles.image)}
+          src={props.src}
+          alt={props.alt ?? ""}
+          onError={() => props.setFailedSrc(props.src)}
+        />
+      </Show>
+      <Show when={props.isLoading && props.src != null && props.failedSrc !== props.src}>
+        <div {...stylexProps(styles.overlay)}>
+          <Spinner shade="inherit" />
+        </div>
+      </Show>
+    </>
+  );
+}
+
 export function Thumbnail(props: ThumbnailProps) {
   const rest = omit(
     props,
@@ -100,38 +142,6 @@ export function Thumbnail(props: ThumbnailProps) {
     stylexProps(styles.root, props.isDisabled && styles.disabled, props.xstyle),
   );
 
-  const Content = () => (
-    <>
-      <Show
-        when={props.src != null && failedSrc() !== props.src}
-        fallback={
-          <Show
-            when={props.isLoading}
-            fallback={
-              <div {...stylexProps(styles.placeholder)}>
-                <Placeholder />
-              </div>
-            }
-          >
-            <Skeleton width="100%" height="100%" radius={2} />
-          </Show>
-        }
-      >
-        <img
-          {...stylexProps(styles.image)}
-          src={props.src}
-          alt={props.alt ?? ""}
-          onError={() => setFailedSrc(props.src)}
-        />
-      </Show>
-      <Show when={props.isLoading && props.src != null && failedSrc() !== props.src}>
-        <div {...stylexProps(styles.overlay)}>
-          <Spinner shade="inherit" />
-        </div>
-      </Show>
-    </>
-  );
-
   return (
     <div
       {...rest}
@@ -144,14 +154,31 @@ export function Thumbnail(props: ThumbnailProps) {
       data-style-src={style()["data-style-src"]}
     >
       <div {...stylexProps(styles.frame)}>
-        <Show when={interactive()} fallback={<Content />}>
+        <Show
+          when={interactive()}
+          fallback={
+            <ThumbnailContents
+              src={props.src}
+              failedSrc={failedSrc()}
+              isLoading={props.isLoading}
+              alt={props.alt}
+              setFailedSrc={setFailedSrc}
+            />
+          }
+        >
           <button
             type="button"
             {...stylexProps(styles.button)}
             aria-label={`Open ${name()}`}
             onClick={(event) => props.onClick?.(event)}
           >
-            <Content />
+            <ThumbnailContents
+              src={props.src}
+              failedSrc={failedSrc()}
+              isLoading={props.isLoading}
+              alt={props.alt}
+              setFailedSrc={setFailedSrc}
+            />
           </button>
         </Show>
         <Show when={props.onRemove != null && !props.isDisabled}>

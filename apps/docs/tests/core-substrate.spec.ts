@@ -3,10 +3,12 @@ import { expect, test } from "@playwright/test";
 
 test("Core theme and i18n substrate stays reactive in the browser", async ({ page, request }) => {
   const response = await request.get("/core-substrate/");
+
   expect(await response.text()).toContain("Core substrate");
 
   const runtimeErrors: string[] = [];
   page.on("pageerror", (error) => runtimeErrors.push(error.stack ?? error.message));
+
   await page.goto("/core-substrate/");
 
   await expect(page.getByTestId("theme-state")).toHaveText("docs:light:#0064e0");
@@ -27,6 +29,8 @@ test("Core theme and i18n substrate stays reactive in the browser", async ({ pag
   expect(
     accessibility.violations.filter(({ impact }) => impact === "critical" || impact === "serious"),
   ).toEqual([]);
+
   expect(runtimeErrors).toEqual([]);
+
   await expect(page.getByRole("main")).toHaveScreenshot("core-substrate-dark.png");
 });

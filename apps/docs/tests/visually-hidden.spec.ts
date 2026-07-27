@@ -6,6 +6,7 @@ test("VisuallyHidden remains accessible and visually absent", async ({ page }) =
 
   const main = page.getByRole("main");
   const hiddenLabel = page.getByText("Close dialog");
+
   await expect(page.getByRole("heading", { name: "VisuallyHidden" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Close dialog" })).toBeVisible();
   await expect(hiddenLabel).toBeAttached();
@@ -18,5 +19,6 @@ test("VisuallyHidden remains accessible and visually absent", async ({ page }) =
   expect(
     accessibility.violations.filter(({ impact }) => impact === "critical" || impact === "serious"),
   ).toEqual([]);
+
   await expect(main).toHaveScreenshot("visually-hidden-docs.png");
 });

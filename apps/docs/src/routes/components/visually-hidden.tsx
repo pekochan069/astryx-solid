@@ -14,14 +14,18 @@ export function VisuallyHiddenDocs() {
   return (
     <Stack as="main" gap={4} padding={6} maxWidth={720}>
       <h1>{component.name}</h1>
+
       <p>{component.description}</p>
+
       <pre>
         <code>{`import { VisuallyHidden } from "${component.subpath}";`}</code>
       </pre>
+
       <button type="button">
         <span aria-hidden="true">×</span>
         <VisuallyHidden as="span">Close dialog</VisuallyHidden>
       </button>
+
       <VisuallyHidden as="div" aria-live="polite">
         Upload complete
       </VisuallyHidden>

@@ -45,6 +45,7 @@ export type TextDisplay = "inline" | "block";
 export type TextJustify = "start" | "center" | "end";
 export type WordBreak = "break-word" | "break-all";
 export type TextWrap = "wrap" | "nowrap" | "balance" | "pretty";
+
 export interface TextProps extends BaseProps {
   children?: JSX.Element;
   type?: TextType;
@@ -62,6 +63,7 @@ export interface TextProps extends BaseProps {
   hasTabularNumbers?: boolean;
   as?: ValidComponent;
 }
+
 const styles = stylex.create({
   primary: { color: colorVars["--color-text-primary"] },
   secondary: { color: colorVars["--color-text-secondary"] },
@@ -126,6 +128,7 @@ const styles = stylex.create({
   balance: { textWrap: "balance" },
   pretty: { textWrap: "pretty" },
 });
+
 const sizeStyles = stylex.create({
   "4xs": { fontSize: textSizeVars["--font-size-4xs"] },
   "3xs": { fontSize: textSizeVars["--font-size-3xs"] },
@@ -139,6 +142,7 @@ const sizeStyles = stylex.create({
   "3xl": { fontSize: textSizeVars["--font-size-3xl"] },
   "4xl": { fontSize: textSizeVars["--font-size-4xl"] },
 });
+
 function typeStyle(type: TextType) {
   switch (type) {
     case "large":
@@ -160,6 +164,15 @@ function typeStyle(type: TextType) {
     default:
       return styles.body;
   }
+}
+
+export function textStyles(
+  type: TextType,
+  color: TextColor,
+  size: TextSize | undefined,
+  weight: TextWeight | undefined,
+) {
+  return [styles[color], typeStyle(type), size && sizeStyles[size], weight && styles[weight]];
 }
 
 function textWrapStyle(textWrap: TextWrap | undefined) {
@@ -184,6 +197,7 @@ export function Text(props: TextProps) {
     ref: props.ref,
   });
   const { maxLines, wordBreak } = truncation;
+
   const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
 
   const rest = omit(
@@ -218,10 +232,7 @@ export function Text(props: TextProps) {
   );
   const style = createMemo(() =>
     stylexProps(
-      styles[color()],
-      typeStyle(type()),
-      props.size && sizeStyles[props.size],
-      props.weight && styles[props.weight],
+      ...textStyles(type(), color(), props.size, props.weight),
       maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
       maxLines() > 0 && styles[wordBreak()],
       maxLines() === 0 && styles[display()],

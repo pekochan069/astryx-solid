@@ -6,6 +6,7 @@ import { createUniqueId } from "solid-js";
 import {
   ContentPrimitives,
   createApp,
+  PackedContainerStatus,
   PackedLayout,
   PackedLayoutPrimitives,
   packedPrimitives,
@@ -16,7 +17,9 @@ const render = () =>
     createUniqueId();
     return createApp();
   });
+
 const first = render();
+
 const primitives = renderToString(
   () => {
     createUniqueId();
@@ -24,6 +27,7 @@ const primitives = renderToString(
   },
   { renderId: "primitives" },
 );
+
 if (
   first !== render() ||
   !first.includes("Close dialog") ||
@@ -40,6 +44,7 @@ if (
 
 const renderLayoutPrimitives = () =>
   renderToString(PackedLayoutPrimitives, { renderId: "layout-primitives" });
+
 const layoutPrimitives = renderLayoutPrimitives();
 if (
   layoutPrimitives !== renderLayoutPrimitives() ||
@@ -51,6 +56,12 @@ if (
   throw new Error(`Unexpected layout primitive server output: ${layoutPrimitives}`);
 }
 
+const containerStatus = renderToString(PackedContainerStatus, { renderId: "container-status" });
+
+if (!containerStatus.includes("No files") || !containerStatus.includes('role="progressbar"')) {
+  throw new Error(`Unexpected container status server output: ${containerStatus}`);
+}
+
 const renderLayout = () =>
   renderToString(
     () => {
@@ -59,6 +70,7 @@ const renderLayout = () =>
     },
     { renderId: "layout" },
   );
+
 const layout = renderLayout();
 if (
   layout !== renderLayout() ||
@@ -70,6 +82,7 @@ if (
 }
 
 const index = resolve(process.cwd(), "index.html");
+
 let html = (await readFile(index, "utf8"))
   .replace("</head>", `${generateHydrationScript()}</head>`)
   .replace('<div id="app"></div>', `<div id="app">${first}</div>`)
@@ -77,7 +90,12 @@ let html = (await readFile(index, "utf8"))
     '<div id="content-primitives"></div>',
     `<div id="content-primitives">${primitives}</div>`,
   )
-  .replace('<div id="packed-layout"></div>', `<div id="packed-layout">${layout}</div>`);
+  .replace('<div id="packed-layout"></div>', `<div id="packed-layout">${layout}</div>`)
+  .replace(
+    '<div id="packed-container-status"></div>',
+    `<div id="packed-container-status">${containerStatus}</div>`,
+  );
+
 for (const [name, component] of Object.entries(packedPrimitives)) {
   const output = renderToString(component, { renderId: name });
   html = html.replace(
@@ -85,5 +103,7 @@ for (const [name, component] of Object.entries(packedPrimitives)) {
     `<div id="packed-${name}">${output}</div>`,
   );
 }
+
 await writeFile(index, html);
+
 console.log(first);

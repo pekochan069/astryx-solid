@@ -24,5 +24,6 @@ export function InternationalizationProvider(props: InternationalizationProvider
       return props.overrides;
     },
   };
+
   return <InternationalizationContext value={value}>{props.children}</InternationalizationContext>;
 }

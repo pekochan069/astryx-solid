@@ -19,11 +19,13 @@ const sizes = { sm: 14, md: 20, lg: 24, xl: 36 };
 
 export type SpinnerSize = keyof typeof sizes;
 export type SpinnerShade = "default" | "onMedia" | "subtle" | "inherit";
+
 export interface SpinnerProps extends BaseProps<HTMLSpanElement | HTMLDivElement> {
   size?: SpinnerSize;
   shade?: SpinnerShade;
   label?: JSX.Element;
 }
+
 const styles = stylex.create({
   wrapper: {
     display: "inline-flex",
@@ -55,6 +57,7 @@ const styles = stylex.create({
     borderTopColor: "currentColor",
   },
 });
+
 export function Spinner(props: SpinnerProps) {
   const rest = omit(
     props,
@@ -81,38 +84,36 @@ export function Spinner(props: SpinnerProps) {
     ),
   );
   const frame = () => sizes[size()];
+
   const rootRef = (element: HTMLSpanElement | HTMLDivElement) => setElementRef(props.ref, element);
 
   const theme = createMemo(() => themeProps("spinner", { size: size(), shade: shade() }));
   const style = createMemo(() => stylexProps(styles.wrapper, props.xstyle));
 
-  const Indicator = (indicatorProps: { isRoot: boolean }) => (
-    <span
-      {...(indicatorProps.isRoot ? rest : {})}
-      {...(indicatorProps.isRoot ? theme() : {})}
-      ref={indicatorProps.isRoot ? rootRef : undefined}
-      role="status"
-      aria-label={
-        props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
-      }
-      class={
-        indicatorProps.isRoot
-          ? [theme().class, spinnerStyle().class, props.class]
-          : spinnerStyle().class
-      }
-      style={{
-        ...spinnerStyle().style,
-        width: `${frame()}px`,
-        height: `${frame()}px`,
-        "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
-        ...(indicatorProps.isRoot ? props.style : {}),
-      }}
-      data-style-src={spinnerStyle()["data-style-src"]}
-    />
-  );
-
   return (
-    <Show when={hasLabel()} fallback={<Indicator isRoot={true} />}>
+    <Show
+      when={hasLabel()}
+      fallback={
+        <span
+          {...rest}
+          {...theme()}
+          ref={rootRef}
+          role="status"
+          aria-label={
+            props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
+          }
+          class={[theme().class, spinnerStyle().class, props.class]}
+          style={{
+            ...spinnerStyle().style,
+            width: `${frame()}px`,
+            height: `${frame()}px`,
+            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
+            ...props.style,
+          }}
+          data-style-src={spinnerStyle()["data-style-src"]}
+        />
+      }
+    >
       <div
         {...rest}
         {...theme()}
@@ -120,7 +121,20 @@ export function Spinner(props: SpinnerProps) {
         class={[theme().class, style().class, props.class]}
         style={{ ...style().style, ...props.style }}
       >
-        <Indicator isRoot={false} />
+        <span
+          role="status"
+          aria-label={
+            props["aria-label"] ?? (typeof props.label === "string" ? props.label : "Loading")
+          }
+          class={spinnerStyle().class}
+          style={{
+            ...spinnerStyle().style,
+            width: `${frame()}px`,
+            height: `${frame()}px`,
+            "border-width": `${Math.max(2, Math.round(frame() / 6))}px`,
+          }}
+          data-style-src={spinnerStyle()["data-style-src"]}
+        />
         <Show
           when={typeof props.label === "string" ? props.label : undefined}
           fallback={props.label}

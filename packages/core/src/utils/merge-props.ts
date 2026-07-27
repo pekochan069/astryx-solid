@@ -11,13 +11,18 @@ export function mergeProps(...parts: ReadonlyArray<SolidStyleProps | undefined>)
   const result: SolidStyleProps = {};
   const classes: string[] = [];
   let style: JSX.CSSProperties | undefined;
+
   for (const part of parts) {
     if (!part) continue;
+
     Object.assign(result, part);
+
     if (part.class) classes.push(part.class);
     if (part.style) style = { ...style, ...part.style };
   }
+
   if (classes.length) result.class = classes.join(" ");
   if (style) result.style = style;
+
   return result;
 }

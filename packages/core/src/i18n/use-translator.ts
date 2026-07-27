@@ -9,5 +9,6 @@ export type TranslatorFn = (key: string, values?: Record<string, unknown>) => st
 export function useTranslator(): TranslatorFn {
   const context = useContext(InternationalizationContext);
   const locale = createMemo(() => context.locale);
+
   return (key, values) => resolve(key, values, locale(), context.messages, context.overrides);
 }

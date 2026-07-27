@@ -22,6 +22,7 @@ import { themeProps } from "../../utils/theme-props";
 
 export type LayoutHeight = "fill" | "auto";
 export type LayoutArea = "header" | "footer" | "content" | "start" | "end" | null;
+
 export interface LayoutSlots {
   readonly hasHeader: boolean;
   readonly hasFooter: boolean;
@@ -31,6 +32,7 @@ export interface LayoutSlots {
 export interface LayoutDividerContextValue {
   readonly defaultHasDividers: boolean;
 }
+
 export const LayoutAreaContext = createContext<LayoutArea>(null);
 export const LayoutSlotsContext = createContext<LayoutSlots>({
   hasHeader: false,
@@ -133,32 +135,33 @@ export function Layout(props: LayoutProps) {
     },
   };
 
-  const Tree = () => (
-    <LayoutSlotsContext value={slots}>
-      <div
-        {...rest}
-        {...themeProps("layout", { height: height() })}
-        class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
-        style={{ ...root().style, ...props.style }}
-        data-style-src={root()["data-style-src"]}
-      >
-        <div {...inner()}>
-          <Area area="header">{props.header}</Area>
-          <div {...middle()}>
-            <Area area="start">{props.start}</Area>
-            <div {...stylexProps(styles.content)}>
-              <Area area="content">{content()}</Area>
-            </div>
-            <Area area="end">{props.end}</Area>
-          </div>
-          <Area area="footer">{props.footer}</Area>
-        </div>
-      </div>
-    </LayoutSlotsContext>
-  );
-
   return (
-    <Show when={props.defaultHasDividers != null} fallback={<Tree />}>
+    <Show
+      when={props.defaultHasDividers != null}
+      fallback={
+        <LayoutSlotsContext value={slots}>
+          <div
+            {...rest}
+            {...themeProps("layout", { height: height() })}
+            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
+            style={{ ...root().style, ...props.style }}
+            data-style-src={root()["data-style-src"]}
+          >
+            <div {...inner()}>
+              <Area area="header">{props.header}</Area>
+              <div {...middle()}>
+                <Area area="start">{props.start}</Area>
+                <div {...stylexProps(styles.content)}>
+                  <Area area="content">{content()}</Area>
+                </div>
+                <Area area="end">{props.end}</Area>
+              </div>
+              <Area area="footer">{props.footer}</Area>
+            </div>
+          </div>
+        </LayoutSlotsContext>
+      }
+    >
       <LayoutDividerContext
         value={{
           get defaultHasDividers() {
@@ -166,7 +169,27 @@ export function Layout(props: LayoutProps) {
           },
         }}
       >
-        <Tree />
+        <LayoutSlotsContext value={slots}>
+          <div
+            {...rest}
+            {...themeProps("layout", { height: height() })}
+            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
+            style={{ ...root().style, ...props.style }}
+            data-style-src={root()["data-style-src"]}
+          >
+            <div {...inner()}>
+              <Area area="header">{props.header}</Area>
+              <div {...middle()}>
+                <Area area="start">{props.start}</Area>
+                <div {...stylexProps(styles.content)}>
+                  <Area area="content">{content()}</Area>
+                </div>
+                <Area area="end">{props.end}</Area>
+              </div>
+              <Area area="footer">{props.footer}</Area>
+            </div>
+          </div>
+        </LayoutSlotsContext>
       </LayoutDividerContext>
     </Show>
   );
@@ -187,11 +210,13 @@ export interface LayoutContentProps extends BaseProps<HTMLDivElement> {
 export interface LayoutPanelResizable {
   readonly _size?: SizeValue;
 }
+
 export interface LayoutPanelProps extends LayoutContentProps {
   width?: SizeValue;
   hasDivider?: boolean;
   resizable?: LayoutPanelResizable;
 }
+
 export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
   hasDivider?: boolean;
   height?: SizeValue;
@@ -199,6 +224,7 @@ export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
   label?: string;
   children?: JSX.Element;
 }
+
 export type LayoutHeaderProps = LayoutBarProps;
 export type LayoutFooterProps = LayoutBarProps;
 
@@ -290,6 +316,7 @@ export function LayoutContent(props: LayoutContentProps) {
     />
   );
 }
+
 /** Sidebar region; divider side follows its Layout slot. */
 export function LayoutPanel(props: LayoutPanelProps) {
   const rest = omit(props, "resizable", "width");
@@ -311,10 +338,12 @@ export function LayoutPanel(props: LayoutPanelProps) {
     />
   );
 }
+
 /** Header region with optional bottom divider. */
 export function LayoutHeader(props: LayoutHeaderProps) {
   return <LayoutBar component="layout-header" divider={areaStyles.headerDivider} {...props} />;
 }
+
 /** Footer region with optional top divider. */
 export function LayoutFooter(props: LayoutFooterProps) {
   return <LayoutBar component="layout-footer" divider={areaStyles.footerDivider} {...props} />;

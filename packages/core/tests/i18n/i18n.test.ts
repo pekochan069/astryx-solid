@@ -21,12 +21,14 @@ describe("i18n substrate", () => {
         total: { defaultMessage: "Total: {value, number}" },
       },
     };
+
     expect(resolve("items", { count: 2 }, "en", messages)).toBe("2 items");
     expect(resolve("total", { value: 1200 }, "en", messages)).toContain("1,200");
   });
 
   it("uses overrides before catalogs and English fallback", () => {
     const messages = { fr: { greeting: { defaultMessage: "Bonjour" } } };
+
     expect(resolve("greeting", undefined, "fr-CA", messages, { fr: { greeting: "Salut" } })).toBe(
       "Salut",
     );
@@ -42,14 +44,17 @@ describe("i18n substrate", () => {
     const Probe = () => {
       const translate = useTranslator();
       const node = document.createElement("span");
+
       createEffect(
         () => translate("greeting"),
         (text) => {
           node.textContent = text;
         },
       );
+
       return node;
     };
+
     const container = document.createElement("div");
     document.body.append(container);
     const dispose = render(
@@ -65,10 +70,14 @@ describe("i18n substrate", () => {
         }),
       container,
     );
+
     expect(container.textContent).toBe("Hello");
+
     setLocale("fr");
     await Promise.resolve();
+
     expect(container.textContent).toBe("Bonjour");
+
     dispose();
   });
 });

@@ -33,10 +33,15 @@ export function resolveSyntaxTokenForMode(value: SyntaxTokenValue, mode: "light"
 
 /** Define a complete syntax theme. */
 export function defineSyntaxTheme(input: SyntaxThemeInput): SyntaxThemeDefinition {
-  if (!/^[A-Za-z0-9_-]+$/.test(input.name))
+  if (!/^[A-Za-z0-9_-]+$/.test(input.name)) {
     throw new Error(`Invalid syntax theme name: ${input.name}`);
+  }
+
   const missing = ALL_SYNTAX_KEYS.filter((key) => !(key in input.tokens));
-  if (missing.length) console.warn(`[Astryx] missing syntax tokens: ${missing.join(", ")}`);
+  if (missing.length) {
+    console.warn(`[Astryx] missing syntax tokens: ${missing.join(", ")}`);
+  }
+
   const tokens = Object.fromEntries(
     ALL_SYNTAX_KEYS.map((key) => [
       key,
@@ -46,6 +51,7 @@ export function defineSyntaxTheme(input: SyntaxThemeInput): SyntaxThemeDefinitio
       ),
     ]),
   ) as SyntaxThemeTokenMap;
+
   return { name: input.name, tokens, __inputTokens: { ...input.tokens } };
 }
 

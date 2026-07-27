@@ -7,7 +7,9 @@ import { dts } from "rolldown-plugin-dts";
 
 const input = {
   index: "./src/index.ts",
+
   button: "./src/components/button/index.ts",
+  card: "./src/components/card/index.ts",
   center: "./src/components/center/index.ts",
   "aspect-ratio": "./src/components/aspect-ratio/index.ts",
   badge: "./src/components/badge/index.ts",
@@ -15,6 +17,7 @@ const input = {
   citation: "./src/components/citation/index.ts",
   code: "./src/components/code/index.ts",
   divider: "./src/components/divider/index.ts",
+  "empty-state": "./src/components/empty-state/index.ts",
   "form-layout": "./src/components/form-layout/index.ts",
   grid: "./src/components/grid/index.ts",
   heading: "./src/components/heading/index.ts",
@@ -22,13 +25,19 @@ const input = {
   kbd: "./src/components/kbd/index.ts",
   hstack: "./src/components/stack/hstack.tsx",
   layout: "./src/components/layout/index.ts",
+  "progress-bar": "./src/components/progress-bar/index.ts",
+  resizable: "./src/components/resizable/index.ts",
   section: "./src/components/section/index.ts",
   skeleton: "./src/components/skeleton/index.ts",
   spinner: "./src/components/spinner/index.ts",
   stack: "./src/components/stack/index.ts",
+  "status-dot": "./src/components/status-dot/index.ts",
   text: "./src/components/text/index.ts",
+  thumbnail: "./src/components/thumbnail/index.ts",
+  timestamp: "./src/components/timestamp/index.ts",
   vstack: "./src/components/stack/vstack.tsx",
   "visually-hidden": "./src/components/visually-hidden/index.ts",
+
   naming: "./src/naming.ts",
   stylex: "./src/stylex/index.ts",
   utils: "./src/utils/index.ts",
@@ -41,13 +50,16 @@ const input = {
   "theme/syntax": "./src/theme/syntax/index.ts",
   i18n: "./src/i18n/index.ts",
 };
+
 const external = ["solid-js", "@solidjs/web"];
+
 const createStylex = () =>
   stylex({
     dev: false,
     runtimeInjection: false,
     unstable_moduleResolution: { type: "commonJS", rootDir: import.meta.dirname },
   });
+
 const clientStylex = createStylex();
 
 export default defineConfig([
@@ -58,13 +70,15 @@ export default defineConfig([
     output: { cleanDir: true },
     plugins: [
       clientStylex,
-      solid(),
+      solid({ jsx: { hydratable: true } }),
       dts(),
       {
         name: "copy-css-files",
         async generateBundle() {
           const dist = import.meta.dirname + "/dist";
+
           if (!existsSync(dist)) mkdirSync(dist);
+
           await Promise.all([
             this.fs.copyFile(
               resolve(import.meta.dirname, "src/reset.css"),
@@ -81,7 +95,9 @@ export default defineConfig([
         name: "emit-astryx-css",
         generateBundle() {
           const css = clientStylex.__stylexCollectCss();
+
           if (!css) throw new Error("No StyleX rules were collected");
+
           this.emitFile({
             type: "asset",
             fileName: "astryx.css",

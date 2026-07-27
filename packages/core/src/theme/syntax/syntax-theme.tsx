@@ -15,6 +15,7 @@ export interface SyntaxThemeProps {
 /** Applies syntax token variables to a subtree. */
 export function SyntaxTheme(props: SyntaxThemeProps) {
   const style = createMemo(() => syntaxThemeStyle(props.theme));
+
   return (
     <SyntaxThemeContext value={props.theme}>
       <Dynamic component="div" style={style()}>

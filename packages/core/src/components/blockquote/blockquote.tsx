@@ -13,6 +13,7 @@ export interface BlockquoteProps extends BaseProps<HTMLQuoteElement> {
   children?: JSX.Element;
   cite?: JSX.Element;
 }
+
 const styles = stylex.create({
   root: {
     borderInlineStartWidth: spacingVars["--spacing-0-5"],
@@ -30,6 +31,7 @@ const styles = stylex.create({
     fontStyle: "normal",
   },
 });
+
 export function Blockquote(props: BlockquoteProps) {
   const rest = omit(props, "cite", "xstyle", "class", "style", "children");
 

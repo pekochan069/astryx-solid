@@ -112,6 +112,7 @@ const styles = stylex.create({
   md: { width: 20, height: 20, fontSize: 20 },
   lg: { width: 24, height: 24, fontSize: 24 },
 });
+
 export interface IconProps extends Omit<
   JSX.SvgSVGAttributes<SVGSVGElement>,
   "color" | "icon" | "style"
@@ -123,6 +124,7 @@ export interface IconProps extends Omit<
   style?: JSX.CSSProperties;
   "data-testid"?: string;
 }
+
 export function Icon(props: IconProps) {
   const rest = omit(props, "icon", "color", "size", "class", "style");
 
@@ -173,6 +175,7 @@ export function Icon(props: IconProps) {
     </Show>
   );
 }
+
 export function renderIconSlot(
   icon: JSX.Element | IconType | IconName,
   props?: { size?: IconSize; color?: IconColor },

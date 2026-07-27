@@ -5,10 +5,14 @@ import { astryxStylex } from "../src/vite";
 
 function layerOrder(options?: Parameters<typeof astryxStylex>[0]) {
   const plugin = astryxStylex(options).find((item) => item.name === "astryx-solid-css-layer-order");
-  if (!plugin || typeof plugin.transformIndexHtml !== "function")
+
+  if (!plugin || typeof plugin.transformIndexHtml !== "function") {
     throw new Error("Missing layer plugin");
+  }
+
   const transform = plugin.transformIndexHtml as unknown as () => { children: string }[];
   const tags = transform();
+
   return Array.isArray(tags) ? tags[0]?.children : undefined;
 }
 
@@ -39,6 +43,7 @@ describe("astryxStylex", () => {
     const changingValue = {
       toString: () => (calls++ === 0 ? "safe" : "safe;</style><script>"),
     };
+
     expect(() => layerOrder({ layers: { library: changingValue as unknown as string } })).toThrow(
       "Invalid CSS layer name",
     );

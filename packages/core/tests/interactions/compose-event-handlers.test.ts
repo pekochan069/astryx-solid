@@ -7,10 +7,12 @@ describe("composeEventHandlers", () => {
     const calls: string[] = [];
     const received: Event[] = [];
     const event = new Event("click", { cancelable: true });
+
     const first = (receivedEvent: Event) => {
       calls.push("first");
       received.push(receivedEvent);
     };
+
     const second = (receivedEvent: Event) => {
       calls.push("second");
       received.push(receivedEvent);

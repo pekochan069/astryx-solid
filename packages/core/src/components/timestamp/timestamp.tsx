@@ -34,7 +34,7 @@ export interface TimestampProps extends BaseProps<HTMLTimeElement> {
   isLive?: boolean;
 }
 
-const day = 86_400;
+const SECONDS_PER_DAY = 86_400;
 
 const styles = stylex.create({
   time: { display: "inline", fontFamily: "inherit", fontStyle: "normal" },
@@ -55,14 +55,15 @@ function relative(date: Date, now: Date) {
   if ((!future && absoluteSeconds < 10) || (future && absoluteSeconds <= 30)) return "now";
 
   const units: Array<[number, string]> = [
-    [365 * day, "year"],
-    [30 * day, "month"],
-    [day, "day"],
+    [365 * SECONDS_PER_DAY, "year"],
+    [30 * SECONDS_PER_DAY, "month"],
+    [SECONDS_PER_DAY, "day"],
     [3600, "hour"],
     [60, "minute"],
   ];
 
-  if (!future && absoluteSeconds >= day && absoluteSeconds < 2 * day) return "yesterday";
+  if (!future && absoluteSeconds >= SECONDS_PER_DAY && absoluteSeconds < 2 * SECONDS_PER_DAY)
+    return "yesterday";
 
   for (const [span, unit] of units)
     if (absoluteSeconds >= span) {
@@ -75,11 +76,27 @@ function relative(date: Date, now: Date) {
   return future ? "in a few seconds" : `${absoluteSeconds} seconds ago`;
 }
 
+function timezoneName(date: Date) {
+  return new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+    .formatToParts(date)
+    .find(({ type }) => type === "timeZoneName")?.value;
+}
+
+function withTimezone(value: string, date: Date, shown: boolean) {
+  const name = shown ? timezoneName(date) : undefined;
+  return name === undefined ? value : `${value} ${name}`;
+}
+
 function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
   if (format === "system_date") return date.toLocaleDateString("en-CA");
-  if (format === "system_time") return date.toLocaleTimeString("en-GB");
+  if (format === "system_time")
+    return withTimezone(date.toLocaleTimeString("en-GB"), date, timezone);
   if (format === "system_date_time")
-    return `${date.toLocaleDateString("en-CA")} ${date.toLocaleTimeString("en-GB")}`;
+    return withTimezone(
+      `${date.toLocaleDateString("en-CA")} ${date.toLocaleTimeString("en-GB")}`,
+      date,
+      timezone,
+    );
 
   const options: Intl.DateTimeFormatOptions =
     format === "date"
@@ -100,7 +117,7 @@ function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
 
   return new Intl.DateTimeFormat(undefined, {
     ...options,
-    ...(timezone ? { timeZoneName: "short" } : {}),
+    ...(timezone && (format === "date_time" || format === "time") ? { timeZoneName: "short" } : {}),
   }).format(date);
 }
 
@@ -127,7 +144,8 @@ export function Timestamp(props: TimestampProps) {
   const valid = () => !Number.isNaN(date().getTime());
   const effective = () =>
     props.format === "auto" || props.format == null
-      ? Math.abs(now().getTime() - date().getTime()) / 1000 <= (props.autoThreshold ?? 7 * day)
+      ? Math.abs(now().getTime() - date().getTime()) / 1000 <=
+        (props.autoThreshold ?? 7 * SECONDS_PER_DAY)
         ? "relative"
         : "date_time"
       : props.format;

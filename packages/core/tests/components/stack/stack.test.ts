@@ -81,7 +81,6 @@ describe("Stack", () => {
       }),
     );
     const stack = container.firstElementChild!;
-
     expect(stack.getAttribute("data-direction")).toBe("horizontal");
     expect(stack.getAttribute("data-gap")).toBe("4");
     expect(stack.getAttribute("data-wrap")).toBe("wrap");
@@ -110,10 +109,8 @@ describe("Stack", () => {
     const stack = container.firstElementChild!;
 
     expect(stack.getAttribute("data-direction")).toBe("vertical");
-
     setDirection("horizontal");
     await Promise.resolve();
-
     expect(stack.getAttribute("data-direction")).toBe("horizontal");
   });
 

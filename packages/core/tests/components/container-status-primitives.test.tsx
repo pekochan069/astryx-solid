@@ -7,7 +7,6 @@ import {
   EmptyState,
   ProgressBar,
   ResizeHandle,
-  type ResizableGroup,
   type ResizableRegion,
   StatusDot,
   Thumbnail,
@@ -81,7 +80,9 @@ describe("container and status primitives", () => {
     await Promise.resolve();
     expect(container.querySelector('[role="tooltip"]')).toBeNull();
   });
+});
 
+describe("progress bar", () => {
   it("clamps progress and exposes indeterminate progress without values", () => {
     const container = mount(() => (
       <>
@@ -117,7 +118,9 @@ describe("container and status primitives", () => {
     const [activeValue, disabledValue] = Array.from(container.querySelectorAll("span")).filter(
       (element) => element.textContent === "32%",
     );
+    const [, disabledProgress] = container.querySelectorAll('[role="progressbar"]');
 
+    expect(disabledProgress?.getAttribute("aria-disabled")).toBe("true");
     expect(disabledLabel?.className).not.toBe(activeLabel?.className);
     expect(disabledValue?.className).not.toBe(activeValue?.className);
   });
@@ -132,8 +135,43 @@ describe("container and status primitives", () => {
     await Promise.resolve();
     expect(progress?.getAttribute("aria-valuenow")).toBe("75");
   });
+});
 
-  it("renders documented timestamp wording, formats, and text styles", () => {
+describe("empty state", () => {
+  it("applies compact title, description, and action layout", () => {
+    const container = mount(() => (
+      <>
+        <EmptyState
+          title="Regular"
+          description="Regular description"
+          actions={<button>Go</button>}
+        />
+        <EmptyState
+          title="Compact"
+          description="Compact description"
+          actions={<button>Go compact</button>}
+          isCompact
+        />
+      </>
+    ));
+    const [regularTitle, compactTitle] = Array.from(container.querySelectorAll("h3"));
+    const regularDescription = Array.from(container.querySelectorAll("div")).find(
+      (element) => element.textContent === "Regular description",
+    );
+    const compactDescription = Array.from(container.querySelectorAll("div")).find(
+      (element) => element.textContent === "Compact description",
+    );
+
+    expect(compactTitle?.className).not.toBe(regularTitle?.className);
+    expect(compactDescription?.className).not.toBe(regularDescription?.className);
+    expect(container.getElementsByTagName("button")[1]?.parentElement?.className).not.toBe(
+      container.getElementsByTagName("button")[0]?.parentElement?.className,
+    );
+  });
+});
+
+describe("timestamp", () => {
+  it("renders documented wording, formats, and text styles", () => {
     const container = mount(() => (
       <>
         <Timestamp
@@ -164,6 +202,19 @@ describe("container and status primitives", () => {
           weight="bold"
         />
         <Timestamp value="2026-02-19T17:00:00Z" format="date_weekday" />
+        <Timestamp
+          data-testid="date-timezone"
+          value="2026-02-19T17:00:00Z"
+          format="date"
+          isTimezoneShown
+        />
+        <Timestamp data-testid="system-time" value="2026-02-19T17:00:00Z" format="system_time" />
+        <Timestamp
+          data-testid="system-time-timezone"
+          value="2026-02-19T17:00:00Z"
+          format="system_time"
+          isTimezoneShown
+        />
       </>
     ));
     const defaultTimestamp = container.querySelector<HTMLElement>(
@@ -181,6 +232,13 @@ describe("container and status primitives", () => {
     expect(styledTimestamp?.textContent).toContain("February");
     expect(styledTimestamp?.className).not.toBe(defaultTimestamp?.className);
     expect(container.textContent).toMatch(/Mon|Tue|Wed|Thu|Fri|Sat|Sun/);
+    expect(container.querySelector('[data-testid="date-timezone"]')?.textContent).not.toMatch(
+      /\b(?:GMT|UTC)[+-]?\d*\b/,
+    );
+    const systemTime = container.querySelector('[data-testid="system-time"]')?.textContent;
+    expect(container.querySelector('[data-testid="system-time-timezone"]')?.textContent).toMatch(
+      new RegExp(`^${systemTime}\\s\\S+`),
+    );
   });
 });
 
@@ -216,10 +274,10 @@ describe("resizable regions", () => {
 });
 
 describe("resizable state restoration", () => {
-  it("persists named regions independently", async () => {
-    let group: ResizableGroup | undefined;
+  it("returns named regions directly and persists them independently", () => {
+    let regions: Record<string, ResizableRegion> | undefined;
     mount(() => {
-      group = useResizable({
+      regions = useResizable({
         autoSaveId: "workspace",
         regions: {
           sidebar: { defaultSize: 200 },
@@ -228,65 +286,22 @@ describe("resizable state restoration", () => {
       });
       return null;
     });
-    if (group === undefined) throw new Error("Expected resize regions");
+    if (regions === undefined) throw new Error("Expected resize regions");
 
-    group.regions.sidebar.resize(240);
-    group.regions.inspector.collapse();
+    regions.sidebar.resize(240);
+    regions.inspector.collapse();
 
     expect(window.localStorage.getItem("astryx-resizable:workspace:sidebar")).toBe("240");
     expect(window.localStorage.getItem("astryx-resizable:workspace:inspector")).toBe("0");
   });
 
-  it("shrinks multi-region groups by ascending shrink order", async () => {
-    let group: ResizableGroup | undefined;
-    mount(() => {
-      group = useResizable({
-        regions: {
-          sidebar: { defaultSize: 200, minSizePx: 100, shrinkOrder: 2 },
-          content: { defaultSize: 200, minSizePx: 100, shrinkOrder: 3 },
-          inspector: { defaultSize: 200, minSizePx: 100, shrinkOrder: 1 },
-        },
-      });
-      return null;
-    });
-    if (group === undefined) throw new Error("Expected resize group");
-
-    group.resizeToFit(450);
-    await Promise.resolve();
-
-    expect(group.regions.inspector.size).toBe(100);
-    expect(group.regions.sidebar.size).toBe(150);
-    expect(group.regions.content.size).toBe(200);
-  });
-
-  it("keeps collapsed regions collapsed while fitting a group", async () => {
-    let group: ResizableGroup | undefined;
-    mount(() => {
-      group = useResizable({
-        regions: {
-          sidebar: { defaultSize: 200, minSizePx: 100, collapsible: true, shrinkOrder: 1 },
-          content: { defaultSize: 200, minSizePx: 100, shrinkOrder: 2 },
-        },
-      });
-      return null;
-    });
-    if (group === undefined) throw new Error("Expected resize group");
-
-    group.regions.sidebar.collapse();
-    group.resizeToFit(150);
-    await Promise.resolve();
-
-    expect(group.regions.sidebar.isCollapsed).toBe(true);
-    expect(group.regions.content.size).toBe(150);
-  });
-
   it("uses multi-region direction for resize handles", () => {
     const container = mount(() => {
-      const group = useResizable({
+      const regions = useResizable({
         direction: "vertical",
         regions: { panel: { defaultSize: 200 } },
       });
-      return <ResizeHandle label="Resize panel" resizable={group.regions.panel.props} />;
+      return <ResizeHandle label="Resize panel" resizable={regions.panel.props} />;
     });
 
     expect(container.querySelector('[role="separator"]')?.getAttribute("aria-orientation")).toBe(

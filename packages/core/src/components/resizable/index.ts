@@ -1,7 +1,7 @@
 export { ResizeHandle, useResizable } from "./resizable";
 
 export type {
-  ResizableGroup,
+  ResizableConfig,
   ResizableProps,
   ResizableRegion,
   ResizableRegionConfig,

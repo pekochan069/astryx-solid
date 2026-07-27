@@ -24,6 +24,14 @@ export interface ResizableRegionConfig {
   shrinkOrder?: number;
 }
 
+export interface ResizableConfig {
+  defaultWidth?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  autoSaveId?: string;
+  onWidthChange?: (width: number) => void;
+}
+
 export interface UseResizableSingleConfig extends ResizableRegionConfig {
   autoSaveId?: string;
   onSizeChange?: (size: number) => void;
@@ -41,6 +49,8 @@ export interface ResizableProps {
   readonly _isCollapsed: boolean;
   readonly _minSizePx: number;
   readonly _maxSizePx: number;
+  readonly _snaps: number[];
+  readonly _collapsedSize: number;
   readonly _collapsible: boolean;
   readonly _direction?: "horizontal" | "vertical";
   readonly _isResizableProps: true;
@@ -56,11 +66,6 @@ export interface ResizableRegion {
   expand(): void;
   resize(size: number): void;
   readonly props: ResizableProps;
-}
-
-export interface ResizableGroup {
-  readonly regions: Record<string, ResizableRegion>;
-  resizeToFit(size: number): void;
 }
 
 function clampSize(size: number, min: number, max: number, snaps: number[]) {
@@ -141,6 +146,8 @@ function createResizableProps(
     },
     _minSizePx: min,
     _maxSizePx: max,
+    _snaps: snaps,
+    _collapsedSize: config.collapsedSize ?? DEFAULT_COLLAPSED_SIZE,
     _collapsible: config.collapsible ?? false,
     _direction: direction,
     _isResizableProps: true,
@@ -244,10 +251,17 @@ function createResizableRegion(
   };
 }
 
-function createResizableGroup(config: UseResizableMultiConfig): ResizableGroup {
-  const entries = Object.entries(config.regions);
-  const regions = Object.fromEntries(
-    entries.map(([name, region]) => [
+export function useResizable(config: UseResizableSingleConfig): ResizableRegion;
+
+export function useResizable(config: UseResizableMultiConfig): Record<string, ResizableRegion>;
+
+export function useResizable(
+  config: UseResizableSingleConfig | UseResizableMultiConfig,
+): ResizableRegion | Record<string, ResizableRegion> {
+  if (!("regions" in config)) return createResizableRegion(config);
+
+  return Object.fromEntries(
+    Object.entries(config.regions).map(([name, region]) => [
       name,
       createResizableRegion(
         {
@@ -258,48 +272,6 @@ function createResizableGroup(config: UseResizableMultiConfig): ResizableGroup {
       ),
     ]),
   );
-
-  return {
-    regions,
-    resizeToFit(availableSize: number) {
-      if (!Number.isFinite(availableSize)) return;
-
-      let overflow =
-        Object.values(regions).reduce((total, region) => total + region.size, 0) -
-        Math.max(0, availableSize);
-      const ordered = entries.toSorted(
-        ([, first], [, second]) =>
-          (first.shrinkOrder ?? Infinity) - (second.shrinkOrder ?? Infinity),
-      );
-
-      for (const [name, regionConfig] of ordered) {
-        if (overflow <= 0) break;
-
-        const region = regions[name];
-        if (region.isCollapsed) continue;
-
-        const previousSize = region.size;
-        const nextSize = clampSize(
-          previousSize - overflow,
-          regionConfig.minSizePx ?? DEFAULT_MIN_SIZE,
-          regionConfig.maxSizePx ?? Infinity,
-          regionConfig.snaps ?? [],
-        );
-        region.resize(nextSize);
-        overflow -= Math.max(0, previousSize - nextSize);
-      }
-    },
-  };
-}
-
-export function useResizable(config: UseResizableSingleConfig): ResizableRegion;
-
-export function useResizable(config: UseResizableMultiConfig): ResizableGroup;
-
-export function useResizable(
-  config: UseResizableSingleConfig | UseResizableMultiConfig,
-): ResizableRegion | ResizableGroup {
-  return "regions" in config ? createResizableGroup(config) : createResizableRegion(config);
 }
 
 export interface ResizeHandleProps extends Omit<BaseProps<HTMLDivElement>, "onKeyDown"> {
@@ -421,11 +393,6 @@ function resizeFromKey(
   }
 }
 
-function setResizeHandleElement(ref: JSX.Ref<HTMLDivElement> | undefined, element: HTMLDivElement) {
-  setElementRef(ref, element);
-  return element;
-}
-
 function resizeHandleRest(props: ResizeHandleProps) {
   return omit(
     props,
@@ -453,7 +420,10 @@ export function ResizeHandle(props: ResizeHandleProps) {
   const [interacting, setInteracting] = createSignal(false);
 
   let element: HTMLDivElement | undefined;
-  const setElement = (next: HTMLDivElement) => (element = setResizeHandleElement(props.ref, next));
+  const setElement = (next: HTMLDivElement) => {
+    element = next;
+    setElementRef(props.ref, next);
+  };
 
   const horizontal = () =>
     (props.direction ?? props.resizable?._direction ?? "horizontal") === "horizontal";

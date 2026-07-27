@@ -66,7 +66,14 @@ render(
 
 const primitiveRoot = requireRoot("content-primitives");
 hydrateAndRecord(primitiveRoot, () =>
-  hydrate(ContentPrimitives, primitiveRoot, { renderId: "primitives" }),
+  hydrate(
+    () => {
+      createUniqueId();
+      return ContentPrimitives();
+    },
+    primitiveRoot,
+    { renderId: "primitives" },
+  ),
 );
 
 const containerStatusRoot = requireRoot("packed-container-status");

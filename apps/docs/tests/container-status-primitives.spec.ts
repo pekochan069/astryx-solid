@@ -29,8 +29,15 @@ test("container and status primitives render accessible states", async ({ page }
   await expect(page.getByRole("button", { name: "Remove Cover image — Landscape" })).toBeVisible();
   await expect(page.getByRole("group", { name: "Disabled cover" })).toHaveCount(1);
 
+  await resizeHandle.evaluate((handle) => {
+    handle.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: 0 }));
+    window.dispatchEvent(new PointerEvent("pointermove", { clientX: 20 }));
+    window.dispatchEvent(new PointerEvent("pointerup"));
+  });
+  await expect(resizeHandle).toHaveAttribute("aria-valuenow", "220");
+
   await resizeHandle.press("ArrowRight");
-  await expect(resizeHandle).toHaveAttribute("aria-valuenow", "210");
+  await expect(resizeHandle).toHaveAttribute("aria-valuenow", "230");
   await resizeHandle.dblclick();
   await expect(resizeHandle).toHaveAttribute("aria-valuenow", "0");
   await resizeHandle.press("Enter");

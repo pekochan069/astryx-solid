@@ -7,6 +7,7 @@ import {
   EmptyState,
   ProgressBar,
   ResizeHandle,
+  type ResizableGroup,
   type ResizableRegion,
   StatusDot,
   Thumbnail,
@@ -100,6 +101,27 @@ describe("container and status primitives", () => {
     expect(indeterminate?.hasAttribute("aria-valuenow")).toBe(false);
   });
 
+  it("styles disabled progress labels and values", () => {
+    const container = mount(() => (
+      <>
+        <ProgressBar value={32} label="Active" hasValueLabel />
+        <ProgressBar value={32} label="Disabled" hasValueLabel isDisabled />
+      </>
+    ));
+    const activeLabel = Array.from(container.querySelectorAll("span")).find(
+      (element) => element.textContent === "Active",
+    );
+    const disabledLabel = Array.from(container.querySelectorAll("span")).find(
+      (element) => element.textContent === "Disabled",
+    );
+    const [activeValue, disabledValue] = Array.from(container.querySelectorAll("span")).filter(
+      (element) => element.textContent === "32%",
+    );
+
+    expect(disabledLabel?.className).not.toBe(activeLabel?.className);
+    expect(disabledValue?.className).not.toBe(activeValue?.className);
+  });
+
   it("updates progress from reactive props", async () => {
     const [value, setValue] = createSignal(25);
     const container = mount(() => <ProgressBar value={value()} max={100} label="Upload" />);
@@ -109,6 +131,40 @@ describe("container and status primitives", () => {
     setValue(75);
     await Promise.resolve();
     expect(progress?.getAttribute("aria-valuenow")).toBe("75");
+  });
+
+  it("renders documented timestamp wording, formats, and text styles", () => {
+    const container = mount(() => (
+      <>
+        <Timestamp
+          data-testid="default-timestamp"
+          value={Date.now() / 1000 - 100_000}
+          format="relative"
+          hasTooltip={false}
+        />
+        <Timestamp
+          data-testid="styled-timestamp"
+          value="2026-02-19T17:00:00Z"
+          format="date_long"
+          type="label"
+          size="lg"
+          color="accent"
+          weight="bold"
+        />
+        <Timestamp value="2026-02-19T17:00:00Z" format="date_weekday" />
+      </>
+    ));
+    const defaultTimestamp = container.querySelector<HTMLElement>(
+      '[data-testid="default-timestamp"]',
+    );
+    const styledTimestamp = container.querySelector<HTMLElement>(
+      '[data-testid="styled-timestamp"]',
+    );
+
+    expect(defaultTimestamp?.textContent).toBe("yesterday");
+    expect(styledTimestamp?.textContent).toContain("February");
+    expect(styledTimestamp?.className).not.toBe(defaultTimestamp?.className);
+    expect(container.textContent).toMatch(/Mon|Tue|Wed|Thu|Fri|Sat|Sun/);
   });
 });
 
@@ -145,9 +201,9 @@ describe("resizable regions", () => {
 
 describe("resizable state restoration", () => {
   it("persists named regions independently", async () => {
-    let regions: Record<string, ResizableRegion> | undefined;
+    let group: ResizableGroup | undefined;
     mount(() => {
-      regions = useResizable({
+      group = useResizable({
         autoSaveId: "workspace",
         regions: {
           sidebar: { defaultSize: 200 },
@@ -156,22 +212,65 @@ describe("resizable state restoration", () => {
       });
       return null;
     });
-    if (regions === undefined) throw new Error("Expected resize regions");
+    if (group === undefined) throw new Error("Expected resize regions");
 
-    regions.sidebar.resize(240);
-    regions.inspector.collapse();
+    group.regions.sidebar.resize(240);
+    group.regions.inspector.collapse();
 
     expect(window.localStorage.getItem("astryx-resizable:workspace:sidebar")).toBe("240");
     expect(window.localStorage.getItem("astryx-resizable:workspace:inspector")).toBe("0");
   });
 
+  it("shrinks multi-region groups by ascending shrink order", async () => {
+    let group: ResizableGroup | undefined;
+    mount(() => {
+      group = useResizable({
+        regions: {
+          sidebar: { defaultSize: 200, minSizePx: 100, shrinkOrder: 2 },
+          content: { defaultSize: 200, minSizePx: 100, shrinkOrder: 3 },
+          inspector: { defaultSize: 200, minSizePx: 100, shrinkOrder: 1 },
+        },
+      });
+      return null;
+    });
+    if (group === undefined) throw new Error("Expected resize group");
+
+    group.resizeToFit(450);
+    await Promise.resolve();
+
+    expect(group.regions.inspector.size).toBe(100);
+    expect(group.regions.sidebar.size).toBe(150);
+    expect(group.regions.content.size).toBe(200);
+  });
+
+  it("keeps collapsed regions collapsed while fitting a group", async () => {
+    let group: ResizableGroup | undefined;
+    mount(() => {
+      group = useResizable({
+        regions: {
+          sidebar: { defaultSize: 200, minSizePx: 100, collapsible: true, shrinkOrder: 1 },
+          content: { defaultSize: 200, minSizePx: 100, shrinkOrder: 2 },
+        },
+      });
+      return null;
+    });
+    if (group === undefined) throw new Error("Expected resize group");
+
+    group.regions.sidebar.collapse();
+    group.resizeToFit(150);
+    await Promise.resolve();
+
+    expect(group.regions.sidebar.isCollapsed).toBe(true);
+    expect(group.regions.content.size).toBe(150);
+  });
+
   it("uses multi-region direction for resize handles", () => {
     const container = mount(() => {
-      const regions = useResizable({
+      const group = useResizable({
         direction: "vertical",
         regions: { panel: { defaultSize: 200 } },
       });
-      return <ResizeHandle label="Resize panel" resizable={regions.panel.props} />;
+      return <ResizeHandle label="Resize panel" resizable={group.regions.panel.props} />;
     });
 
     expect(container.querySelector('[role="separator"]')?.getAttribute("aria-orientation")).toBe(

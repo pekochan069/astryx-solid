@@ -7,11 +7,14 @@ import type { TextColor, TextSize, TextType, TextWeight } from "../text/text";
 import { stylexProps } from "../../stylex";
 import { colorVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
+import { textStyles } from "../text/text";
 
 export type TimestampFormat =
   | "relative"
   | "auto"
   | "date"
+  | "date_long"
+  | "date_weekday"
   | "date_time"
   | "time"
   | "system_date"
@@ -34,7 +37,7 @@ export interface TimestampProps extends BaseProps<HTMLTimeElement> {
 const day = 86_400;
 
 const styles = stylex.create({
-  root: { fontFamily: "inherit", fontStyle: "normal", color: colorVars["--color-text-secondary"] },
+  time: { display: "inline", fontFamily: "inherit", fontStyle: "normal" },
   focus: {
     outline: { default: null, ":focus-visible": `2px solid ${colorVars["--color-accent"]}` },
   },
@@ -47,9 +50,9 @@ function dateOf(value: string | number) {
 function relative(date: Date, now: Date) {
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
   const future = seconds < 0;
-  const n = Math.abs(seconds);
+  const absoluteSeconds = Math.abs(seconds);
 
-  if (n <= 30) return "now";
+  if (absoluteSeconds <= 30) return "now";
 
   const units: Array<[number, string]> = [
     [365 * day, "year"],
@@ -59,15 +62,17 @@ function relative(date: Date, now: Date) {
     [60, "minute"],
   ];
 
+  if (!future && absoluteSeconds >= day && absoluteSeconds < 2 * day) return "yesterday";
+
   for (const [span, unit] of units)
-    if (n >= span) {
-      const count = Math.floor(n / span);
+    if (absoluteSeconds >= span) {
+      const count = Math.floor(absoluteSeconds / span);
       return future
         ? `in ${count} ${unit}${count === 1 ? "" : "s"}`
         : `${count} ${unit}${count === 1 ? "" : "s"} ago`;
     }
 
-  return future ? "in a few seconds" : `${n} seconds ago`;
+  return future ? "in a few seconds" : `${absoluteSeconds} seconds ago`;
 }
 
 function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
@@ -79,9 +84,19 @@ function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
   const options: Intl.DateTimeFormatOptions =
     format === "date"
       ? { year: "numeric", month: "short", day: "numeric" }
-      : format === "time"
-        ? { hour: "numeric", minute: "2-digit" }
-        : { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+      : format === "date_long"
+        ? { year: "numeric", month: "long", day: "numeric" }
+        : format === "date_weekday"
+          ? { year: "numeric", month: "short", day: "numeric", weekday: "short" }
+          : format === "time"
+            ? { hour: "numeric", minute: "2-digit" }
+            : {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              };
 
   return new Intl.DateTimeFormat(undefined, {
     ...options,
@@ -139,7 +154,13 @@ export function Timestamp(props: TimestampProps) {
   );
   const style = createMemo(() =>
     stylexProps(
-      styles.root,
+      styles.time,
+      ...textStyles(
+        props.type ?? "supporting",
+        props.color ?? "secondary",
+        props.size,
+        props.weight,
+      ),
       props.hasTooltip !== false && effective() === "relative" && styles.focus,
       props.xstyle,
     ),

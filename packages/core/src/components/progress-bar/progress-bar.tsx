@@ -8,8 +8,10 @@ import {
   colorVars,
   durationVars,
   easeVars,
+  fontWeightVars,
   radiusVars,
   spacingVars,
+  typeScaleVars,
 } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 
@@ -47,7 +49,20 @@ const styles = stylex.create({
     gap: spacingVars["--spacing-1"],
     width: "100%",
   },
-  header: { display: "flex", justifyContent: "space-between" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "baseline" },
+  label: {
+    fontSize: typeScaleVars["--text-body-size"],
+    lineHeight: typeScaleVars["--text-body-leading"],
+    fontWeight: fontWeightVars["--font-weight-medium"],
+    color: colorVars["--color-text-primary"],
+  },
+  valueLabel: {
+    fontSize: typeScaleVars["--text-body-size"],
+    lineHeight: typeScaleVars["--text-body-leading"],
+    fontWeight: fontWeightVars["--font-weight-normal"],
+    color: colorVars["--color-text-secondary"],
+  },
+  disabledText: { color: colorVars["--color-text-disabled"] },
   hidden: {
     position: "absolute",
     width: 1,
@@ -125,11 +140,18 @@ export function ProgressBar(props: ProgressBarProps) {
       <div {...stylexProps(styles.header)}>
         <span
           id={labelId}
-          class={props.isLabelHidden ? stylexProps(styles.hidden).class : undefined}
+          {...stylexProps(
+            styles.label,
+            props.isLabelHidden && styles.hidden,
+            props.isDisabled && styles.disabledText,
+          )}
           textContent={props.label}
         />
         <Show when={props.hasValueLabel && !props.isIndeterminate}>
-          <span textContent={text()} />
+          <span
+            {...stylexProps(styles.valueLabel, props.isDisabled && styles.disabledText)}
+            textContent={text()}
+          />
         </Show>
       </div>
       <div

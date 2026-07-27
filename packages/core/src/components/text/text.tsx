@@ -166,6 +166,15 @@ function typeStyle(type: TextType) {
   }
 }
 
+export function textStyles(
+  type: TextType,
+  color: TextColor,
+  size: TextSize | undefined,
+  weight: TextWeight | undefined,
+) {
+  return [styles[color], typeStyle(type), size && sizeStyles[size], weight && styles[weight]];
+}
+
 function textWrapStyle(textWrap: TextWrap | undefined) {
   switch (textWrap) {
     case "nowrap":
@@ -223,10 +232,7 @@ export function Text(props: TextProps) {
   );
   const style = createMemo(() =>
     stylexProps(
-      styles[color()],
-      typeStyle(type()),
-      props.size && sizeStyles[props.size],
-      props.weight && styles[props.weight],
+      ...textStyles(type(), color(), props.size, props.weight),
       maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
       maxLines() > 0 && styles[wordBreak()],
       maxLines() === 0 && styles[display()],

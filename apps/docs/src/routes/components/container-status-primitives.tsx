@@ -58,7 +58,7 @@ export function ContainerStatusPrimitivesDocs() {
 
       <div>
         <StatusDot variant="success" label="Online" isPulsing />
-        <StatusDot variant="warning" label="Needs attention" />
+        <StatusDot variant="warning" label="Needs attention" tooltip="Service needs attention" />
         <StatusDot variant="error" label="Offline" />
         <span>Online</span>
         <Timestamp value="2025-01-01T12:00:00Z" format="date_time" />

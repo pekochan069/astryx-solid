@@ -27,6 +27,7 @@ export function astryxStylex(options: AstryxStylexOptions = {}): Plugin[] {
     rootDir = process.cwd(),
     layers = {},
   } = options;
+
   const library = validateLayer(layers.library ?? "astryx-base");
   const product = validateLayer(layers.product ?? "product");
 

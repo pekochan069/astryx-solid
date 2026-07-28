@@ -1,8 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
-import { Dynamic } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit, Show } from "solid-js";
+import { createMemo, Match, omit, Show, Switch } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -61,15 +60,6 @@ const styles = stylex.create({
   actionsCompact: { flexDirection: "column" },
 });
 
-const headingTags = {
-  1: "h1",
-  2: "h2",
-  3: "h3",
-  4: "h4",
-  5: "h5",
-  6: "h6",
-} as const;
-
 function EmptyStateHeading(props: {
   level: NonNullable<EmptyStateProps["headingLevel"]>;
   title: string;
@@ -77,7 +67,25 @@ function EmptyStateHeading(props: {
 }) {
   const style = createMemo(() => stylexProps(styles.title, props.isCompact && styles.titleCompact));
 
-  return <Dynamic component={headingTags[props.level]} {...style()} textContent={props.title} />;
+  return (
+    <Switch fallback={<h3 {...style()} textContent={props.title} />}>
+      <Match when={props.level === 1}>
+        <h1 {...style()} textContent={props.title} />
+      </Match>
+      <Match when={props.level === 2}>
+        <h2 {...style()} textContent={props.title} />
+      </Match>
+      <Match when={props.level === 4}>
+        <h4 {...style()} textContent={props.title} />
+      </Match>
+      <Match when={props.level === 5}>
+        <h5 {...style()} textContent={props.title} />
+      </Match>
+      <Match when={props.level === 6}>
+        <h6 {...style()} textContent={props.title} />
+      </Match>
+    </Switch>
+  );
 }
 
 export function EmptyState(props: EmptyStateProps) {

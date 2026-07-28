@@ -20,6 +20,10 @@ test("action foundation hydrates accessible interaction states", async ({ page }
   );
   await expect(page.getByText("Disabled link", { exact: true })).not.toHaveAttribute("href");
 
+  const primary = page.getByRole("button", { name: "Primary action" });
+  await expect(primary).toHaveText("Primary action");
+  await expect(primary.locator(":scope > span").first()).toBeHidden();
+
   const unavailable = page.getByRole("button", { name: "Unavailable action" });
   await unavailable.focus();
   await expect(page.getByRole("tooltip")).toHaveText("Available after setup");

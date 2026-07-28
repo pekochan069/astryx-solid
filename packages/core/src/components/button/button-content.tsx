@@ -17,7 +17,11 @@ interface ButtonContentProps {
 export function ButtonContent(props: ButtonContentProps): JSX.Element {
   return (
     <>
-      <span {...stylex.attrs(loadingStyles.overlay)} aria-hidden="true" hidden={!props.loading}>
+      <span
+        {...stylex.attrs(loadingStyles.overlay)}
+        style={{ display: props.loading ? "grid" : "none" }}
+        aria-hidden="true"
+      >
         <Spinner size="sm" shade="inherit" />
       </span>
       <span

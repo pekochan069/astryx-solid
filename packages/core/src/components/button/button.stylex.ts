@@ -91,7 +91,7 @@ export const styles = stylex.create({
 });
 
 export const loadingStyles = stylex.create({
-  overlay: { position: "absolute", inset: 0, display: "grid", "place-items": "center" },
+  overlay: { position: "absolute", inset: 0, "place-items": "center" },
 });
 
 export const groupStyles = stylex.create({

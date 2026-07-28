@@ -52,7 +52,8 @@ describe("container and status primitives", () => {
 
     expect(container.textContent).toContain("Card content");
     expect(container.querySelector("h2")?.textContent).toBe("No results");
-    expect(container.querySelector('[role="status"]')?.textContent).toContain("Try another search");
+    expect(container.textContent).toContain("Try another search");
+    expect(container.querySelector('[role="status"]')).toBeNull();
     expect(container.querySelector('[role="img"]')?.getAttribute("aria-label")).toBe("Online");
     expect(container.querySelector('[role="group"]')?.getAttribute("aria-label")).toBe("photo.png");
     expect(container.querySelector("time")?.getAttribute("datetime")).toBe(

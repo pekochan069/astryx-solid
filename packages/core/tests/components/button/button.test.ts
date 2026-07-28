@@ -81,7 +81,10 @@ describe("Button", () => {
 
     expect(button.disabled).toBe(false);
     expect(button.getAttribute("aria-disabled")).toBe("true");
-    expect(button.title).toBe("Try later");
+    button.focus();
+    const description = document.getElementById(button.getAttribute("aria-describedby") ?? "");
+    expect(description?.role).toBe("tooltip");
+    expect(description?.textContent).toBe("Try later");
     expect(event.defaultPrevented).toBe(true);
     expect(onClick).not.toHaveBeenCalled();
   });

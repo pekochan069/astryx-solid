@@ -134,7 +134,8 @@ export function Section(props: SectionProps) {
   return (
     <div
       {...rest}
-      class={[outer().class, props.class]}
+      {...theme()}
+      class={[theme().class, outer().class, props.class]}
       style={{
         ...outer().style,
         ...(props.width != null && { width: size(props.width) }),
@@ -145,12 +146,7 @@ export function Section(props: SectionProps) {
       }}
       data-style-src={outer()["data-style-src"]}
     >
-      <div
-        {...theme()}
-        class={[theme().class, style().class]}
-        style={style().style}
-        data-style-src={style()["data-style-src"]}
-      >
+      <div class={style().class} style={style().style} data-style-src={style()["data-style-src"]}>
         {props.children}
       </div>
     </div>

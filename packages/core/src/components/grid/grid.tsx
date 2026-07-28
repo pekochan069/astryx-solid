@@ -13,11 +13,14 @@ import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export type GridAlignment = "start" | "center" | "end" | "stretch";
-export type GridColumns = number | { minWidth: number; max?: number; repeat?: "fill" | "fit" };
 
-export interface GridProps extends BaseProps<HTMLDivElement> {
-  columns?: GridColumns;
-  minChildWidth?: number;
+export interface GridResponsiveColumns {
+  minColumnWidth: number;
+  maxColumns?: number;
+  mode?: "auto-fill" | "auto-fit";
+}
+
+interface GridCommonProps extends BaseProps<HTMLDivElement> {
   rowHeight?: number;
   width?: SizeValue;
   height?: SizeValue;
@@ -31,11 +34,20 @@ export interface GridProps extends BaseProps<HTMLDivElement> {
   children?: JSX.Element;
 }
 
+export interface GridFixedProps extends GridCommonProps {
+  columns?: number;
+  responsive?: never;
+}
+
+export interface GridResponsiveProps extends GridCommonProps {
+  columns?: never;
+  responsive: GridResponsiveColumns;
+}
+
+export type GridProps = GridFixedProps | GridResponsiveProps;
+
 const styles = stylex.create({
   grid: { display: "grid" },
-  responsive: {
-    gridTemplateColumns: "repeat(auto-fit, minmax(var(--grid-min-child-width), 1fr))",
-  },
   rows: (value: number) => ({ gridAutoRows: `${value}px` }),
   alignStart: { alignItems: "start" },
   alignCenter: { alignItems: "center" },
@@ -77,12 +89,45 @@ const spacing: Record<SpacingStep, string> = {
   10: spacingVars["--spacing-10"],
 };
 
+function positiveInteger(value: number | undefined, fallback: number) {
+  return value != null && Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+function responsiveTemplate(
+  responsive: GridResponsiveColumns,
+  gap: SpacingStep | undefined,
+  columnGap: SpacingStep | undefined,
+) {
+  const minWidth =
+    Number.isFinite(responsive.minColumnWidth) && responsive.minColumnWidth > 0
+      ? responsive.minColumnWidth
+      : 1;
+  const mode = responsive.mode ?? "auto-fit";
+  const maxColumns =
+    responsive.maxColumns == null ? undefined : positiveInteger(responsive.maxColumns, 1);
+  const chosenGap = columnGap ?? gap;
+  const cappedWidth =
+    maxColumns == null
+      ? `${minWidth}px`
+      : chosenGap == null
+        ? `max(${minWidth}px, calc(100% / ${maxColumns}))`
+        : `max(${minWidth}px, calc((100% - (${maxColumns - 1} * ${spacing[chosenGap]})) / ${maxColumns}))`;
+
+  return `repeat(${mode}, minmax(min(100%, ${cappedWidth}), 1fr))`;
+}
+
+function gridTemplate(props: GridProps) {
+  return props.responsive == null
+    ? `repeat(${positiveInteger(props.columns, 1)}, 1fr)`
+    : responsiveTemplate(props.responsive, props.gap, props.columnGap);
+}
+
 /** CSS-grid container with fixed or responsive columns. */
 export function Grid(props: GridProps) {
   const rest = omit(
     props,
     "columns",
-    "minChildWidth",
+    "responsive",
     "rowHeight",
     "width",
     "height",
@@ -99,14 +144,17 @@ export function Grid(props: GridProps) {
     "children",
   );
 
-  const isUncappedResponsive = () => props.columns == null && props.minChildWidth != null;
-  const template = createMemo(() =>
-    gridTemplate(props.columns, props.minChildWidth, props.gap, props.columnGap),
+  const template = createMemo(() => gridTemplate(props));
+  const validRowHeight = createMemo(() =>
+    props.rowHeight != null && Number.isFinite(props.rowHeight) && props.rowHeight > 0
+      ? props.rowHeight
+      : undefined,
   );
 
   const theme = createMemo(() =>
     themeProps("grid", {
-      columns: typeof props.columns === "number" ? props.columns : undefined,
+      columns: props.responsive == null ? positiveInteger(props.columns, 1) : undefined,
+      responsive: props.responsive != null ? "true" : undefined,
       gap: props.gap,
       align: props.align,
       justify: props.justify,
@@ -115,8 +163,7 @@ export function Grid(props: GridProps) {
   const style = createMemo(() =>
     stylexProps(
       styles.grid,
-      isUncappedResponsive() && styles.responsive,
-      props.rowHeight != null && styles.rows(props.rowHeight),
+      validRowHeight() != null && styles.rows(validRowHeight() ?? 1),
       props.gap != null && styles.gap(spacing[props.gap]),
       props.rowGap != null && styles.rowGap(spacing[props.rowGap]),
       props.columnGap != null && styles.columnGap(spacing[props.columnGap]),
@@ -133,8 +180,7 @@ export function Grid(props: GridProps) {
       class={[theme().class, style().class, props.class]}
       style={{
         ...style().style,
-        ...(!isUncappedResponsive() && { "grid-template-columns": template() }),
-        ...(isUncappedResponsive() && { "--grid-min-child-width": `${props.minChildWidth}px` }),
+        "grid-template-columns": template(),
         ...(props.width != null && { width: size(props.width) }),
         ...(props.height != null && { height: size(props.height) }),
         ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
@@ -146,44 +192,4 @@ export function Grid(props: GridProps) {
       {props.children}
     </div>
   );
-}
-
-function gridTemplate(
-  columns: GridColumns | undefined,
-  minChildWidth: number | undefined,
-  gap: SpacingStep | undefined,
-  columnGap: SpacingStep | undefined,
-) {
-  if (typeof columns === "object") return responsiveTemplate(columns, gap, columnGap);
-  if (minChildWidth != null && minChildWidth > 0)
-    return columns != null && columns > 0
-      ? cappedTemplate(minChildWidth, columns, "auto-fit", gap, columnGap)
-      : `repeat(auto-fit, minmax(${minChildWidth}px, 1fr))`;
-  return columns != null && columns > 0 ? `repeat(${columns}, 1fr)` : "1fr";
-}
-
-function responsiveTemplate(
-  columns: Exclude<GridColumns, number>,
-  gap: SpacingStep | undefined,
-  columnGap: SpacingStep | undefined,
-) {
-  const repeat = columns.repeat === "fit" ? "auto-fit" : "auto-fill";
-  return columns.max != null && columns.max > 0
-    ? cappedTemplate(columns.minWidth, columns.max, repeat, gap, columnGap)
-    : `repeat(${repeat}, minmax(${columns.minWidth}px, 1fr))`;
-}
-
-function cappedTemplate(
-  minWidth: number,
-  max: number,
-  repeat: "auto-fill" | "auto-fit",
-  gap: SpacingStep | undefined,
-  columnGap: SpacingStep | undefined,
-) {
-  const chosenGap = columnGap ?? gap;
-  const perColumn =
-    chosenGap == null
-      ? `calc(100% / ${max})`
-      : `calc((100% - ${max - 1} * var(--spacing-${String(chosenGap).replace(".", "-")})) / ${max})`;
-  return `repeat(${repeat}, minmax(min(100%, max(${minWidth}px, ${perColumn})), 1fr))`;
 }

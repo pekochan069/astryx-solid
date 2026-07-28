@@ -11,7 +11,8 @@ import { themeProps } from "../../utils/theme-props";
 
 export interface BlockquoteProps extends BaseProps<HTMLQuoteElement> {
   children?: JSX.Element;
-  cite?: JSX.Element;
+  cite?: string;
+  attribution?: JSX.Element;
 }
 
 const styles = stylex.create({
@@ -33,7 +34,7 @@ const styles = stylex.create({
 });
 
 export function Blockquote(props: BlockquoteProps) {
-  const rest = omit(props, "cite", "xstyle", "class", "style", "children");
+  const rest = omit(props, "attribution", "xstyle", "class", "style", "children");
 
   const theme = createMemo(() => themeProps("blockquote"));
   const style = createMemo(() => stylexProps(styles.root, props.xstyle));
@@ -47,9 +48,9 @@ export function Blockquote(props: BlockquoteProps) {
       data-style-src={style()["data-style-src"]}
     >
       {props.children}
-      <Show when={props.cite != null}>
+      <Show when={props.attribution != null}>
         <footer>
-          <cite {...stylexProps(styles.cite)}>{props.cite}</cite>
+          <cite {...stylexProps(styles.cite)}>{props.attribution}</cite>
         </footer>
       </Show>
     </blockquote>

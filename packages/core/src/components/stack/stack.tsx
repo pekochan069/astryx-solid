@@ -7,11 +7,11 @@ import type { SizeValue } from "../../types/size-value.types";
 
 import { paddingBlockStyles, paddingInlineStyles } from "../../layout/padding.stylex";
 import { stylexProps } from "../../stylex";
+import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 import {
   stack,
   type SpacingStep,
-  type StackAlignment,
   type StackCrossAlignment,
   type StackDirection,
   type StackMainAlignment,
@@ -34,40 +34,10 @@ export interface StackProps extends BaseProps<HTMLElement> {
    */
   direction?: StackDirection;
 
-  /**
-   * Horizontal alignment of items.
-   * - When `direction='horizontal'`: controls main-axis (justify-content).
-   *   Accepts: `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`
-   * - When `direction='vertical'`: controls cross-axis (align-items).
-   *   Accepts: `'start' | 'center' | 'end' | 'stretch'`
-   */
-  hAlign?: StackAlignment;
-
-  /**
-   * Vertical alignment of items.
-   * - When `direction='horizontal'`: controls cross-axis (align-items).
-   *   Accepts: `'start' | 'center' | 'end' | 'stretch'`
-   * - When `direction='vertical'`: controls main-axis (justify-content).
-   *   Accepts: `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`
-   */
-  vAlign?: StackAlignment;
-
-  /**
-   * Main-axis alignment alias. Resolves based on `direction`:
-   * - `horizontal` → `hAlign` (justify-content)
-   * - `vertical` → `vAlign` (justify-content)
-   *
-   * Mirrors CSS `justify-content` / Tailwind `justify-*`.
-   */
+  /** Main-axis alignment, matching CSS `justify-content`. */
   justify?: StackMainAlignment;
 
-  /**
-   * Cross-axis alignment alias. Resolves based on `direction`:
-   * - `horizontal` → `vAlign` (align-items)
-   * - `vertical` → `hAlign` (align-items)
-   *
-   * Mirrors CSS `align-items` / Tailwind `items-*`.
-   */
+  /** Cross-axis alignment, matching CSS `align-items`. */
   align?: StackCrossAlignment;
 
   /**
@@ -157,9 +127,6 @@ export interface StackProps extends BaseProps<HTMLElement> {
 /**
  * Arranges children in a horizontal or vertical flex layout.
  *
- * `hAlign` and `vAlign` map to the correct flex axis based on `direction`.
- * Explicit axis props take precedence over the `justify` and `align` aliases.
- *
  * @example
  * ```tsx
  * <Stack gap={2}>
@@ -167,7 +134,7 @@ export interface StackProps extends BaseProps<HTMLElement> {
  *   <Item />
  * </Stack>
  *
- * <Stack direction="horizontal" gap={4} vAlign="center">
+ * <Stack direction="horizontal" gap={4} align="center">
  *   <Item />
  *   <Item />
  * </Stack>
@@ -184,8 +151,6 @@ export function Stack(props: StackProps) {
   const rest = omit(
     merged,
     "direction",
-    "hAlign",
-    "vAlign",
     "justify",
     "align",
     "gap",
@@ -204,26 +169,6 @@ export function Stack(props: StackProps) {
     "style",
   );
 
-  const resolvedHAlign = createMemo(
-    () => merged.hAlign ?? (merged.direction === "horizontal" ? merged.justify : merged.align),
-  );
-  const resolvedVAlign = createMemo(
-    () => merged.vAlign ?? (merged.direction === "horizontal" ? merged.align : merged.justify),
-  );
-
-  const mainAlign = createMemo(
-    () =>
-      (merged.direction === "horizontal" ? resolvedHAlign() : resolvedVAlign()) as
-        | StackMainAlignment
-        | undefined,
-  );
-  const crossAlign = createMemo(
-    () =>
-      (merged.direction === "horizontal" ? resolvedVAlign() : resolvedHAlign()) as
-        | StackCrossAlignment
-        | undefined,
-  );
-
   const resolvedPaddingInline = createMemo(() => merged.paddingInline ?? merged.padding);
   const resolvedPaddingBlock = createMemo(() => merged.paddingBlock ?? merged.padding);
 
@@ -239,37 +184,29 @@ export function Stack(props: StackProps) {
     stylexProps(
       ...stack({
         direction: merged.direction,
-        mainAlign: mainAlign(),
-        crossAlign: crossAlign(),
+        mainAlign: merged.justify,
+        crossAlign: merged.align,
         gap: merged.gap,
         wrap: merged.wrap,
       }),
-      resolvedPaddingInline() != null && paddingInlineStyles[resolvedPaddingInline()!],
-      resolvedPaddingBlock() != null && paddingBlockStyles[resolvedPaddingBlock()!],
+      resolvedPaddingInline() != null && paddingInlineStyles[resolvedPaddingInline() ?? 0],
+      resolvedPaddingBlock() != null && paddingBlockStyles[resolvedPaddingBlock() ?? 0],
       merged.isScrollable && overflowStyles.scrollable,
       merged.xstyle,
     ),
   );
 
   const sizingStyle = createMemo(() => ({
-    ...(merged.width != null && {
-      width: typeof merged.width === "number" ? `${merged.width}px` : merged.width,
-    }),
-    ...(merged.height != null && {
-      height: typeof merged.height === "number" ? `${merged.height}px` : merged.height,
-    }),
-    ...(merged.maxWidth != null && {
-      "max-width": typeof merged.maxWidth === "number" ? `${merged.maxWidth}px` : merged.maxWidth,
-    }),
-    ...(merged.minHeight != null && {
-      "min-height":
-        typeof merged.minHeight === "number" ? `${merged.minHeight}px` : merged.minHeight,
-    }),
+    ...(merged.width != null && { width: size(merged.width) }),
+    ...(merged.height != null && { height: size(merged.height) }),
+    ...(merged.maxWidth != null && { "max-width": size(merged.maxWidth) }),
+    ...(merged.minHeight != null && { "min-height": size(merged.minHeight) }),
   }));
 
   return (
     <Dynamic
       component={merged.as}
+      {...rest}
       {...theme()}
       class={[theme().class, style().class, merged.class]}
       style={{
@@ -278,7 +215,6 @@ export function Stack(props: StackProps) {
         ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
-      {...rest}
     />
   );
 }

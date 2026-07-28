@@ -433,9 +433,10 @@ export function ResizeHandle(props: ResizeHandleProps) {
       ? -1
       : 1);
 
-  let cancelDrag = () => {};
+  const [dragController, setDragController] = createSignal<AbortController>();
   const finish = (complete: boolean) => {
-    cancelDrag();
+    dragController()?.abort();
+    setDragController(undefined);
     setDragging(false);
 
     if (typeof document !== "undefined") {
@@ -464,16 +465,12 @@ export function ResizeHandle(props: ResizeHandleProps) {
     const up = () => finish(true);
     const cancel = () => finish(false);
 
-    cancelDrag = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", cancel);
-      cancelDrag = () => {};
-    };
-
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", cancel);
+    const controller = new AbortController();
+    setDragController(controller);
+    const options = { signal: controller.signal };
+    window.addEventListener("pointermove", move, options);
+    window.addEventListener("pointerup", up, options);
+    window.addEventListener("pointercancel", cancel, options);
   };
 
   const onKeyDown = (event: KeyboardEvent) => {

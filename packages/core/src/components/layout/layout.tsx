@@ -21,29 +21,30 @@ import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
 export type LayoutHeight = "fill" | "auto";
-export type LayoutArea = "header" | "footer" | "content" | "start" | "end" | null;
+type LayoutArea = "header" | "footer" | "content" | "start" | "end" | null;
 
-export interface LayoutSlots {
+interface LayoutSlots {
   readonly hasHeader: boolean;
   readonly hasFooter: boolean;
   readonly hasStart: boolean;
   readonly hasEnd: boolean;
 }
-export interface LayoutDividerContextValue {
+interface LayoutDividerContextValue {
   readonly defaultHasDividers: boolean;
 }
 
-export const LayoutAreaContext = createContext<LayoutArea>(null);
-export const LayoutSlotsContext = createContext<LayoutSlots>({
+const LayoutAreaContext = createContext<LayoutArea>(null);
+const LayoutSlotsContext = createContext<LayoutSlots>({
   hasHeader: false,
   hasFooter: false,
   hasStart: false,
   hasEnd: false,
 });
-export const LayoutDividerContext = createContext<LayoutDividerContextValue | null>(null);
+const LayoutDividerContext = createContext<LayoutDividerContextValue>({
+  defaultHasDividers: false,
+});
 
 export interface LayoutProps extends Omit<BaseProps<HTMLDivElement>, "content"> {
-  content?: JSX.Element;
   contentWidth?: SizeValue;
   end?: JSX.Element;
   footer?: JSX.Element;
@@ -52,6 +53,7 @@ export interface LayoutProps extends Omit<BaseProps<HTMLDivElement>, "content"> 
   padding?: SpacingStep;
   start?: JSX.Element;
   defaultHasDividers?: boolean;
+  content?: JSX.Element;
   children?: JSX.Element;
 }
 
@@ -84,11 +86,8 @@ const styles = stylex.create({
 
 /** Page shell with explicit header, panel, content, and footer slots. */
 export function Layout(props: LayoutProps) {
-  const height = () => props.height ?? "fill";
-  const content = () => props.content ?? props.children;
   const rest = omit(
     props,
-    "content",
     "contentWidth",
     "end",
     "footer",
@@ -97,11 +96,14 @@ export function Layout(props: LayoutProps) {
     "padding",
     "start",
     "defaultHasDividers",
+    "content",
     "xstyle",
     "class",
     "style",
     "children",
   );
+
+  const height = () => props.height ?? "fill";
   const root = createMemo(() =>
     stylexProps(styles.outer, height() === "fill" ? styles.fill : styles.auto, props.xstyle),
   );
@@ -120,84 +122,63 @@ export function Layout(props: LayoutProps) {
       props.contentWidth != null && styles.constrained(size(props.contentWidth)),
     ),
   );
+
+  const theme = createMemo(() => themeProps("layout", { height: height() }));
+
+  const inheritedDividers = useContext(LayoutDividerContext);
+  const dividerContext: LayoutDividerContextValue = {
+    get defaultHasDividers() {
+      return props.defaultHasDividers ?? inheritedDividers.defaultHasDividers;
+    },
+  };
+
   const slots: LayoutSlots = {
     get hasHeader() {
-      return props.header != null;
+      return props.header != null && props.header !== false;
     },
     get hasFooter() {
-      return props.footer != null;
+      return props.footer != null && props.footer !== false;
     },
     get hasStart() {
-      return props.start != null;
+      return props.start != null && props.start !== false;
     },
     get hasEnd() {
-      return props.end != null;
+      return props.end != null && props.end !== false;
     },
   };
 
   return (
-    <Show
-      when={props.defaultHasDividers != null}
-      fallback={
-        <LayoutSlotsContext value={slots}>
-          <div
-            {...rest}
-            {...themeProps("layout", { height: height() })}
-            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
-            style={{ ...root().style, ...props.style }}
-            data-style-src={root()["data-style-src"]}
-          >
-            <div {...inner()}>
-              <Area area="header">{props.header}</Area>
-              <div {...middle()}>
-                <Area area="start">{props.start}</Area>
-                <div {...stylexProps(styles.content)}>
-                  <Area area="content">{content()}</Area>
-                </div>
-                <Area area="end">{props.end}</Area>
+    <LayoutDividerContext value={dividerContext}>
+      <LayoutSlotsContext value={slots}>
+        <div
+          {...rest}
+          {...theme()}
+          class={[theme().class, root().class, props.class]}
+          style={{ ...root().style, ...props.style }}
+          data-style-src={root()["data-style-src"]}
+        >
+          <div {...inner()}>
+            <Area area="header">{props.header}</Area>
+            <div {...middle()}>
+              <Area area="start">{props.start}</Area>
+              <div {...stylexProps(styles.content)}>
+                <Area area="content">{props.content ?? props.children}</Area>
               </div>
-              <Area area="footer">{props.footer}</Area>
+              <Area area="end">{props.end}</Area>
             </div>
+            <Area area="footer">{props.footer}</Area>
           </div>
-        </LayoutSlotsContext>
-      }
-    >
-      <LayoutDividerContext
-        value={{
-          get defaultHasDividers() {
-            return props.defaultHasDividers ?? false;
-          },
-        }}
-      >
-        <LayoutSlotsContext value={slots}>
-          <div
-            {...rest}
-            {...themeProps("layout", { height: height() })}
-            class={[themeProps("layout", { height: height() }).class, root().class, props.class]}
-            style={{ ...root().style, ...props.style }}
-            data-style-src={root()["data-style-src"]}
-          >
-            <div {...inner()}>
-              <Area area="header">{props.header}</Area>
-              <div {...middle()}>
-                <Area area="start">{props.start}</Area>
-                <div {...stylexProps(styles.content)}>
-                  <Area area="content">{content()}</Area>
-                </div>
-                <Area area="end">{props.end}</Area>
-              </div>
-              <Area area="footer">{props.footer}</Area>
-            </div>
-          </div>
-        </LayoutSlotsContext>
-      </LayoutDividerContext>
-    </Show>
+        </div>
+      </LayoutSlotsContext>
+    </LayoutDividerContext>
   );
 }
 
 function Area(props: { area: Exclude<LayoutArea, null>; children: JSX.Element }) {
-  return props.children == null ? null : (
-    <LayoutAreaContext value={props.area}>{props.children}</LayoutAreaContext>
+  return (
+    <Show when={props.children != null && props.children !== false}>
+      <LayoutAreaContext value={props.area}>{props.children}</LayoutAreaContext>
+    </Show>
   );
 }
 
@@ -207,14 +188,9 @@ export interface LayoutContentProps extends BaseProps<HTMLDivElement> {
   label?: string;
   children?: JSX.Element;
 }
-export interface LayoutPanelResizable {
-  readonly _size?: SizeValue;
-}
-
 export interface LayoutPanelProps extends LayoutContentProps {
   width?: SizeValue;
   hasDivider?: boolean;
-  resizable?: LayoutPanelResizable;
 }
 
 export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
@@ -319,7 +295,7 @@ export function LayoutContent(props: LayoutContentProps) {
 
 /** Sidebar region; divider side follows its Layout slot. */
 export function LayoutPanel(props: LayoutPanelProps) {
-  const rest = omit(props, "resizable", "width");
+  const rest = omit(props, "width");
   const area = useContext(LayoutAreaContext);
   const slots = useContext(LayoutSlotsContext);
 
@@ -327,7 +303,7 @@ export function LayoutPanel(props: LayoutPanelProps) {
     <LayoutAreaComponent
       {...rest}
       component="layout-panel"
-      width={props.resizable?._size ?? props.width}
+      width={props.width}
       hasDivider={props.hasDivider}
       isStartPanel={area === "start"}
       isEndPanel={area === "end"}
@@ -410,7 +386,7 @@ function LayoutAreaComponent(
     <div
       {...rest}
       {...theme()}
-      role={props.role}
+      role={props.role ?? (props.label != null ? "region" : undefined)}
       aria-label={props.label}
       class={[theme().class, style().class, props.class]}
       style={{
@@ -469,7 +445,7 @@ function LayoutBar(
     <div
       {...rest}
       {...theme()}
-      role={props.role}
+      role={props.role ?? (props.label != null ? "region" : undefined)}
       aria-label={props.label}
       data-divider={hasDivider() || undefined}
       class={[theme().class, style().class, props.class]}

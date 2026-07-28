@@ -1,6 +1,6 @@
 import { render, type JSX } from "@solidjs/web";
 import { afterEach, describe, expect, it } from "bun:test";
-import { createComponent } from "solid-js";
+import { createComponent, createSignal } from "solid-js";
 
 import {
   Center,
@@ -65,7 +65,7 @@ describe("layout primitives", () => {
             children: <span data-testid="header-content">Header</span>,
           }),
           start: createComponent(LayoutPanel, { children: "Panel" }),
-          content: createComponent(LayoutContent, { children: "Content" }),
+          children: createComponent(LayoutContent, { children: "Content" }),
           footer: createComponent(LayoutFooter, {
             children: <span data-testid="footer-content">Footer</span>,
           }),
@@ -78,6 +78,8 @@ describe("layout primitives", () => {
     const footerContent = container.querySelector('[data-testid="footer-content"]');
 
     expect(section.textContent).toBe("HeaderPanelContentFooter");
+    expect(section.className).toContain("astryx-solid-section");
+    expect(section.getAttribute("data-variant")).toBe("section");
     expect(headerContent?.parentElement?.className).not.toContain("astryx-solid-layout-header");
     expect(headerContent?.parentElement?.parentElement?.className).toContain(
       "astryx-solid-layout-header",
@@ -86,6 +88,57 @@ describe("layout primitives", () => {
     expect(footerContent?.parentElement?.parentElement?.className).toContain(
       "astryx-solid-layout-footer",
     );
+  });
+
+  it("reacts when optional Layout slots change", async () => {
+    const [hasHeader, setHasHeader] = createSignal(false);
+    const container = mount(() =>
+      createComponent(Layout, {
+        get header() {
+          return hasHeader() ? createComponent(LayoutHeader, { children: "Header" }) : undefined;
+        },
+        children: createComponent(LayoutContent, { label: "Main", children: "Content" }),
+      }),
+    );
+
+    expect(container.textContent).toBe("Content");
+    expect(container.querySelector('[aria-label="Main"]')?.getAttribute("role")).toBe("region");
+
+    setHasHeader(true);
+    await Promise.resolve();
+    expect(container.textContent).toBe("HeaderContent");
+
+    setHasHeader(false);
+    await Promise.resolve();
+    expect(container.textContent).toBe("Content");
+  });
+
+  it("renders responsive grids and ignores invalid spans", () => {
+    const container = mount(() => (
+      <>
+        <Grid responsive={{ minColumnWidth: 240, maxColumns: 3 }} gap={2}>
+          <GridSpan columns={0} rows={-1} data-testid="span">
+            Item
+          </GridSpan>
+        </Grid>
+        <Grid columns={0} rowHeight={-1} data-testid="fallback-grid" />
+      </>
+    ));
+    const grid = container.firstElementChild;
+    const span = container.querySelector<HTMLElement>('[data-testid="span"]');
+    const fallback = container.querySelector<HTMLElement>('[data-testid="fallback-grid"]');
+
+    if (!(grid instanceof HTMLElement)) throw new Error("Expected grid");
+    if (span == null) throw new Error("Expected grid span");
+    if (fallback == null) throw new Error("Expected fallback grid");
+
+    expect(grid.style.gridTemplateColumns).toContain("repeat(auto-fit");
+    expect(grid.style.gridTemplateColumns).toContain("240px");
+    expect(span.style.gridColumn).toBe("");
+    expect(span.style.gridRow).toBe("");
+    expect(getComputedStyle(span).display).not.toBe("grid");
+    expect(fallback.style.gridTemplateColumns).toBe("repeat(1, 1fr)");
+    expect(fallback.style.gridAutoRows).toBe("");
   });
 
   it("renders StackItem through Stack's public composition seam", () => {

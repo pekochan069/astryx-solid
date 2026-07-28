@@ -26,7 +26,6 @@ export interface HeadingProps extends BaseProps<HTMLHeadingElement> {
   wordBreak?: WordBreak;
   textWrap?: TextWrap;
   justify?: TextJustify;
-  hasCapsize?: boolean;
   hasStrikethrough?: boolean;
 }
 
@@ -129,7 +128,6 @@ export function Heading(props: HeadingProps) {
     "wordBreak",
     "textWrap",
     "justify",
-    "hasCapsize",
     "hasStrikethrough",
     "xstyle",
     "class",
@@ -148,7 +146,7 @@ export function Heading(props: HeadingProps) {
     ref: props.ref,
   });
   const { maxLines, wordBreak } = truncation;
-  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
+  const display = () => (maxLines() ? "block" : (props.display ?? "block"));
 
   const theme = createMemo(() =>
     themeProps("heading", { level: props.level, type: props.type, color: color() }),

@@ -41,7 +41,9 @@ describe("content structure", () => {
         <Text as="p">Body</Text>
         <Heading level={2}>Heading</Heading>
         <Code>const value = 1</Code>
-        <Blockquote cite="Author">Quote</Blockquote>
+        <Blockquote cite="https://example.com/source" attribution="Author">
+          Quote
+        </Blockquote>
         <Divider label="Section" />
       </>
     ));
@@ -49,6 +51,9 @@ describe("content structure", () => {
     expect(container.querySelector("p")?.textContent).toBe("Body");
     expect(container.querySelector("h2")?.textContent).toBe("Heading");
     expect(container.querySelector("code")?.textContent).toBe("const value = 1");
+    expect(container.querySelector("blockquote")?.getAttribute("cite")).toBe(
+      "https://example.com/source",
+    );
     expect(container.querySelector("blockquote footer cite")?.textContent).toBe("Author");
     expect(container.querySelector('[role="separator"]')?.getAttribute("aria-orientation")).toBe(
       "horizontal",
@@ -141,7 +146,12 @@ describe("content feedback and icons", () => {
         <Kbd keys="ctrl+enter" />
         <Skeleton width={20} height={10} />
         <Spinner label="Loading records" />
-        <Citation source={{ title: "Reference", url: "https://example.com" }} number={4} />
+        <Citation
+          source={{ title: "Reference", url: "https://example.com" }}
+          number={4}
+          target="_blank"
+          rel="author"
+        />
       </>
     ));
 
@@ -158,7 +168,16 @@ describe("content feedback and icons", () => {
 
     expect(spinnerLabel?.className.includes("astryx-solid-text")).toBe(true);
     expect(spinnerLabel?.getAttribute("data-type")).toBe("body");
-    expect(container.querySelector("a")?.getAttribute("href")).toBe("https://example.com");
+    const citation = container.querySelector("a");
+
+    expect(citation?.getAttribute("href")).toBe("https://example.com");
+    expect(citation?.getAttribute("role")).toBeNull();
+    expect(citation?.getAttribute("target")).toBe("_blank");
+    expect(citation?.getAttribute("rel")?.split(" ").sort()).toEqual([
+      "author",
+      "noopener",
+      "noreferrer",
+    ]);
   });
 
   it("renders wrapped built-in icons and only titles measured truncation", () => {

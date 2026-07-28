@@ -1,5 +1,6 @@
 import type { JSX } from "@solidjs/web";
 
+import { Dynamic } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
 import { createMemo, omit, Show } from "solid-js";
 
@@ -60,18 +61,23 @@ const styles = stylex.create({
   actionsCompact: { flexDirection: "column" },
 });
 
+const headingTags = {
+  1: "h1",
+  2: "h2",
+  3: "h3",
+  4: "h4",
+  5: "h5",
+  6: "h6",
+} as const;
+
 function EmptyStateHeading(props: {
   level: NonNullable<EmptyStateProps["headingLevel"]>;
   title: string;
   isCompact: boolean;
 }) {
-  const style = stylexProps(styles.title, props.isCompact && styles.titleCompact);
-  if (props.level === 1) return <h1 {...style} textContent={props.title} />;
-  if (props.level === 2) return <h2 {...style} textContent={props.title} />;
-  if (props.level === 4) return <h4 {...style} textContent={props.title} />;
-  if (props.level === 5) return <h5 {...style} textContent={props.title} />;
-  if (props.level === 6) return <h6 {...style} textContent={props.title} />;
-  return <h3 {...style} textContent={props.title} />;
+  const style = createMemo(() => stylexProps(styles.title, props.isCompact && styles.titleCompact));
+
+  return <Dynamic component={headingTags[props.level]} {...style()} textContent={props.title} />;
 }
 
 export function EmptyState(props: EmptyStateProps) {
@@ -99,7 +105,6 @@ export function EmptyState(props: EmptyStateProps) {
     <div
       {...rest}
       {...theme()}
-      role="status"
       class={[theme().class, style().class, props.class]}
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}

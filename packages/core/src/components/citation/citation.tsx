@@ -1,4 +1,4 @@
-import { Dynamic, type ValidComponent } from "@solidjs/web";
+import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
 import { createMemo, omit, Show } from "solid-js";
 
@@ -26,6 +26,9 @@ export interface CitationProps extends BaseProps<HTMLElement> {
   source: CitationSource;
   number: number;
   variant?: "label" | "number";
+  target?: JSX.AnchorHTMLAttributes<HTMLAnchorElement>["target"];
+  rel?: string;
+  referrerPolicy?: JSX.AnchorHTMLAttributes<HTMLAnchorElement>["referrerpolicy"];
 }
 
 const styles = stylex.create({
@@ -81,13 +84,34 @@ const styles = stylex.create({
 export function Citation(props: CitationProps) {
   const t = useTranslator();
 
-  const rest = omit(props, "source", "number", "variant", "xstyle", "class", "style");
+  const rest = omit(
+    props,
+    "source",
+    "number",
+    "variant",
+    "target",
+    "rel",
+    "referrerPolicy",
+    "xstyle",
+    "class",
+    "style",
+  );
 
   const variant = () => props.variant ?? "label";
   const title = () => props.source.title ?? String(props.number);
+  const component = (): ValidComponent => (props.source.url ? "a" : "span");
+  const rel = createMemo(() => {
+    const tokens = new Set((props.rel ?? "").split(/\s+/).filter(Boolean));
+
+    if (props.target === "_blank") {
+      tokens.add("noopener");
+      tokens.add("noreferrer");
+    }
+
+    return tokens.size > 0 ? [...tokens].join(" ") : undefined;
+  });
 
   const theme = createMemo(() => themeProps("citation", { variant: variant() }));
-  const component = (): ValidComponent => (props.source.url ? "a" : "span");
   const style = createMemo(() =>
     stylexProps(
       variant() === "number" ? styles.number : styles.label,
@@ -102,9 +126,9 @@ export function Citation(props: CitationProps) {
       {...rest}
       {...theme()}
       href={props.source.url}
-      target={props.source.url ? "_blank" : undefined}
-      rel={props.source.url ? "noopener noreferrer" : undefined}
-      role={props.source.url ? "doc-noteref" : undefined}
+      target={props.source.url ? props.target : undefined}
+      rel={props.source.url ? rel() : undefined}
+      referrerPolicy={props.source.url ? props.referrerPolicy : undefined}
       title={title()}
       aria-label={t("@astryx.citation.label", { number: props.number, title: title() })}
       class={[theme().class, style().class, props.class]}

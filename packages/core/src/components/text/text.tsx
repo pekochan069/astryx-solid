@@ -58,7 +58,6 @@ export interface TextProps extends BaseProps {
   wordBreak?: WordBreak;
   textWrap?: TextWrap;
   justify?: TextJustify;
-  hasCapsize?: boolean;
   hasStrikethrough?: boolean;
   hasTabularNumbers?: boolean;
   as?: ValidComponent;
@@ -198,7 +197,7 @@ export function Text(props: TextProps) {
   });
   const { maxLines, wordBreak } = truncation;
 
-  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
+  const display = () => (maxLines() ? "block" : (props.display ?? "inline"));
 
   const rest = omit(
     props,
@@ -212,7 +211,6 @@ export function Text(props: TextProps) {
     "wordBreak",
     "textWrap",
     "justify",
-    "hasCapsize",
     "hasStrikethrough",
     "hasTabularNumbers",
     "as",

@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createContext, createMemo, omit } from "solid-js";
+import { createMemo, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -10,12 +10,6 @@ import { spacingVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
 
 export type FormLayoutDirection = "vertical" | "horizontal" | "horizontal-labels";
-
-export interface FormLayoutContextValue {
-  readonly direction: FormLayoutDirection;
-}
-
-export const FormLayoutContext = createContext<FormLayoutContextValue>({ direction: "vertical" });
 
 export interface FormLayoutProps extends BaseProps<HTMLDivElement> {
   direction?: FormLayoutDirection;
@@ -38,16 +32,11 @@ const styles = stylex.create({
   },
 });
 
-/** Arranges form fields and provides their layout direction. */
+/** Arranges form fields in a responsive form layout. */
 export function FormLayout(props: FormLayoutProps) {
   const rest = omit(props, "direction", "xstyle", "class", "style", "children");
 
   const direction = () => props.direction ?? "vertical";
-  const value: FormLayoutContextValue = {
-    get direction() {
-      return direction();
-    },
-  };
 
   const theme = createMemo(() => themeProps("form-layout", { direction: direction() }));
   const style = createMemo(() =>
@@ -60,16 +49,14 @@ export function FormLayout(props: FormLayoutProps) {
   );
 
   return (
-    <FormLayoutContext value={value}>
-      <div
-        {...rest}
-        {...theme()}
-        class={[theme().class, style().class, props.class]}
-        style={{ ...style().style, ...props.style }}
-        data-style-src={style()["data-style-src"]}
-      >
-        {props.children}
-      </div>
-    </FormLayoutContext>
+    <div
+      {...rest}
+      {...theme()}
+      class={[theme().class, style().class, props.class]}
+      style={{ ...style().style, ...props.style }}
+      data-style-src={style()["data-style-src"]}
+    >
+      {props.children}
+    </div>
   );
 }

@@ -24,7 +24,7 @@ const messages = {
   fr: { greeting: { defaultMessage: "Bonjour" } },
 };
 
-export function CoreSubstrate() {
+function CoreSubstrate() {
   // ponytail: Solid 2 beta SSR ID offset; remove after Start/Solid stable hydration matches.
   if (import.meta.env.SSR) createUniqueId();
 

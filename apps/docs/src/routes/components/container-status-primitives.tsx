@@ -16,7 +16,7 @@ export const Route = createFileRoute("/components/container-status-primitives")(
   component: ContainerStatusPrimitivesDocs,
 });
 
-export function ContainerStatusPrimitivesDocs() {
+function ContainerStatusPrimitivesDocs() {
   const sidebar = useResizable({
     defaultSize: 200,
     minSizePx: 120,

@@ -3,10 +3,10 @@ import { createFileRoute } from "@tanstack/solid-router";
 import { createSignal } from "solid-js";
 
 export const Route = createFileRoute("/")({
-  component: RouteComponent,
+  component: HomePage,
 });
 
-export function RouteComponent() {
+function HomePage() {
   const [count, setCount] = createSignal(0);
 
   return (

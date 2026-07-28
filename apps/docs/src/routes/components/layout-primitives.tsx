@@ -20,7 +20,7 @@ export const Route = createFileRoute("/components/layout-primitives")({
   component: LayoutPrimitivesDocs,
 });
 
-export function LayoutPrimitivesDocs() {
+function LayoutPrimitivesDocs() {
   return (
     <Stack as="main" gap={6} padding={6} maxWidth={960}>
       <h1>Layout primitives</h1>
@@ -71,7 +71,7 @@ function ResponsiveGridExample() {
   // ponytail: mount after hydration for WebKit; remove when Solid 2 preserves this SSR subtree.
   return (
     <Show when={isMounted()}>
-      <Grid minChildWidth={240} gap={2} aria-label="Example grid">
+      <Grid responsive={{ minColumnWidth: 240 }} gap={2} aria-label="Example grid">
         <div>First grid item</div>
         <div>Second grid item</div>
       </Grid>

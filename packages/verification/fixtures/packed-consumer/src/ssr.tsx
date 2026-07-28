@@ -6,6 +6,7 @@ import { createUniqueId } from "solid-js";
 import {
   ContentPrimitives,
   createApp,
+  PackedActions,
   PackedContainerStatus,
   PackedLayout,
   PackedLayoutPrimitives,
@@ -56,6 +57,10 @@ if (
   throw new Error(`Unexpected layout primitive server output: ${layoutPrimitives}`);
 }
 
+const actions = renderToString(PackedActions, { renderId: "actions" });
+if (!actions.includes("Cancel action") || !actions.includes("Native"))
+  throw new Error(`Unexpected action output: ${actions}`);
+
 const containerStatus = renderToString(PackedContainerStatus, { renderId: "container-status" });
 
 if (!containerStatus.includes("No files") || !containerStatus.includes('role="progressbar"')) {
@@ -91,6 +96,7 @@ let html = (await readFile(index, "utf8"))
     `<div id="content-primitives">${primitives}</div>`,
   )
   .replace('<div id="packed-layout"></div>', `<div id="packed-layout">${layout}</div>`)
+  .replace('<div id="packed-actions"></div>', `<div id="packed-actions">${actions}</div>`)
   .replace(
     '<div id="packed-container-status"></div>',
     `<div id="packed-container-status">${containerStatus}</div>`,

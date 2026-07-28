@@ -17,9 +17,7 @@
     "core-styling-theme": {
       "packages": ["@astryx-solid/core"],
       "inventoryPatterns": [
-        "=.",
         "./astryx.css",
-        "./button",
         "./i18n",
         "./locales/*.json",
         "./naming",
@@ -64,6 +62,40 @@
         "browser"
       ],
       "issue": "https://github.com/pekochan069/astryx-solid/issues/18"
+    },
+    "action-foundation": {
+      "packages": ["@astryx-solid/core"],
+      "inventoryPatterns": [
+        "=.",
+        "=./Button",
+        "=./ButtonGroup",
+        "=./IconButton",
+        "=./Link",
+        "=./ToggleButton",
+        "=./button",
+        "=./button-group",
+        "=./icon-button",
+        "=./link",
+        "=./toggle-button",
+        "=packages/core/src/Button/Button.doc.mjs",
+        "=packages/core/src/Button/Button.test.tsx",
+        "=packages/core/src/ButtonGroup/ButtonGroup.doc.mjs",
+        "=packages/core/src/ButtonGroup/ButtonGroup.test.tsx",
+        "=packages/core/src/IconButton/IconButton.doc.mjs",
+        "=packages/core/src/IconButton/IconButton.test.tsx",
+        "=packages/core/src/Link/Link.doc.mjs",
+        "=packages/core/src/Link/Link.test.tsx",
+        "=packages/core/src/Link/LinkProvider.doc.mjs",
+        "=packages/core/src/Link/useLinkComponent.test.tsx",
+        "=packages/core/src/Link/useLinkComponent.ts",
+        "=packages/core/src/Link/useLinkify.test.tsx",
+        "=packages/core/src/Link/useLinkify.tsx",
+        "=packages/core/src/ToggleButton/ToggleButton.doc.mjs",
+        "=packages/core/src/ToggleButton/ToggleButton.test.tsx",
+        "=packages/core/src/ToggleButton/ToggleButtonGroup.doc.mjs"
+      ],
+      "gates": ["ledger", "core", "core-signatures", "packed-consumer", "docs", "browser"],
+      "issue": "https://github.com/pekochan069/astryx-solid/issues/23"
     },
     "core-reactive-interaction": {
       "packages": ["@astryx-solid/core"],
@@ -313,6 +345,91 @@
       ]
     },
     {
+      "source": "Action foundation Solid APIs and baseline documentation/tests",
+      "batch": "action-foundation",
+      "package": "@astryx-solid/core",
+      "disposition": "implemented",
+      "replacement": "Solid-native action controls from root and lowercase subpaths",
+      "rationale": "Link, Button, ButtonGroup, IconButton, ToggleButton, and ToggleButtonGroup ship through public Solid entries with unit, packed-consumer, SSR, hydration, docs, and browser evidence.",
+      "evidence": [
+        "packages/core/src/index.ts",
+        "packages/core/tests/components/action-controls.test.tsx",
+        "packages/core/tests/components/link/link.test.tsx",
+        "packages/core/tests/components/toggle-button/toggle-button.test.tsx",
+        "apps/docs/tests/action-foundation.spec.ts"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/23",
+      "surfaces": [
+        ".",
+        "./button",
+        "./button-group",
+        "./icon-button",
+        "./link",
+        "./toggle-button",
+        "packages/core/src/ButtonGroup/ButtonGroup.doc.mjs",
+        "packages/core/src/ButtonGroup/ButtonGroup.test.tsx",
+        "packages/core/src/IconButton/IconButton.doc.mjs",
+        "packages/core/src/IconButton/IconButton.test.tsx",
+        "packages/core/src/Link/Link.doc.mjs",
+        "packages/core/src/Link/Link.test.tsx",
+        "packages/core/src/Link/LinkProvider.doc.mjs",
+        "packages/core/src/ToggleButton/ToggleButton.doc.mjs",
+        "packages/core/src/ToggleButton/ToggleButton.test.tsx",
+        "packages/core/src/ToggleButton/ToggleButtonGroup.doc.mjs"
+      ]
+    },
+    {
+      "source": "Legacy uppercase action-control package subpaths",
+      "batch": "action-foundation",
+      "package": "@astryx-solid/core",
+      "disposition": "approved-incompatible",
+      "replacement": "Lowercase ./button, ./button-group, ./icon-button, ./link, and ./toggle-button exports",
+      "rationale": "Issue #14 and #23 establish canonical lowercase Solid package subpaths rather than React-era uppercase casing.",
+      "evidence": ["packages/core/package.json", "packages/core/rolldown.config.ts"],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/23",
+      "classification": ["package-subpath-casing"],
+      "affectedSurfaces": ["./Button", "./ButtonGroup", "./IconButton", "./Link", "./ToggleButton"],
+      "migrationGuidance": [
+        "Replace each uppercase @astryxdesign/core action subpath with its lowercase @astryx-solid/core equivalent."
+      ],
+      "surfaces": ["./Button", "./ButtonGroup", "./IconButton", "./Link", "./ToggleButton"]
+    },
+    {
+      "source": "Solid-native action resolver and polymorphic-ref contracts",
+      "batch": "action-foundation",
+      "package": "@astryx-solid/core",
+      "disposition": "approved-incompatible",
+      "replacement": "Explicit href router adapters, accessor-based link hooks, and truthful button/anchor refs",
+      "rationale": "Solid reactivity requires accessor contracts; explicit adapters avoid React to-prop magic; refs identify actual rendered roots.",
+      "evidence": [
+        "packages/core/src/components/link/use-link-component.ts",
+        "packages/core/src/components/link/use-linkify.tsx",
+        "packages/core/src/components/button/button.tsx",
+        "packages/core/tests/components/link/link.test.tsx"
+      ],
+      "approval": "https://github.com/pekochan069/astryx-solid/issues/23",
+      "classification": ["framework-contract-replacement"],
+      "affectedSurfaces": [
+        "packages/core/src/Button/Button.doc.mjs",
+        "packages/core/src/Button/Button.test.tsx",
+        "packages/core/src/Link/useLinkComponent.test.tsx",
+        "packages/core/src/Link/useLinkComponent.ts",
+        "packages/core/src/Link/useLinkify.test.tsx",
+        "packages/core/src/Link/useLinkify.tsx"
+      ],
+      "migrationGuidance": [
+        "Pass router components that accept href through LinkProvider or as; call useLinkComponent and useLinkify with accessors; type refs as the rendered button/anchor union."
+      ],
+      "surfaces": [
+        "packages/core/src/Button/Button.doc.mjs",
+        "packages/core/src/Button/Button.test.tsx",
+        "packages/core/src/Link/useLinkComponent.test.tsx",
+        "packages/core/src/Link/useLinkComponent.ts",
+        "packages/core/src/Link/useLinkify.test.tsx",
+        "packages/core/src/Link/useLinkify.tsx"
+      ]
+    },
+    {
       "source": "@astryx-solid/core styling and theme exports",
       "batch": "core-styling-theme",
       "package": "@astryx-solid/core",
@@ -328,9 +445,7 @@
       ],
       "approval": "https://github.com/pekochan069/astryx-solid/issues/18",
       "surfaces": [
-        ".",
         "./astryx.css",
-        "./button",
         "./i18n",
         "./locales/*.json",
         "./naming",
@@ -346,8 +461,6 @@
         "./visually-hidden",
         "packages/core/README.md",
         "packages/core/package.json",
-        "packages/core/src/Button/Button.doc.mjs",
-        "packages/core/src/Button/Button.test.tsx",
         "packages/core/src/README.md",
         "packages/core/src/i18n/InternationalizationProvider.doc.mjs",
         "packages/core/src/i18n/__tests__/resolve.test.ts",

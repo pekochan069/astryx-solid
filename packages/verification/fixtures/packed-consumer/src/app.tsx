@@ -2,6 +2,8 @@ import {
   AspectRatio,
   Badge,
   Blockquote,
+  Button,
+  ButtonGroup,
   Card,
   Center,
   Citation,
@@ -14,6 +16,9 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
+  Link,
+  LinkProvider,
   Kbd,
   Layout,
   LayoutContent,
@@ -31,15 +36,28 @@ import {
   Text,
   Thumbnail,
   Timestamp,
+  ToggleButton,
+  ToggleButtonGroup,
+  useLinkComponent,
+  useLinkify,
   useResizable,
   VStack,
 } from "@astryx-solid/core";
+import { Button as SubpathButton } from "@astryx-solid/core/button";
+import { ButtonGroup as SubpathButtonGroup } from "@astryx-solid/core/button-group";
 import { useInteractiveRole } from "@astryx-solid/core/hooks";
 import { InternationalizationProvider, useTranslator } from "@astryx-solid/core/i18n";
+import { IconButton as SubpathIconButton } from "@astryx-solid/core/icon-button";
 import { InteractiveRoleContext } from "@astryx-solid/core/interactive-role-context";
+import { Link as SubpathLink, type LinkComponent } from "@astryx-solid/core/link";
 import { SizeContext, useSize } from "@astryx-solid/core/size-context";
 import { defineTheme, Theme, useTheme } from "@astryx-solid/core/theme";
+import {
+  ToggleButton as SubpathToggleButton,
+  ToggleButtonGroup as SubpathToggleButtonGroup,
+} from "@astryx-solid/core/toggle-button";
 import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
+import { Dynamic } from "@solidjs/web";
 import { createSignal } from "solid-js";
 
 const lightTheme = defineTheme({ name: "consumer-light", tokens: { "--color-accent": "a" } });
@@ -120,6 +138,69 @@ export function PackedContainerStatus() {
       <Timestamp value="2025-01-01T00:00:00Z" format="system_date" />
       <ResizeHandle label="Resize panel" resizable={region.props} />
     </Card>
+  );
+}
+
+export const actionExportsMatch =
+  Button === SubpathButton &&
+  ButtonGroup === SubpathButtonGroup &&
+  IconButton === SubpathIconButton &&
+  Link === SubpathLink &&
+  ToggleButton === SubpathToggleButton &&
+  ToggleButtonGroup === SubpathToggleButtonGroup;
+
+const RouterLink: LinkComponent = (props) => (
+  <Dynamic {...props} component="a" data-router-link="true" />
+);
+
+export function PackedAdapter() {
+  return (
+    <LinkProvider component={RouterLink}>
+      <Link href="/router">Router</Link>
+    </LinkProvider>
+  );
+}
+
+export function PackedActions() {
+  const resolved = useLinkComponent(() => undefined);
+  const linked = useLinkify(() => "Visit https://example.com");
+  return (
+    <Stack data-testid="packed-actions" data-native-link={resolved() === "a" ? "true" : "false"}>
+      <Link href="/native">Native</Link>
+      {linked()}
+      <Button
+        label="Cancel action"
+        onClick={(event) => event.preventDefault()}
+        clickAction={() => {
+          throw new Error("Canceled action ran");
+        }}
+      />
+      <ButtonGroup label="Packed group">
+        <Button label="First" />
+        <Button label="Second" href="/second" />
+      </ButtonGroup>
+      <IconButton label="Settings" icon="⚙" />
+    </Stack>
+  );
+}
+
+export function PackedInteractiveActions() {
+  const [pressed, setPressed] = createSignal(false);
+  const [single, setSingle] = createSignal<string | null>("grid");
+  const [multiple, setMultiple] = createSignal<readonly string[]>(["bold"]);
+  return (
+    <Stack data-testid="packed-interactive-actions">
+      <PackedAdapter />
+      <ToggleButton label="Favorite" isPressed={pressed()} onPressedChange={setPressed} />
+      <ToggleButtonGroup label="View" value={single()} onChange={setSingle}>
+        <ToggleButton label="Grid" value="grid" />
+        <ToggleButton label="List" value="list" />
+      </ToggleButtonGroup>
+      <ToggleButtonGroup label="Format" type="multiple" value={multiple()} onChange={setMultiple}>
+        <ToggleButton label="Bold" value="bold" />
+        <ToggleButton label="Italic" value="italic" />
+      </ToggleButtonGroup>
+    </Stack>
   );
 }
 

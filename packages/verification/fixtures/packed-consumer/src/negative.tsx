@@ -1,4 +1,14 @@
-import { Center, FormLayout, Grid, Layout, Section } from "@astryx-solid/core";
+import {
+  Button,
+  Center,
+  FormLayout,
+  Grid,
+  IconButton,
+  Layout,
+  Link,
+  Section,
+  ToggleButtonGroup,
+} from "@astryx-solid/core";
 import { InternationalizationProvider } from "@astryx-solid/core/i18n";
 import { defineTheme, Theme } from "@astryx-solid/core/theme";
 import { VisuallyHidden } from "@astryx-solid/core/visually-hidden";
@@ -28,3 +38,17 @@ const theme = defineTheme({ name: "negative" });
 
 // @ts-expect-error: Section variant uses its constrained public union.
 <Section variant="raised" />;
+
+// @ts-expect-error: explicit Solid router adapters do not inject React Router `to`.
+<Link href="/docs" to="/docs">
+  Docs
+</Link>;
+
+// @ts-expect-error: Button refs must accept either truthful button or anchor roots.
+<Button label="Root" ref={(element: HTMLButtonElement) => element.focus()} />;
+
+// @ts-expect-error: IconButton requires an icon.
+<IconButton label="Settings" />;
+
+// @ts-expect-error: single groups require nullable string values.
+<ToggleButtonGroup label="View" value={["grid"]} onChange={() => {}} />;

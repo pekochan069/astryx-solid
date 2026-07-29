@@ -63,7 +63,9 @@ describe("Button", () => {
     expect(button.getAttribute("aria-busy")).toBe("true");
     expect(button.disabled).toBe(true);
   });
+});
 
+describe("Button accessibility", () => {
   it("prevents tooltip-disabled activation before consumer handlers", () => {
     const onClick = mock();
     const container = mount(() =>
@@ -130,7 +132,9 @@ describe("Button", () => {
     expect(button.getAttribute("aria-label")).toBe("Add item");
     expect(button.textContent).toBe("+");
   });
+});
 
+describe("Button composition", () => {
   it("ports width, elevation, visible children, and end content", () => {
     const container = mount(() => [
       createComponent(Button, {

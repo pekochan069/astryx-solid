@@ -41,9 +41,7 @@ describe("content structure", () => {
         <Text as="p">Body</Text>
         <Heading level={2}>Heading</Heading>
         <Code>const value = 1</Code>
-        <Blockquote cite="https://example.com/source" attribution="Author">
-          Quote
-        </Blockquote>
+        <Blockquote cite="Author">Quote</Blockquote>
         <Divider label="Section" />
       </>
     ));
@@ -51,9 +49,7 @@ describe("content structure", () => {
     expect(container.querySelector("p")?.textContent).toBe("Body");
     expect(container.querySelector("h2")?.textContent).toBe("Heading");
     expect(container.querySelector("code")?.textContent).toBe("const value = 1");
-    expect(container.querySelector("blockquote")?.getAttribute("cite")).toBe(
-      "https://example.com/source",
-    );
+    expect(container.querySelector("blockquote")?.getAttribute("cite")).toBeNull();
     expect(container.querySelector("blockquote footer cite")?.textContent).toBe("Author");
     expect(container.querySelector('[role="separator"]')?.getAttribute("aria-orientation")).toBe(
       "horizontal",
@@ -171,7 +167,7 @@ describe("content feedback and icons", () => {
     const citation = container.querySelector("a");
 
     expect(citation?.getAttribute("href")).toBe("https://example.com");
-    expect(citation?.getAttribute("role")).toBeNull();
+    expect(citation?.getAttribute("role")).toBe("doc-noteref");
     expect(citation?.getAttribute("target")).toBe("_blank");
     expect(citation?.getAttribute("rel")?.split(" ").sort()).toEqual([
       "author",

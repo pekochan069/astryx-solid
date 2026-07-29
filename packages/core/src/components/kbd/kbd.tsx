@@ -72,7 +72,18 @@ const styles = stylex.create({
 });
 
 function isMacPlatform() {
-  return typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform ?? "");
+  if (typeof navigator === "undefined") return false;
+
+  const userAgentData =
+    "userAgentData" in navigator &&
+    typeof navigator.userAgentData === "object" &&
+    navigator.userAgentData !== null &&
+    "platform" in navigator.userAgentData
+      ? navigator.userAgentData.platform
+      : undefined;
+  const platform = typeof userAgentData === "string" ? userAgentData : navigator.platform;
+
+  return /Mac|iPhone|iPad|iPod/i.test(platform ?? "");
 }
 
 function display(key: string, mac: boolean) {

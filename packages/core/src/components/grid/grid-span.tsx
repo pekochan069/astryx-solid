@@ -14,7 +14,7 @@ export interface GridSpanProps extends BaseProps<HTMLDivElement> {
   children?: JSX.Element;
 }
 
-const styles = stylex.create({ root: { minWidth: 0 } });
+const styles = stylex.create({ span: { minWidth: 0, display: "grid", height: "100%" } });
 
 function positiveSpan(value: number | undefined) {
   return value != null && Number.isInteger(value) && value > 0 ? value : undefined;
@@ -30,7 +30,7 @@ export function GridSpan(props: GridSpanProps) {
   const rows = createMemo(() => positiveSpan(props.rows));
 
   const theme = themeProps("grid-span");
-  const style = createMemo(() => stylexProps(styles.root, props.xstyle));
+  const style = createMemo(() => stylexProps(styles.span, props.xstyle));
 
   return (
     <div

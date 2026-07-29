@@ -2,9 +2,10 @@ import type { JSX } from "@solidjs/web";
 import type { Accessor } from "solid-js";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, createSignal, omit } from "solid-js";
+import { createMemo, createSignal, omit, Show } from "solid-js";
 
 import { colorVars, fontWeightVars } from "../../theme/tokens.stylex.ts";
+import { themeProps } from "../../utils/theme-props.ts";
 import { Button, type ButtonProps } from "../button/button.tsx";
 import { useToggleButtonGroup } from "./toggle-button-group.tsx";
 
@@ -108,6 +109,7 @@ export function ToggleButton(props: ToggleButtonProps) {
     "pressedIcon",
     "value",
     "children",
+    "class",
   );
 
   const group = useToggleButtonGroup();
@@ -116,13 +118,15 @@ export function ToggleButton(props: ToggleButtonProps) {
   const icon = createMemo(() =>
     state.pressed() && props.pressedIcon != null ? props.pressedIcon : props.icon,
   );
-  const tooltip = createMemo(() =>
-    props.isIconOnly ? (props.tooltip ?? props.label) : props.tooltip,
+  const theme = createMemo(() =>
+    themeProps("toggle-button", { isPressed: state.pressed() ? "true" : "false" }),
   );
 
   return (
     <Button
       {...rest}
+      class={[theme().class, props.class]}
+      data-is-pressed={theme()["data-is-pressed"]}
       variant="ghost"
       style={{
         "background-color": state.pressed() ? colorVars["--color-overlay-pressed"] : undefined,
@@ -132,7 +136,7 @@ export function ToggleButton(props: ToggleButtonProps) {
       isInterruptible
       aria-pressed={state.pressed() ? "true" : "false"}
       icon={icon()}
-      tooltip={tooltip()}
+      tooltip={props.tooltip}
       onClick={state.onClick}
       clickAction={
         group != null && props.value != null
@@ -142,14 +146,20 @@ export function ToggleButton(props: ToggleButtonProps) {
             : undefined
       }
     >
-      <span {...stylex.attrs(labelStyles.wrapper)}>
-        <span {...stylex.attrs(state.pressed() && labelStyles.pressed)}>
-          {props.children ?? props.label}
+      <Show when={props.children != null || !props.isIconOnly}>
+        <span {...stylex.attrs(labelStyles.wrapper)}>
+          <span {...stylex.attrs(state.pressed() && labelStyles.pressed)}>
+            <Show when={props.children != null} fallback={<span textContent={props.label} />}>
+              {props.children}
+            </Show>
+          </span>
+          <span {...stylex.attrs(labelStyles.widthReservation)} aria-hidden="true">
+            <Show when={props.children != null} fallback={<span textContent={props.label} />}>
+              {props.children}
+            </Show>
+          </span>
         </span>
-        <span {...stylex.attrs(labelStyles.widthReservation)} aria-hidden="true">
-          {props.children ?? props.label}
-        </span>
-      </span>
+      </Show>
     </Button>
   );
 }

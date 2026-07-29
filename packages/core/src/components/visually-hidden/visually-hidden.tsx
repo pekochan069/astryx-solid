@@ -1,17 +1,23 @@
 import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, merge, omit } from "solid-js";
+import { omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
+
+import { stylexProps } from "../../stylex";
+import { setElementRef } from "../../utils/set-element-ref";
 
 /**
  * Props for {@link VisuallyHidden}.
  *
- * Consumer `class` and `style` props are omitted so the fixed accessibility
- * styles cannot be displaced accidentally. ARIA attributes, roles, IDs, data
+ * Consumer `xstyle`, `class`, and `style` props are omitted so the fixed
+ * accessibility styles cannot be displaced accidentally. ARIA attributes, roles, IDs, data
  * attributes, event handlers, and refs pass through to the rendered element.
  */
-export interface VisuallyHiddenProps extends Omit<BaseProps, "class" | "style"> {
+export interface VisuallyHiddenProps extends Omit<
+  BaseProps<HTMLElement>,
+  "xstyle" | "class" | "style"
+> {
   /** Content exposed to assistive technology while hidden visually. */
   children?: JSX.Element;
 
@@ -57,17 +63,16 @@ const styles = stylex.create({
  * ```
  */
 export function VisuallyHidden(props: VisuallyHiddenProps) {
-  const merged = merge({ as: "span" }, props);
-  const rest = omit(merged, "as");
+  const rest = omit(props, "as", "children", "ref");
 
-  const style = createMemo(() => {
-    const stylexProps = stylex.props(styles.visuallyHidden);
-    return {
-      class: stylexProps.className,
-      style: stylexProps.style,
-      "data-stylex-src": stylexProps["data-style-src"],
-    };
-  });
-
-  return <Dynamic component={merged.as} {...style()} {...rest} />;
+  return (
+    <Dynamic
+      component={props.as ?? "span"}
+      {...rest}
+      ref={(element: HTMLElement) => setElementRef(props.ref, element)}
+      {...stylexProps(styles.visuallyHidden)}
+    >
+      {props.children}
+    </Dynamic>
+  );
 }

@@ -1,15 +1,14 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
 import { stylexProps } from "../../stylex";
 import { spacingVars } from "../../theme/tokens.stylex";
 import { themeProps } from "../../utils/theme-props";
-
-export type FormLayoutDirection = "vertical" | "horizontal" | "horizontal-labels";
+import { FormLayoutContext, type FormLayoutDirection } from "./form-layout-context";
 
 export interface FormLayoutProps extends BaseProps<HTMLDivElement> {
   direction?: FormLayoutDirection;
@@ -34,29 +33,41 @@ const styles = stylex.create({
 
 /** Arranges form fields in a responsive form layout. */
 export function FormLayout(props: FormLayoutProps) {
-  const rest = omit(props, "direction", "xstyle", "class", "style", "children");
+  const merged = merge(
+    {
+      direction: "vertical",
+    } satisfies FormLayoutProps,
+    props,
+  );
+  const rest = omit(merged, "direction", "xstyle", "class", "style", "children");
 
-  const direction = () => props.direction ?? "vertical";
-
-  const theme = createMemo(() => themeProps("form-layout", { direction: direction() }));
+  const theme = createMemo(() => themeProps("form-layout", { direction: merged.direction }));
   const style = createMemo(() =>
     stylexProps(
       styles.base,
-      direction() === "horizontal" && styles.horizontal,
-      direction() === "horizontal-labels" && styles.horizontalLabels,
-      props.xstyle,
+      merged.direction === "horizontal" && styles.horizontal,
+      merged.direction === "horizontal-labels" && styles.horizontalLabels,
+      merged.xstyle,
     ),
   );
 
+  const context = {
+    get direction() {
+      return merged.direction;
+    },
+  };
+
   return (
-    <div
-      {...rest}
-      {...theme()}
-      class={[theme().class, style().class, props.class]}
-      style={{ ...style().style, ...props.style }}
-      data-style-src={style()["data-style-src"]}
-    >
-      {props.children}
-    </div>
+    <FormLayoutContext value={context}>
+      <div
+        {...rest}
+        {...theme()}
+        class={[theme().class, style().class, merged.class]}
+        style={{ ...style().style, ...merged.style }}
+        data-style-src={style()["data-style-src"]}
+      >
+        {merged.children}
+      </div>
+    </FormLayoutContext>
   );
 }

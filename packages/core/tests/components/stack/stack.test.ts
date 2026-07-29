@@ -87,7 +87,9 @@ describe("Stack", () => {
     expect(stack.getAttribute("data-wrap")).toBe("wrap");
     expect(stack.className).toContain("test-consumer-style");
   });
+});
 
+describe("Stack behavior", () => {
   it("adds scroll styling when requested", () => {
     const container = mount(() => [
       createComponent(Stack, {}),
@@ -140,5 +142,22 @@ describe("Stack", () => {
 
     expect(horizontal.className).not.toBe(horizontalClass);
     expect(vertical.className).not.toBe(verticalClass);
+  });
+
+  it("maps horizontal and vertical alignment props to flex axes", () => {
+    const container = mount(() => [
+      createComponent(Stack, { direction: "horizontal", hAlign: "between" }),
+      createComponent(Stack, { direction: "horizontal", justify: "between" }),
+      createComponent(Stack, { direction: "vertical", hAlign: "center" }),
+      createComponent(Stack, { direction: "vertical", align: "center" }),
+      createComponent(Stack, { direction: "vertical", vAlign: "between" }),
+      createComponent(Stack, { direction: "vertical", justify: "between" }),
+    ]);
+    const [horizontal, horizontalAlias, vertical, verticalAlias, verticalMain, verticalMainAlias] =
+      Array.from(container.children);
+
+    expect(horizontal.className).toBe(horizontalAlias.className);
+    expect(vertical.className).toBe(verticalAlias.className);
+    expect(verticalMain.className).toBe(verticalMainAlias.className);
   });
 });

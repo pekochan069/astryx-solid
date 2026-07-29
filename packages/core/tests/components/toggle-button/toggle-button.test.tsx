@@ -39,9 +39,11 @@ describe("ToggleButton", () => {
       />
     ));
     const button = root.querySelector("button")!;
+    expect(button.getAttribute("data-is-pressed")).toBe("false");
     button.click();
     await Promise.resolve();
     expect(button.getAttribute("aria-pressed")).toBe("true");
+    expect(button.getAttribute("data-is-pressed")).toBe("true");
     expect(original).toBeInstanceOf(MouseEvent);
   });
 
@@ -77,7 +79,7 @@ describe("ToggleButton", () => {
     expect(root.querySelector("button")?.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("swaps pressed icon, reserves label width, and adds icon tooltip", async () => {
+  it("swaps pressed icon, reserves label width, and does not infer a tooltip", async () => {
     const [pressed, setPressed] = createSignal(false);
     const root = mount(() => (
       <>
@@ -100,10 +102,15 @@ describe("ToggleButton", () => {
       (element) => element.textContent === "Star",
     );
     expect(reservation).toBeDefined();
-    iconOnly.focus();
-    expect(
-      document.getElementById(iconOnly.getAttribute("aria-describedby") ?? "")?.textContent,
-    ).toBe("Menu");
+    expect(iconOnly.textContent).toBe("☰");
+    expect(iconOnly.hasAttribute("aria-describedby")).toBe(false);
+  });
+
+  it("uses label when children is null", () => {
+    const root = mount(() => <ToggleButton label="Fallback" children={null} />);
+    const button = root.querySelector("button");
+
+    expect(button?.textContent).toContain("Fallback");
   });
 });
 
@@ -126,6 +133,16 @@ describe("ToggleButtonGroup", () => {
     await Promise.resolve();
     expect(value()).toBe("list");
     expect(child).not.toHaveBeenCalled();
+  });
+
+  it("uses group enabled state instead of child disabled state", () => {
+    const root = mount(() => (
+      <ToggleButtonGroup label="View" value={null} onChange={() => {}}>
+        <ToggleButton label="Grid" value="grid" isDisabled />
+      </ToggleButtonGroup>
+    ));
+
+    expect(root.querySelector("button")?.disabled).toBe(false);
   });
 
   it("updates multiple selection immutably and applies group disabled", () => {

@@ -49,6 +49,7 @@ const styles = stylex.create({
     flexDirection: "column",
     gap: spacingVars["--spacing-1"],
     width: "100%",
+    minWidth: 48,
   },
   header: { display: "flex", justifyContent: "space-between", alignItems: "baseline" },
   label: {
@@ -65,6 +66,7 @@ const styles = stylex.create({
   },
   disabledText: { color: colorVars["--color-text-disabled"] },
   track: {
+    width: "100%",
     height: 8,
     backgroundColor: colorVars["--color-background-muted"],
     borderRadius: radiusVars["--radius-full"],
@@ -81,6 +83,7 @@ const styles = stylex.create({
     width: "40%",
     animationName: slide,
     animationDuration: { default: "1.5s", "@media (prefers-reduced-motion: reduce)": "3s" },
+    animationTimingFunction: "ease-in-out",
     animationIterationCount: "infinite",
   },
   accent: { backgroundColor: colorVars["--color-accent"] },
@@ -91,7 +94,13 @@ const styles = stylex.create({
 });
 
 export function ProgressBar(props: ProgressBarProps) {
-  const merged = merge(props);
+  const merged = merge(
+    {
+      variant: "accent",
+    } satisfies Partial<ProgressBarProps>,
+    props,
+  );
+
   const rest = omit(
     merged,
     "value",
@@ -114,13 +123,13 @@ export function ProgressBar(props: ProgressBarProps) {
   const value = createMemo(() =>
     Math.min(Math.max(0, Number.isFinite(merged.value) ? (merged.value ?? 0) : 0), max()),
   );
-  const variant = () => (merged.isDisabled ? "neutral" : (merged.variant ?? "accent"));
+  const fillVariant = () => (merged.isDisabled ? "neutral" : merged.variant);
   const text = () =>
     merged.formatValueLabel?.(value(), max()) ??
     `${max() > 0 ? Math.round((value() / max()) * 100) : 0}%`;
   const labelId = createUniqueId();
 
-  const theme = createMemo(() => themeProps("progressbar", { variant: variant() }));
+  const theme = createMemo(() => themeProps("progressbar", { variant: merged.variant }));
   const root = createMemo(() => stylexProps(styles.root, props.xstyle));
 
   return (
@@ -162,13 +171,15 @@ export function ProgressBar(props: ProgressBarProps) {
         aria-valuemax={props.isIndeterminate ? undefined : max()}
         aria-valuetext={props.isIndeterminate ? undefined : text()}
         aria-disabled={props.isDisabled ? "true" : undefined}
+        {...themeProps("progressbar-track")}
         {...stylexProps(styles.track)}
       >
         <div
+          {...themeProps("progressbar-fill", { variant: fillVariant() })}
           {...stylexProps(
             styles.fill,
             props.isIndeterminate && styles.indeterminate,
-            styles[variant()],
+            styles[fillVariant()],
           )}
           style={
             props.isIndeterminate

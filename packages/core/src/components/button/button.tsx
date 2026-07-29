@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web";
 
-import { createMemo, createSignal, merge, omit } from "solid-js";
+import { createMemo, createSignal, merge, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props.ts";
 import type { SizeValue } from "../../types/size-value.types.ts";
@@ -67,14 +67,14 @@ export interface ButtonProps extends BaseProps<HTMLButtonElement> {
 export function Button(props: ButtonProps) {
   const merged = merge(
     {
-      variant: "secondary" as ButtonVariant,
-      type: "button" as const,
-      elevation: "none" as ButtonElevation,
+      variant: "secondary",
+      type: "button",
+      elevation: "none",
       isDisabled: false,
       isLoading: false,
       isIconOnly: false,
       isInterruptible: false,
-    },
+    } satisfies Partial<ButtonProps>,
     props,
   );
   const rest = omit(
@@ -126,7 +126,6 @@ export function Button(props: ButtonProps) {
 
   const [activeActions, setActiveActions] = createSignal(0);
   const size = createMemo(() => merged.size ?? inheritedSize());
-  const variant = createMemo(() => merged.variant ?? "secondary");
   const loading = createMemo(() => merged.isLoading || activeActions() > 0);
   const delaySpinner = createMemo(() => activeActions() > 0 || merged.isInterruptible);
   const disabled = createMemo(
@@ -144,9 +143,9 @@ export function Button(props: ButtonProps) {
   );
   const ariaLabel = createMemo(() => (needsAriaLabel() ? merged.label : merged["aria-label"]));
 
-  const theme = createMemo(() => themeProps("button", { variant: variant(), size: size() }));
+  const theme = createMemo(() => themeProps("button", { variant: merged.variant, size: size() }));
   const styled = createMemo(() => {
-    const currentVariant = variant();
+    const currentVariant = merged.variant;
     const solidGroup = currentVariant === "primary" || currentVariant === "destructive";
 
     return stylexProps(
@@ -191,7 +190,7 @@ export function Button(props: ButtonProps) {
         loading={loading()}
         delaySpinner={delaySpinner()}
         size={size()}
-        variant={variant()}
+        variant={merged.variant}
         target={targetAndRel().target}
         rel={targetAndRel().rel}
         theme={theme()}
@@ -204,7 +203,9 @@ export function Button(props: ButtonProps) {
         onClick={onClick}
         onKeyDown={onKeyDown}
       />
-      {merged.tooltip != null && <ButtonTooltip text={merged.tooltip} tooltip={tooltip} />}
+      <Show when={merged.tooltip != null}>
+        <ButtonTooltip text={merged.tooltip as string} tooltip={tooltip} />
+      </Show>
     </>
   );
 }

@@ -1,7 +1,6 @@
-import type { JSX } from "@solidjs/web";
-
+import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, Match, omit, Show, Switch } from "solid-js";
+import { createMemo, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -37,6 +36,7 @@ const styles = stylex.create({
   text: { display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "360px" },
   title: {
     margin: 0,
+    fontFamily: "inherit",
     fontSize: typeScaleVars["--text-large-size"],
     lineHeight: typeScaleVars["--text-large-leading"],
     fontWeight: fontWeightVars["--font-weight-semibold"],
@@ -45,6 +45,7 @@ const styles = stylex.create({
   titleCompact: { fontSize: typeScaleVars["--text-label-size"] },
   description: {
     margin: 0,
+    fontFamily: "inherit",
     fontSize: typeScaleVars["--text-body-size"],
     lineHeight: typeScaleVars["--text-body-leading"],
     fontWeight: fontWeightVars["--font-weight-normal"],
@@ -53,12 +54,22 @@ const styles = stylex.create({
   descriptionCompact: { fontSize: typeScaleVars["--text-supporting-size"] },
   actions: {
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     gap: spacingVars["--spacing-2"],
     marginTop: spacingVars["--spacing-1"],
   },
   actionsCompact: { flexDirection: "column" },
 });
+
+const headingTags: Record<NonNullable<EmptyStateProps["headingLevel"]>, ValidComponent> = {
+  1: "h1",
+  2: "h2",
+  3: "h3",
+  4: "h4",
+  5: "h5",
+  6: "h6",
+};
 
 function EmptyStateHeading(props: {
   level: NonNullable<EmptyStateProps["headingLevel"]>;
@@ -67,25 +78,7 @@ function EmptyStateHeading(props: {
 }) {
   const style = createMemo(() => stylexProps(styles.title, props.isCompact && styles.titleCompact));
 
-  return (
-    <Switch fallback={<h3 {...style()} textContent={props.title} />}>
-      <Match when={props.level === 1}>
-        <h1 {...style()} textContent={props.title} />
-      </Match>
-      <Match when={props.level === 2}>
-        <h2 {...style()} textContent={props.title} />
-      </Match>
-      <Match when={props.level === 4}>
-        <h4 {...style()} textContent={props.title} />
-      </Match>
-      <Match when={props.level === 5}>
-        <h5 {...style()} textContent={props.title} />
-      </Match>
-      <Match when={props.level === 6}>
-        <h6 {...style()} textContent={props.title} />
-      </Match>
-    </Switch>
-  );
+  return <Dynamic component={headingTags[props.level]} {...style()} textContent={props.title} />;
 }
 
 export function EmptyState(props: EmptyStateProps) {
@@ -113,6 +106,7 @@ export function EmptyState(props: EmptyStateProps) {
     <div
       {...rest}
       {...theme()}
+      role="status"
       class={[theme().class, style().class, props.class]}
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}

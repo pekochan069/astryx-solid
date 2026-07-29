@@ -30,10 +30,9 @@ export interface ButtonGroupProps extends BaseProps<HTMLDivElement> {
 /** Connected Button roots with native tab order and arrow-key focus movement. */
 export function ButtonGroup(props: ButtonGroupProps) {
   const merged = mergeProps(
-    { orientation: "horizontal" as ButtonGroupOrientation, isDisabled: false },
+    { orientation: "horizontal", isDisabled: false } satisfies Partial<ButtonGroupProps>,
     props,
   );
-
   const rest = omit(
     merged,
     "children",
@@ -52,7 +51,7 @@ export function ButtonGroup(props: ButtonGroupProps) {
   );
 
   const moveFocus = (event: KeyboardEvent) => {
-    props.onKeyDown?.(event);
+    merged.onKeyDown?.(event);
     const canNavigate =
       !event.defaultPrevented && !event.altKey && !event.ctrlKey && !event.metaKey;
 
@@ -107,11 +106,11 @@ export function ButtonGroup(props: ButtonGroupProps) {
         <div
           {...rest}
           ref={(element) => {
-            props.ref?.(element);
+            merged.ref?.(element);
           }}
           {...themeProps("button-group", { orientation: merged.orientation, size: merged.size })}
-          class={[style().class, props.class]}
-          style={{ ...style().style, ...props.style }}
+          class={[style().class, merged.class]}
+          style={{ ...style().style, ...merged.style }}
           data-style-src={style()["data-style-src"]}
           role="group"
           aria-label={merged.label}

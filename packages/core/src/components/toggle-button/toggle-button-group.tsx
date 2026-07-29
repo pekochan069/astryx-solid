@@ -17,7 +17,9 @@ interface GroupContext {
   readonly size?: ButtonSize;
   readonly isDisabled?: boolean;
 }
+
 const ToggleButtonGroupContext = createContext<GroupContext | null>(null);
+
 export function useToggleButtonGroup() {
   return useContext(ToggleButtonGroupContext);
 }
@@ -26,6 +28,7 @@ const styles = stylex.create({
   group: { display: "inline-flex", "align-items": "center", gap: spacingVars["--spacing-1"] },
   vertical: { "flex-direction": "column", "align-items": "stretch" },
 });
+
 interface Base extends Omit<BaseProps<HTMLDivElement>, "onChange" | "type"> {
   children: JSX.Element;
   label: string;
@@ -34,19 +37,23 @@ interface Base extends Omit<BaseProps<HTMLDivElement>, "onChange" | "type"> {
   orientation?: "horizontal" | "vertical";
   ref?: (element: HTMLDivElement) => void;
 }
+
 export interface ToggleButtonGroupSingleProps extends Base {
   type?: "single";
   value: string | null;
   onChange: (value: string | null) => void;
 }
+
 export interface ToggleButtonGroupMultipleProps extends Base {
   type: "multiple";
   value: readonly string[];
   onChange: (value: readonly string[]) => void;
 }
+
 export type ToggleButtonGroupProps = ToggleButtonGroupSingleProps | ToggleButtonGroupMultipleProps;
 
 export function ToggleButtonGroup(props: ToggleButtonGroupProps) {
+  const isDisabled = () => props.isDisabled ?? false;
   const rest = omit(
     props,
     "children",
@@ -80,6 +87,7 @@ export function ToggleButtonGroup(props: ToggleButtonGroupProps) {
       );
     else props.onChange(props.value === value ? null : value);
   };
+
   const context = {
     selected,
     toggle,
@@ -87,7 +95,7 @@ export function ToggleButtonGroup(props: ToggleButtonGroupProps) {
       return props.size;
     },
     get isDisabled() {
-      return props.isDisabled;
+      return isDisabled();
     },
   };
 

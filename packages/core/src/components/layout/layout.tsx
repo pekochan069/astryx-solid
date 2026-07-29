@@ -1,11 +1,12 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createContext, createMemo, omit, Show, useContext } from "solid-js";
+import { createContext, createMemo, merge, omit, Show, useContext } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
 import type { SpacingStep } from "../../types/spacing-steps.types";
+import type { ResizableProps } from "../resizable";
 
 import {
   containerPaddingBlockEndVarStyles,
@@ -86,8 +87,15 @@ const styles = stylex.create({
 
 /** Page shell with explicit header, panel, content, and footer slots. */
 export function Layout(props: LayoutProps) {
-  const rest = omit(
+  const merged = merge(
+    {
+      height: "fill",
+    } satisfies LayoutProps,
     props,
+  );
+
+  const rest = omit(
+    merged,
     "contentWidth",
     "end",
     "footer",
@@ -103,47 +111,46 @@ export function Layout(props: LayoutProps) {
     "children",
   );
 
-  const height = () => props.height ?? "fill";
-  const root = createMemo(() =>
-    stylexProps(styles.outer, height() === "fill" ? styles.fill : styles.auto, props.xstyle),
+  const rootStyle = createMemo(() =>
+    stylexProps(styles.outer, merged.height === "fill" ? styles.fill : styles.auto, merged.xstyle),
   );
-  const inner = createMemo(() =>
+  const innerStyle = createMemo(() =>
     stylexProps(
       styles.inner,
-      height() === "fill" ? styles.fill : styles.auto,
-      props.padding != null && layoutPaddingOuterXVarStyles[props.padding],
-      props.padding != null && layoutPaddingOuterYVarStyles[props.padding],
-      props.contentWidth != null && styles.contentWidth(size(props.contentWidth)),
+      merged.height === "fill" ? styles.fill : styles.auto,
+      merged.padding != null && layoutPaddingOuterXVarStyles[merged.padding],
+      merged.padding != null && layoutPaddingOuterYVarStyles[merged.padding],
+      merged.contentWidth != null && styles.contentWidth(size(merged.contentWidth)),
     ),
   );
-  const middle = createMemo(() =>
+  const middleStyle = createMemo(() =>
     stylexProps(
       styles.middle,
-      props.contentWidth != null && styles.constrained(size(props.contentWidth)),
+      merged.contentWidth != null && styles.constrained(size(merged.contentWidth)),
     ),
   );
 
-  const theme = createMemo(() => themeProps("layout", { height: height() }));
+  const theme = createMemo(() => themeProps("layout", { height: merged.height }));
 
   const inheritedDividers = useContext(LayoutDividerContext);
   const dividerContext: LayoutDividerContextValue = {
     get defaultHasDividers() {
-      return props.defaultHasDividers ?? inheritedDividers.defaultHasDividers;
+      return merged.defaultHasDividers ?? inheritedDividers.defaultHasDividers;
     },
   };
 
   const slots: LayoutSlots = {
     get hasHeader() {
-      return props.header != null && props.header !== false;
+      return merged.header != null && merged.header !== false;
     },
     get hasFooter() {
-      return props.footer != null && props.footer !== false;
+      return merged.footer != null && merged.footer !== false;
     },
     get hasStart() {
-      return props.start != null && props.start !== false;
+      return merged.start != null && merged.start !== false;
     },
     get hasEnd() {
-      return props.end != null && props.end !== false;
+      return merged.end != null && merged.end !== false;
     },
   };
 
@@ -153,20 +160,20 @@ export function Layout(props: LayoutProps) {
         <div
           {...rest}
           {...theme()}
-          class={[theme().class, root().class, props.class]}
-          style={{ ...root().style, ...props.style }}
-          data-style-src={root()["data-style-src"]}
+          class={[theme().class, rootStyle().class, merged.class]}
+          style={{ ...rootStyle().style, ...merged.style }}
+          data-style-src={rootStyle()["data-style-src"]}
         >
-          <div {...inner()}>
-            <Area area="header">{props.header}</Area>
-            <div {...middle()}>
-              <Area area="start">{props.start}</Area>
+          <div {...innerStyle()}>
+            <Area area="header">{merged.header}</Area>
+            <div {...middleStyle()}>
+              <Area area="start">{merged.start}</Area>
               <div {...stylexProps(styles.content)}>
-                <Area area="content">{props.content ?? props.children}</Area>
+                <Area area="content">{merged.content ?? merged.children}</Area>
               </div>
-              <Area area="end">{props.end}</Area>
+              <Area area="end">{merged.end}</Area>
             </div>
-            <Area area="footer">{props.footer}</Area>
+            <Area area="footer">{merged.footer}</Area>
           </div>
         </div>
       </LayoutSlotsContext>
@@ -191,9 +198,10 @@ export interface LayoutContentProps extends BaseProps<HTMLDivElement> {
 export interface LayoutPanelProps extends LayoutContentProps {
   width?: SizeValue;
   hasDivider?: boolean;
+  resizable?: ResizableProps;
 }
 
-export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
+export interface LayoutBaseProps extends BaseProps<HTMLDivElement> {
   hasDivider?: boolean;
   height?: SizeValue;
   padding?: SpacingStep;
@@ -201,8 +209,8 @@ export interface LayoutBarProps extends BaseProps<HTMLDivElement> {
   children?: JSX.Element;
 }
 
-export type LayoutHeaderProps = LayoutBarProps;
-export type LayoutFooterProps = LayoutBarProps;
+export type LayoutHeaderProps = LayoutBaseProps;
+export type LayoutFooterProps = LayoutBaseProps;
 
 const areaStyles = stylex.create({
   area: {
@@ -211,14 +219,42 @@ const areaStyles = stylex.create({
     overflow: "clip",
     paddingInline: `var(--layout-padding-inner-x, ${spacingVars["--spacing-4"]})`,
     paddingBlock: `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-start": `var(--layout-padding-inner-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-end": `var(--layout-padding-inner-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-start": `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-end": `var(--layout-padding-inner-y, ${spacingVars["--spacing-4"]})`,
   },
+  content: { height: "100%", flex: 1 },
   scrollable: { overflow: "auto" },
-  fullBleed: { paddingInline: 0, paddingBlock: 0 },
+  fullBleed: {
+    paddingInline: 0,
+    paddingBlock: 0,
+    "--container-padding-inline-start": "0px",
+    "--container-padding-inline-end": "0px",
+    "--container-padding-block-start": "0px",
+    "--container-padding-block-end": "0px",
+  },
   outerInlineStart: {
     paddingInlineStart: `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
   },
   outerInlineEnd: {
     paddingInlineEnd: `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+  },
+  contentOuterInlineStart: {
+    paddingInlineStart: `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-start": `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-inline-end": `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+  },
+  contentOuterInlineEnd: {
+    paddingInlineEnd: `var(--layout-padding-outer-x, ${spacingVars["--spacing-4"]})`,
+  },
+  contentOuterBlockStart: {
+    paddingBlockStart: `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-start": `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+  },
+  contentOuterBlockEnd: {
+    paddingBlockEnd: `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
+    "--container-padding-block-end": `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
   },
   outerBlockStart: {
     paddingBlockStart: `var(--layout-padding-outer-y, ${spacingVars["--spacing-4"]})`,
@@ -295,7 +331,8 @@ export function LayoutContent(props: LayoutContentProps) {
 
 /** Sidebar region; divider side follows its Layout slot. */
 export function LayoutPanel(props: LayoutPanelProps) {
-  const rest = omit(props, "width");
+  const rest = omit(props, "width", "resizable");
+
   const area = useContext(LayoutAreaContext);
   const slots = useContext(LayoutSlotsContext);
 
@@ -303,7 +340,7 @@ export function LayoutPanel(props: LayoutPanelProps) {
     <LayoutAreaComponent
       {...rest}
       component="layout-panel"
-      width={props.width}
+      width={props.resizable?._size ?? props.width}
       hasDivider={props.hasDivider}
       isStartPanel={area === "start"}
       isEndPanel={area === "end"}
@@ -325,19 +362,19 @@ export function LayoutFooter(props: LayoutFooterProps) {
   return <LayoutBar component="layout-footer" divider={areaStyles.footerDivider} {...props} />;
 }
 
-function LayoutAreaComponent(
-  props: LayoutContentProps & {
-    component: string;
-    width?: SizeValue;
-    hasDivider?: boolean;
-    isStartPanel?: boolean;
-    isEndPanel?: boolean;
-    outerInlineStart?: boolean;
-    outerInlineEnd?: boolean;
-    outerBlockStart?: boolean;
-    outerBlockEnd?: boolean;
-  },
-) {
+interface LayoutAreaComponentProps extends LayoutContentProps {
+  component: string;
+  width?: SizeValue;
+  hasDivider?: boolean;
+  isStartPanel?: boolean;
+  isEndPanel?: boolean;
+  outerInlineStart?: boolean;
+  outerInlineEnd?: boolean;
+  outerBlockStart?: boolean;
+  outerBlockEnd?: boolean;
+}
+
+function LayoutAreaComponent(props: LayoutAreaComponentProps) {
   const rest = omit(
     props,
     "component",
@@ -363,13 +400,42 @@ function LayoutAreaComponent(
   const style = createMemo(() =>
     stylexProps(
       areaStyles.area,
-      props.width != null && areaStyles.panel,
+      props.component === "layout-content" && areaStyles.content,
+      props.component !== "layout-content" && areaStyles.panel,
       props.isScrollable !== false && areaStyles.scrollable,
       props.padding === 0 && areaStyles.fullBleed,
-      props.padding == null && props.outerInlineStart && areaStyles.outerInlineStart,
-      props.padding == null && props.outerInlineEnd && areaStyles.outerInlineEnd,
-      props.padding == null && props.outerBlockStart && areaStyles.outerBlockStart,
-      props.padding == null && props.outerBlockEnd && areaStyles.outerBlockEnd,
+      props.padding == null &&
+        props.component === "layout-content" &&
+        props.outerInlineStart &&
+        areaStyles.contentOuterInlineStart,
+      props.padding == null &&
+        props.component === "layout-content" &&
+        props.outerInlineEnd &&
+        areaStyles.contentOuterInlineEnd,
+      props.padding == null &&
+        props.component === "layout-content" &&
+        props.outerBlockStart &&
+        areaStyles.contentOuterBlockStart,
+      props.padding == null &&
+        props.component === "layout-content" &&
+        props.outerBlockEnd &&
+        areaStyles.contentOuterBlockEnd,
+      props.padding == null &&
+        props.component !== "layout-content" &&
+        props.outerInlineStart &&
+        areaStyles.outerInlineStart,
+      props.padding == null &&
+        props.component !== "layout-content" &&
+        props.outerInlineEnd &&
+        areaStyles.outerInlineEnd,
+      props.padding == null &&
+        props.component !== "layout-content" &&
+        props.outerBlockStart &&
+        areaStyles.outerBlockStart,
+      props.padding == null &&
+        props.component !== "layout-content" &&
+        props.outerBlockEnd &&
+        areaStyles.outerBlockEnd,
       props.padding != null && paddingStyles[props.padding],
       props.padding != null && containerPaddingInlineVarStyles[props.padding],
       props.padding != null && containerPaddingBlockStartVarStyles[props.padding],
@@ -401,12 +467,12 @@ function LayoutAreaComponent(
   );
 }
 
-function LayoutBar(
-  props: LayoutBarProps & {
-    component: string;
-    divider: typeof areaStyles.headerDivider | typeof areaStyles.footerDivider;
-  },
-) {
+interface LayoutBarProps extends LayoutBaseProps {
+  component: string;
+  divider: typeof areaStyles.headerDivider | typeof areaStyles.footerDivider;
+}
+
+function LayoutBar(props: LayoutBarProps) {
   const rest = omit(
     props,
     "component",
@@ -426,7 +492,7 @@ function LayoutBar(
   const hasDivider = () => props.hasDivider ?? inherited?.defaultHasDividers ?? false;
 
   const theme = createMemo(() => themeProps(props.component));
-  const style = createMemo(() =>
+  const rootStyle = createMemo(() =>
     stylexProps(areaStyles.bar, hasDivider() && props.divider, props.xstyle),
   );
   const innerStyle = createMemo(() =>
@@ -448,13 +514,13 @@ function LayoutBar(
       role={props.role ?? (props.label != null ? "region" : undefined)}
       aria-label={props.label}
       data-divider={hasDivider() || undefined}
-      class={[theme().class, style().class, props.class]}
+      class={[theme().class, rootStyle().class, props.class]}
       style={{
-        ...style().style,
+        ...rootStyle().style,
         ...(props.height != null && { height: size(props.height) }),
         ...props.style,
       }}
-      data-style-src={style()["data-style-src"]}
+      data-style-src={rootStyle()["data-style-src"]}
     >
       <div {...innerStyle()}>{props.children}</div>
     </div>

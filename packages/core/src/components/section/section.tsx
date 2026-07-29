@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
@@ -40,6 +40,27 @@ export interface SectionProps extends BaseProps<HTMLDivElement> {
   children?: JSX.Element;
 }
 
+const sectionPadding = `var(--astryx-section-padding, ${spacingVars["--spacing-4"]})`;
+const sectionPaddingInline = `var(--astryx-section-padding-inline, ${sectionPadding})`;
+const sectionPaddingInlineStart = `var(--astryx-section-padding-inline-start, ${sectionPaddingInline})`;
+const sectionPaddingInlineEnd = `var(--astryx-section-padding-inline-end, ${sectionPaddingInline})`;
+const sectionPaddingBlockStart = `var(--astryx-section-padding-block-start, ${sectionPadding})`;
+const sectionPaddingBlockEnd = `var(--astryx-section-padding-block-end, ${sectionPadding})`;
+
+const paddingValues: Record<SpacingStep, string> = {
+  0: spacingVars["--spacing-0"],
+  0.5: spacingVars["--spacing-0-5"],
+  1: spacingVars["--spacing-1"],
+  1.5: spacingVars["--spacing-1-5"],
+  2: spacingVars["--spacing-2"],
+  3: spacingVars["--spacing-3"],
+  4: spacingVars["--spacing-4"],
+  5: spacingVars["--spacing-5"],
+  6: spacingVars["--spacing-6"],
+  8: spacingVars["--spacing-8"],
+  10: spacingVars["--spacing-10"],
+};
+
 const styles = stylex.create({
   outer: {
     marginInlineStart: "calc(-1 * var(--container-padding-inline-start, 0px))",
@@ -53,16 +74,20 @@ const styles = stylex.create({
       ":last-child": "calc(-1 * var(--container-padding-block-end, 0px))",
     },
   },
-  inner: { height: "100%" },
+  inner: { height: "100%", boxSizing: "border-box" },
   defaultPadding: {
-    paddingInlineStart: `var(--astryx-section-padding-inline-start, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    paddingInlineEnd: `var(--astryx-section-padding-inline-end, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    paddingBlockStart: `var(--astryx-section-padding-block-start, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    paddingBlockEnd: `var(--astryx-section-padding-block-end, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    "--container-padding-inline-start": `var(--astryx-section-padding-inline-start, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    "--container-padding-inline-end": `var(--astryx-section-padding-inline-end, var(--astryx-section-padding-inline, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    "--container-padding-block-start": `var(--astryx-section-padding-block-start, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
-    "--container-padding-block-end": `var(--astryx-section-padding-block-end, var(--astryx-section-padding-block, var(--astryx-section-padding, ${spacingVars["--spacing-4"]})))`,
+    paddingInlineStart: sectionPaddingInlineStart,
+    paddingInlineEnd: sectionPaddingInlineEnd,
+    paddingBlockStart: sectionPaddingBlockStart,
+    paddingBlockEnd: sectionPaddingBlockEnd,
+    "--container-padding-inline-start": sectionPaddingInlineStart,
+    "--container-padding-inline-end": sectionPaddingInlineEnd,
+    "--container-padding-block-start": sectionPaddingBlockStart,
+    "--container-padding-block-end": sectionPaddingBlockEnd,
+    "--layout-padding-outer-x": sectionPaddingInlineStart,
+    "--layout-padding-outer-y": sectionPaddingBlockStart,
+    "--layout-padding-inner-x": sectionPaddingInlineStart,
+    "--layout-padding-inner-y": sectionPaddingBlockStart,
   },
   section: { backgroundColor: colorVars["--color-background-surface"] },
   transparent: { backgroundColor: "transparent" },
@@ -91,8 +116,15 @@ const styles = stylex.create({
 
 /** Container with background variants, dividers, padding, and nested-section bleed. */
 export function Section(props: SectionProps) {
-  const rest = omit(
+  const merged = merge(
+    {
+      variant: "section",
+    } satisfies Partial<SectionProps>,
     props,
+  );
+
+  const rest = omit(
+    merged,
     "variant",
     "width",
     "height",
@@ -107,27 +139,38 @@ export function Section(props: SectionProps) {
     "children",
   );
 
-  const variant = () => props.variant ?? "section";
-  const outer = createMemo(() => stylexProps(styles.outer, props.xstyle));
+  const outer = createMemo(() => stylexProps(styles.outer, merged.xstyle));
+  const explicitPaddingVars = createMemo(() => {
+    const value = merged.padding == null ? undefined : paddingValues[merged.padding];
 
-  const theme = createMemo(() => themeProps("section", { variant: variant() }));
+    return value == null
+      ? {}
+      : {
+          "--layout-padding-outer-x": value,
+          "--layout-padding-outer-y": value,
+          "--layout-padding-inner-x": value,
+          "--layout-padding-inner-y": value,
+        };
+  });
+
+  const theme = createMemo(() => themeProps("section", { variant: merged.variant }));
   const style = createMemo(() =>
     stylexProps(
       styles.inner,
-      props.padding == null && styles.defaultPadding,
-      styles[variant()],
-      props.padding != null && paddingStyles[props.padding],
-      props.padding != null && containerPaddingInlineVarStyles[props.padding],
-      props.padding != null && containerPaddingBlockStartVarStyles[props.padding],
-      props.padding != null && containerPaddingBlockEndVarStyles[props.padding],
-      props.padding != null && sectionPaddingPropagationStyles[props.padding],
-      props.paddingBlock != null && paddingBlockStyles[props.paddingBlock],
-      props.paddingBlock != null && containerPaddingBlockStartVarStyles[props.paddingBlock],
-      props.paddingBlock != null && containerPaddingBlockEndVarStyles[props.paddingBlock],
-      props.dividers?.includes("top") && styles.top,
-      props.dividers?.includes("bottom") && styles.bottom,
-      props.dividers?.includes("start") && styles.start,
-      props.dividers?.includes("end") && styles.end,
+      merged.padding == null && styles.defaultPadding,
+      styles[merged.variant],
+      merged.padding != null && paddingStyles[merged.padding],
+      merged.padding != null && containerPaddingInlineVarStyles[merged.padding],
+      merged.padding != null && containerPaddingBlockStartVarStyles[merged.padding],
+      merged.padding != null && containerPaddingBlockEndVarStyles[merged.padding],
+      merged.padding != null && sectionPaddingPropagationStyles[merged.padding],
+      merged.paddingBlock != null && paddingBlockStyles[merged.paddingBlock],
+      merged.paddingBlock != null && containerPaddingBlockStartVarStyles[merged.paddingBlock],
+      merged.paddingBlock != null && containerPaddingBlockEndVarStyles[merged.paddingBlock],
+      merged.dividers?.includes("top") && styles.top,
+      merged.dividers?.includes("bottom") && styles.bottom,
+      merged.dividers?.includes("start") && styles.start,
+      merged.dividers?.includes("end") && styles.end,
     ),
   );
 
@@ -135,19 +178,20 @@ export function Section(props: SectionProps) {
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, outer().class, props.class]}
+      class={[theme().class, outer().class, merged.class]}
       style={{
         ...outer().style,
-        ...(props.width != null && { width: size(props.width) }),
-        ...(props.height != null && { height: size(props.height) }),
-        ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
-        ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
-        ...props.style,
+        ...(merged.width != null && { width: size(merged.width) }),
+        ...(merged.height != null && { height: size(merged.height) }),
+        ...(merged.maxWidth != null && { "max-width": size(merged.maxWidth) }),
+        ...(merged.minHeight != null && { "min-height": size(merged.minHeight) }),
+        ...explicitPaddingVars(),
+        ...merged.style,
       }}
       data-style-src={outer()["data-style-src"]}
     >
       <div class={style().class} style={style().style} data-style-src={style()["data-style-src"]}>
-        {props.children}
+        {merged.children}
       </div>
     </div>
   );

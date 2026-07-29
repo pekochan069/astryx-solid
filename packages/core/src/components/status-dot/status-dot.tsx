@@ -67,7 +67,7 @@ const styles = stylex.create({
     paddingBlock: 4,
     borderRadius: 4,
     backgroundColor: colorVars["--color-background-inverted"],
-    color: colorVars["--color-text-primary"],
+    color: colorVars["--color-on-dark"],
     whiteSpace: "nowrap",
     pointerEvents: "none",
   },
@@ -100,10 +100,10 @@ export function StatusDot(props: StatusDotProps) {
     "onKeyDown",
     "ref",
   );
+
   let element: HTMLSpanElement | undefined;
   let tooltipElement: HTMLSpanElement | undefined;
   const tooltipId = `status-dot-tooltip-${createUniqueId()}`;
-
   const hideTooltip = () => {
     tooltipElement?.remove();
     tooltipElement = undefined;
@@ -119,6 +119,7 @@ export function StatusDot(props: StatusDotProps) {
     element.append(tooltipElement);
     element.setAttribute("aria-describedby", tooltipId);
   };
+
   const onPointerEnter = (event: StatusDotEvent<PointerEvent>) => {
     showTooltip();
     invokeHandler(props.onPointerEnter, event);

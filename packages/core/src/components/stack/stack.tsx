@@ -7,6 +7,7 @@ import type { SizeValue } from "../../types/size-value.types";
 
 import { paddingBlockStyles, paddingInlineStyles } from "../../layout/padding.stylex";
 import { stylexProps } from "../../stylex";
+import { setElementRef } from "../../utils/set-element-ref";
 import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 import {
@@ -25,6 +26,8 @@ const overflowStyles = stylex.create({
 });
 
 /** Props for the {@link Stack} flex-layout component. */
+export type StackAlignment = StackMainAlignment | StackCrossAlignment;
+
 export interface StackProps extends BaseProps<HTMLElement> {
   /**
    * Direction of the stack layout.
@@ -34,10 +37,22 @@ export interface StackProps extends BaseProps<HTMLElement> {
    */
   direction?: StackDirection;
 
-  /** Main-axis alignment, matching CSS `justify-content`. */
+  /**
+   * Horizontal alignment. Maps to main axis for horizontal stacks and cross
+   * axis for vertical stacks.
+   */
+  hAlign?: StackAlignment;
+
+  /**
+   * Vertical alignment. Maps to cross axis for horizontal stacks and main
+   * axis for vertical stacks.
+   */
+  vAlign?: StackAlignment;
+
+  /** Main-axis alignment alias, matching CSS `justify-content`. */
   justify?: StackMainAlignment;
 
-  /** Cross-axis alignment, matching CSS `align-items`. */
+  /** Cross-axis alignment alias, matching CSS `align-items`. */
   align?: StackCrossAlignment;
 
   /**
@@ -140,6 +155,32 @@ export interface StackProps extends BaseProps<HTMLElement> {
  * </Stack>
  * ```
  */
+function toMainAlignment(value: StackAlignment | undefined): StackMainAlignment | undefined {
+  switch (value) {
+    case "start":
+    case "center":
+    case "end":
+    case "between":
+    case "around":
+    case "evenly":
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function toCrossAlignment(value: StackAlignment | undefined): StackCrossAlignment | undefined {
+  switch (value) {
+    case "start":
+    case "center":
+    case "end":
+    case "stretch":
+      return value;
+    default:
+      return undefined;
+  }
+}
+
 export function Stack(props: StackProps) {
   const merged = merge(
     {
@@ -151,6 +192,8 @@ export function Stack(props: StackProps) {
   const rest = omit(
     merged,
     "direction",
+    "hAlign",
+    "vAlign",
     "justify",
     "align",
     "gap",
@@ -167,14 +210,27 @@ export function Stack(props: StackProps) {
     "xstyle",
     "class",
     "style",
+    "children",
+    "ref",
   );
 
+  const direction = () => merged.direction ?? "vertical";
+  const component = () => merged.as ?? "div";
+  const alignments = createMemo(() => {
+    const hAlign = merged.hAlign ?? (direction() === "horizontal" ? merged.justify : merged.align);
+    const vAlign = merged.vAlign ?? (direction() === "horizontal" ? merged.align : merged.justify);
+
+    return {
+      mainAlign: toMainAlignment(direction() === "horizontal" ? hAlign : vAlign),
+      crossAlign: toCrossAlignment(direction() === "horizontal" ? vAlign : hAlign),
+    };
+  });
   const resolvedPaddingInline = createMemo(() => merged.paddingInline ?? merged.padding);
   const resolvedPaddingBlock = createMemo(() => merged.paddingBlock ?? merged.padding);
 
   const theme = createMemo(() =>
     themeProps("stack", {
-      direction: merged.direction,
+      direction: direction(),
       gap: merged.gap,
       wrap: merged.wrap,
     }),
@@ -183,9 +239,9 @@ export function Stack(props: StackProps) {
   const style = createMemo(() =>
     stylexProps(
       ...stack({
-        direction: merged.direction,
-        mainAlign: merged.justify,
-        crossAlign: merged.align,
+        direction: direction(),
+        mainAlign: alignments().mainAlign,
+        crossAlign: alignments().crossAlign,
         gap: merged.gap,
         wrap: merged.wrap,
       }),
@@ -205,9 +261,10 @@ export function Stack(props: StackProps) {
 
   return (
     <Dynamic
-      component={merged.as}
+      component={component()}
       {...rest}
       {...theme()}
+      ref={(element: HTMLElement) => setElementRef(merged.ref, element)}
       class={[theme().class, style().class, merged.class]}
       style={{
         ...style().style,
@@ -215,6 +272,8 @@ export function Stack(props: StackProps) {
         ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
-    />
+    >
+      {merged.children}
+    </Dynamic>
   );
 }

@@ -61,7 +61,8 @@ describe("Link", () => {
         Disabled
       </Link>
     ));
-    const link = root.querySelector("a");
+    const link = root.firstElementChild;
+    expect(link?.tagName).toBe("A");
     expect(link?.hasAttribute("href")).toBe(false);
     link?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(onClick).not.toHaveBeenCalled();

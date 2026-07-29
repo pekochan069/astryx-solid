@@ -53,7 +53,7 @@ describe("container and status primitives", () => {
     expect(container.textContent).toContain("Card content");
     expect(container.querySelector("h2")?.textContent).toBe("No results");
     expect(container.textContent).toContain("Try another search");
-    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(container.querySelector('[role="status"]')?.textContent).toContain("No results");
     expect(container.querySelector('[role="img"]')?.getAttribute("aria-label")).toBe("Online");
     expect(container.querySelector('[role="group"]')?.getAttribute("aria-label")).toBe("photo.png");
     expect(container.querySelector("time")?.getAttribute("datetime")).toBe(
@@ -80,6 +80,32 @@ describe("container and status primitives", () => {
     dot.dispatchEvent(dispatch("keydown", { key: "Escape" }));
     await Promise.resolve();
     expect(container.querySelector('[role="tooltip"]')).toBeNull();
+  });
+
+  it("gives each status dot tooltip a distinct ID", async () => {
+    const container = mount(() => (
+      <>
+        <StatusDot variant="success" label="First" tooltip="First tooltip" />
+        <StatusDot variant="warning" label="Second" tooltip="Second tooltip" />
+      </>
+    ));
+    const dots = Array.from(container.querySelectorAll<HTMLElement>('[role="img"]'));
+    const firstDot = dots[0];
+    const secondDot = dots[1];
+    if (firstDot === undefined || secondDot === undefined) throw new Error("Expected status dots");
+
+    firstDot.dispatchEvent(dispatch("pointerenter"));
+    await Promise.resolve();
+    const firstTooltip = firstDot.querySelector<HTMLElement>('[role="tooltip"]');
+    if (firstTooltip === null) throw new Error("Expected first status dot tooltip");
+
+    secondDot.dispatchEvent(dispatch("pointerenter"));
+    await Promise.resolve();
+    const secondTooltip = secondDot.querySelector<HTMLElement>('[role="tooltip"]');
+    if (secondTooltip === null) throw new Error("Expected second status dot tooltip");
+
+    expect(secondTooltip.id).not.toBe(firstTooltip.id);
+    expect(secondDot.getAttribute("aria-describedby")).toBe(secondTooltip.id);
   });
 });
 
@@ -240,6 +266,76 @@ describe("timestamp", () => {
     expect(container.querySelector('[data-testid="system-time-timezone"]')?.textContent).toMatch(
       new RegExp(`^${systemTime}\\s\\S+`),
     );
+  });
+});
+
+describe("timestamp lifecycle", () => {
+  it("warns once for invalid values", async () => {
+    const warnings: unknown[][] = [];
+    const originalWarn = console.warn;
+    const [value, setValue] = createSignal<string | number>("invalid");
+    Object.defineProperty(console, "warn", {
+      configurable: true,
+      value: (...args: unknown[]) => warnings.push(args),
+    });
+
+    try {
+      mount(() => <Timestamp value={value()} />);
+      expect(warnings).toHaveLength(1);
+
+      setValue(Date.now());
+      await Promise.resolve();
+      setValue("still invalid");
+      await Promise.resolve();
+
+      expect(warnings).toHaveLength(1);
+    } finally {
+      Object.defineProperty(console, "warn", { configurable: true, value: originalWarn });
+    }
+  });
+
+  it("starts and clears live timers as reactive inputs change", async () => {
+    const callbacks: Array<() => void> = [];
+    const cleared: number[] = [];
+    const originalSetInterval = globalThis.setInterval;
+    const originalClearInterval = globalThis.clearInterval;
+    const [isLive, setIsLive] = createSignal(false);
+    const [value, setValue] = createSignal(Date.now() / 1000 - 10);
+    Object.defineProperty(globalThis, "setInterval", {
+      configurable: true,
+      value: (callback: () => void) => callbacks.push(callback),
+    });
+    Object.defineProperty(globalThis, "clearInterval", {
+      configurable: true,
+      value: (timer: number) => cleared.push(timer),
+    });
+
+    try {
+      mount(() => <Timestamp value={value()} format="relative" isLive={isLive()} />);
+      expect(callbacks).toHaveLength(0);
+
+      setIsLive(true);
+      await Promise.resolve();
+      expect(callbacks).toHaveLength(1);
+
+      setValue(Date.now() / 1000 - 120);
+      await Promise.resolve();
+      expect(callbacks).toHaveLength(2);
+      expect(cleared).toEqual([1]);
+
+      setIsLive(false);
+      await Promise.resolve();
+      expect(cleared).toEqual([1, 2]);
+    } finally {
+      Object.defineProperty(globalThis, "setInterval", {
+        configurable: true,
+        value: originalSetInterval,
+      });
+      Object.defineProperty(globalThis, "clearInterval", {
+        configurable: true,
+        value: originalClearInterval,
+      });
+    }
   });
 });
 

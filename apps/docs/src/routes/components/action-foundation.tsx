@@ -19,6 +19,8 @@ export const Route = createFileRoute("/components/action-foundation")({
 });
 
 const RouterLink: LinkComponent = (props) => <a {...props} data-router-link="true" />;
+const toggleButtonStyle = { width: "128px", "justify-content": "flex-start" };
+const ToggleIconSpacer = () => <span aria-hidden="true" style={{ width: "16px" }} />;
 
 function LinkExamples() {
   return (
@@ -80,18 +82,39 @@ function ToggleExamples() {
       <Stack gap={3} align="start">
         <ToggleButton
           label="Favorite"
-          icon="☆"
-          pressedIcon="★"
+          icon={<span style={{ display: "inline-block", width: "16px" }}>☆</span>}
+          pressedIcon={<span style={{ display: "inline-block", width: "16px" }}>★</span>}
           isPressed={favorite()}
           onPressedChange={setFavorite}
+          style={toggleButtonStyle}
         />
         <ToggleButtonGroup label="View mode" value={view()} onChange={setView}>
-          <ToggleButton label="Grid" value="grid" />
-          <ToggleButton label="List" value="list" />
+          <ToggleButton
+            label="Grid"
+            value="grid"
+            icon={<ToggleIconSpacer />}
+            style={toggleButtonStyle}
+          />
+          <ToggleButton
+            label="List"
+            value="list"
+            icon={<ToggleIconSpacer />}
+            style={toggleButtonStyle}
+          />
         </ToggleButtonGroup>
         <ToggleButtonGroup type="multiple" label="Formatting" value={format()} onChange={setFormat}>
-          <ToggleButton label="Bold" value="bold" />
-          <ToggleButton label="Italic" value="italic" />
+          <ToggleButton
+            label="Bold"
+            value="bold"
+            icon={<ToggleIconSpacer />}
+            style={toggleButtonStyle}
+          />
+          <ToggleButton
+            label="Italic"
+            value="italic"
+            icon={<ToggleIconSpacer />}
+            style={toggleButtonStyle}
+          />
         </ToggleButtonGroup>
       </Stack>
     </section>

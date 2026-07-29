@@ -83,6 +83,9 @@ export const styles = stylex.create({
     justifyContent: "center",
     flexShrink: 0,
   },
+  contentWrapper: {
+    display: "contents",
+  },
   labelText: {
     overflow: "hidden",
     textOverflow: "ellipsis",

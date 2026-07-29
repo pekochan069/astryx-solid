@@ -25,6 +25,7 @@ export function ButtonContent(props: ButtonContentProps): JSX.Element {
         <Spinner size="sm" shade="inherit" />
       </span>
       <span
+        {...stylex.attrs(styles.contentWrapper)}
         style={{ visibility: props.loading ? "hidden" : undefined }}
         aria-hidden={props.loading ? "true" : undefined}
       >

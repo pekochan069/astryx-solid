@@ -77,7 +77,7 @@ function ToggleExamples() {
   return (
     <section aria-labelledby="toggles-heading">
       <h2 id="toggles-heading">Toggle buttons</h2>
-      <Stack gap={3}>
+      <Stack gap={3} align="start">
         <ToggleButton
           label="Favorite"
           icon="☆"

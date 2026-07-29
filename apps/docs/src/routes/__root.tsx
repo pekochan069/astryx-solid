@@ -13,6 +13,12 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   }),
+  notFoundComponent: () => (
+    <main>
+      <h1>Page not found</h1>
+      <a href="/">Return home</a>
+    </main>
+  ),
   shellComponent: RootDocument,
 });
 

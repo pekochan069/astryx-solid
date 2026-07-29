@@ -14,14 +14,23 @@ export interface GridSpanProps extends BaseProps<HTMLDivElement> {
   children?: JSX.Element;
 }
 
-const styles = stylex.create({ root: { display: "grid", minWidth: 0, height: "100%" } });
+const styles = stylex.create({ span: { minWidth: 0, display: "grid", height: "100%" } });
+
+function positiveSpan(value: number | undefined) {
+  return value != null && Number.isInteger(value) && value > 0 ? value : undefined;
+}
 
 /** Grid item that spans specified columns or rows. */
 export function GridSpan(props: GridSpanProps) {
   const rest = omit(props, "columns", "rows", "xstyle", "class", "style", "children");
 
+  const columns = createMemo(() =>
+    props.columns === "full" ? "1 / -1" : positiveSpan(props.columns),
+  );
+  const rows = createMemo(() => positiveSpan(props.rows));
+
   const theme = themeProps("grid-span");
-  const style = createMemo(() => stylexProps(styles.root, props.xstyle));
+  const style = createMemo(() => stylexProps(styles.span, props.xstyle));
 
   return (
     <div
@@ -30,10 +39,10 @@ export function GridSpan(props: GridSpanProps) {
       class={[theme.class, style().class, props.class]}
       style={{
         ...style().style,
-        ...(props.columns != null && {
-          "grid-column": props.columns === "full" ? "1 / -1" : `span ${props.columns}`,
+        ...(columns() != null && {
+          "grid-column": columns() === "1 / -1" ? columns() : `span ${columns()}`,
         }),
-        ...(props.rows != null && { "grid-row": `span ${props.rows}` }),
+        ...(rows() != null && { "grid-row": `span ${rows()}` }),
         ...props.style,
       }}
       data-style-src={style()["data-style-src"]}

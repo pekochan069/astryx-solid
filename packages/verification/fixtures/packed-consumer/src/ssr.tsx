@@ -6,6 +6,7 @@ import { createUniqueId } from "solid-js";
 import {
   ContentPrimitives,
   createApp,
+  PackedActions,
   PackedContainerStatus,
   PackedLayout,
   PackedLayoutPrimitives,
@@ -103,6 +104,11 @@ for (const [name, component] of Object.entries(packedPrimitives)) {
     `<div id="packed-${name}">${output}</div>`,
   );
 }
+
+const actions = renderToString(PackedActions, { renderId: "actions" });
+if (!actions.includes("Cancel action") || !actions.includes("Native"))
+  throw new Error(`Unexpected action output: ${actions}`);
+html = html.replace('<div id="packed-actions"></div>', `<div id="packed-actions">${actions}</div>`);
 
 await writeFile(index, html);
 

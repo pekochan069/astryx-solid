@@ -1,6 +1,6 @@
 import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -56,9 +56,9 @@ export interface TextProps extends BaseProps {
   maxLines?: number;
   hasTruncateTooltip?: boolean;
   wordBreak?: WordBreak;
+  hasCapsize?: boolean;
   textWrap?: TextWrap;
   justify?: TextJustify;
-  hasCapsize?: boolean;
   hasStrikethrough?: boolean;
   hasTabularNumbers?: boolean;
   as?: ValidComponent;
@@ -122,11 +122,17 @@ const styles = stylex.create({
   end: { textAlign: "end" },
   strikethrough: { textDecoration: "line-through" },
   tabular: { fontVariantNumeric: "tabular-nums" },
-  "break-word": { overflowWrap: "break-word" },
+  "break-word": { wordBreak: "normal", overflowWrap: "break-word" },
   "break-all": { wordBreak: "break-all" },
   nowrap: { textWrap: "nowrap" },
   balance: { textWrap: "balance" },
   pretty: { textWrap: "pretty" },
+  wrap: { textWrap: "wrap" },
+  capsize: {
+    textBoxEdge: "cap alphabetic",
+    textBoxTrim: "trim-both",
+    display: "block",
+  },
 });
 
 const sizeStyles = stylex.create({
@@ -183,25 +189,23 @@ function textWrapStyle(textWrap: TextWrap | undefined) {
       return styles.balance;
     case "pretty":
       return styles.pretty;
+    case "wrap":
+      return styles.wrap;
     default:
       return false;
   }
 }
 
 export function Text(props: TextProps) {
-  const type = () => props.type ?? "body";
-  const color = () => props.color ?? (type() === "supporting" ? "secondary" : "primary");
-  const truncation = useTruncation({
-    maxLines: () => props.maxLines,
-    wordBreak: () => props.wordBreak,
-    ref: props.ref,
-  });
-  const { maxLines, wordBreak } = truncation;
-
-  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "inline"));
+  const merged = merge(
+    {
+      type: "body",
+    } satisfies Partial<TextProps>,
+    props,
+  );
 
   const rest = omit(
-    props,
+    merged,
     "type",
     "size",
     "color",
@@ -210,9 +214,9 @@ export function Text(props: TextProps) {
     "maxLines",
     "hasTruncateTooltip",
     "wordBreak",
+    "hasCapsize",
     "textWrap",
     "justify",
-    "hasCapsize",
     "hasStrikethrough",
     "hasTabularNumbers",
     "as",
@@ -222,44 +226,62 @@ export function Text(props: TextProps) {
     "children",
   );
 
+  const color = () =>
+    merged.color ??
+    (merged.type === "supporting"
+      ? "secondary"
+      : merged.type === "inherit"
+        ? "inherit"
+        : "primary");
+  const truncation = useTruncation({
+    maxLines: () => merged.maxLines,
+    wordBreak: () => merged.wordBreak,
+    ref: merged.ref,
+  });
+  const { maxLines, wordBreak } = truncation;
+
+  const display = () =>
+    maxLines() > 0 || merged.hasCapsize ? "block" : (merged.display ?? "inline");
+
   const title = () =>
-    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+    maxLines() > 0 && merged.hasTruncateTooltip !== false && truncation.isTruncated()
       ? truncation.fullText()
       : undefined;
 
   const theme = createMemo(() =>
-    themeProps("text", { type: type(), size: props.size, color: color() }),
+    themeProps("text", { type: merged.type, size: merged.size, color: color() }),
   );
   const style = createMemo(() =>
     stylexProps(
-      ...textStyles(type(), color(), props.size, props.weight),
+      ...textStyles(merged.type, color(), merged.size, merged.weight),
       maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
       maxLines() > 0 && styles[wordBreak()],
       maxLines() === 0 && styles[display()],
-      textWrapStyle(props.textWrap),
-      props.justify && props.justify !== "start" && styles[props.justify],
-      props.hasStrikethrough && styles.strikethrough,
-      props.hasTabularNumbers && styles.tabular,
-      props.xstyle,
+      textWrapStyle(merged.textWrap),
+      merged.justify && merged.justify !== "start" && styles[merged.justify],
+      merged.hasCapsize && styles.capsize,
+      merged.hasStrikethrough && styles.strikethrough,
+      merged.hasTabularNumbers && styles.tabular,
+      merged.xstyle,
     ),
   );
 
   return (
     <Dynamic
-      component={props.as ?? "span"}
+      component={merged.as ?? "span"}
       {...rest}
       {...theme()}
-      class={[theme().class, style().class, props.class]}
+      class={[theme().class, style().class, merged.class]}
       ref={truncation.ref}
-      title={title()}
+      title={merged.title ?? title()}
       style={{
         ...style().style,
         ...(maxLines() > 1 && { "-webkit-line-clamp": maxLines() }),
-        ...props.style,
+        ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      {merged.children}
     </Dynamic>
   );
 }

@@ -14,12 +14,17 @@ import "@astryx-solid/core/astryx.css";
 import "@astryx-solid/core/tailwind-theme.css";
 
 import {
+  actionExportsMatch,
   ContentPrimitives,
   createApp,
+  PackedActions,
+  PackedInteractiveActions,
   PackedContainerStatus,
   PackedLayout,
   packedPrimitives,
 } from "./app";
+
+if (!actionExportsMatch) throw new Error("Action root and subpath exports differ");
 
 if (
   stableClassName("button") !== "astryx-solid-button" ||
@@ -77,9 +82,10 @@ hydrateAndRecord(primitiveRoot, () =>
 );
 
 const containerStatusRoot = requireRoot("packed-container-status");
-hydrateAndRecord(containerStatusRoot, () =>
-  hydrate(PackedContainerStatus, containerStatusRoot, { renderId: "container-status" }),
-);
+hydrateAndRecord(containerStatusRoot, () => {
+  containerStatusRoot.replaceChildren();
+  render(PackedContainerStatus, containerStatusRoot);
+});
 
 const layoutRoot = requireRoot("packed-layout");
 hydrateAndRecord(layoutRoot, () =>
@@ -97,3 +103,13 @@ for (const [name, component] of Object.entries(packedPrimitives)) {
   const packedRoot = requireRoot(`packed-${name}`);
   hydrateAndRecord(packedRoot, () => hydrate(component, packedRoot, { renderId: name }));
 }
+
+const actionRoot = requireRoot("packed-actions");
+hydrateAndRecord(actionRoot, () => {
+  actionRoot.replaceChildren();
+  render(PackedActions, actionRoot);
+});
+
+const adapterRoot = document.createElement("div");
+document.body.append(adapterRoot);
+render(PackedInteractiveActions, adapterRoot);

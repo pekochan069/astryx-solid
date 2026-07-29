@@ -9,6 +9,10 @@ const input = {
   index: "./src/index.ts",
 
   button: "./src/components/button/index.ts",
+  "button-group": "./src/components/button-group/index.ts",
+  "icon-button": "./src/components/icon-button/index.ts",
+  link: "./src/components/link/index.ts",
+  "toggle-button": "./src/components/toggle-button/index.ts",
   card: "./src/components/card/index.ts",
   center: "./src/components/center/index.ts",
   "aspect-ratio": "./src/components/aspect-ratio/index.ts",

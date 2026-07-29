@@ -1,14 +1,21 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createEffect, createMemo, createSignal, omit, onCleanup } from "solid-js";
+import { createEffect, createMemo, createSignal, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
 import { stylexProps } from "../../stylex";
-import { colorVars, radiusVars, spacingVars } from "../../theme/tokens.stylex";
+import {
+  colorVars,
+  durationVars,
+  easeVars,
+  radiusVars,
+  spacingVars,
+} from "../../theme/tokens.stylex";
 import { setElementRef } from "../../utils/set-element-ref";
 import { themeProps } from "../../utils/theme-props";
+import { useResizeHandleInteractions } from "./use-resize-handle-interactions";
 
 const STORAGE_PREFIX = "astryx-resizable:";
 const DEFAULT_MIN_SIZE = 50;
@@ -289,13 +296,32 @@ export interface ResizeHandleProps extends Omit<BaseProps<HTMLDivElement>, "onKe
 }
 
 const styles = stylex.create({
-  root: { position: "relative", flexShrink: 0, backgroundColor: colorVars["--color-border"] },
+  root: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    backgroundColor: colorVars["--color-border"],
+    transitionProperty: "background-color",
+    transitionDuration: durationVars["--duration-fast"],
+    transitionTimingFunction: easeVars["--ease-standard"],
+    outline: {
+      default: "none",
+      ":focus-visible": `2px solid ${colorVars["--color-accent"]}`,
+    },
+    outlineOffset: {
+      default: null,
+      ":focus-visible": spacingVars["--spacing-0-5"],
+    },
+  },
   horizontal: { width: 1, height: "100%", cursor: "col-resize" },
   vertical: { height: 1, width: "100%", cursor: "row-resize" },
   overlay: { position: "absolute", zIndex: 2, backgroundColor: "transparent" },
-  overlayHorizontal: { right: 0, top: 0, bottom: 0, width: spacingVars["--spacing-4"] },
-  overlayVertical: { bottom: 0, left: 0, right: 0, height: spacingVars["--spacing-4"] },
-  invisible: { backgroundColor: "transparent" },
+  overlayHorizontal: { insetInlineEnd: 0, top: 0, bottom: 0, width: spacingVars["--spacing-4"] },
+  overlayVertical: { insetBlockEnd: 0, left: 0, right: 0, height: spacingVars["--spacing-4"] },
+  invisibleHorizontal: { backgroundColor: "transparent", width: 0 },
+  invisibleVertical: { backgroundColor: "transparent", height: 0 },
   disabled: { cursor: "default", pointerEvents: "none" },
   hitArea: { position: "absolute", zIndex: 1, touchAction: "none", userSelect: "none" },
   hitAreaHorizontal: {
@@ -303,14 +329,12 @@ const styles = stylex.create({
     top: 0,
     bottom: 0,
     left: "50%",
-    transform: "translateX(-50%)",
   },
   hitAreaVertical: {
     height: spacingVars["--spacing-4"],
     left: 0,
     right: 0,
     top: "50%",
-    transform: "translateY(-50%)",
   },
   pill: {
     position: "absolute",
@@ -318,79 +342,49 @@ const styles = stylex.create({
     pointerEvents: "none",
     borderRadius: radiusVars["--radius-full"],
     backgroundColor: colorVars["--color-border"],
-  },
-  pillHorizontal: {
-    width: 3,
-    height: spacingVars["--spacing-8"],
+    transitionProperty: "opacity, background-color, transform",
+    transitionDuration: durationVars["--duration-fast"],
+    transitionTimingFunction: easeVars["--ease-standard"],
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
   },
-  pillVertical: {
-    width: spacingVars["--spacing-8"],
-    height: 3,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-  },
-  pillStartHorizontal: { left: 0, transform: "translate(-100%, -50%)" },
-  pillEndHorizontal: { left: "100%", transform: "translate(0, -50%)" },
-  pillStartVertical: { top: 0, transform: "translate(-50%, -100%)" },
-  pillEndVertical: { top: "100%", transform: "translate(-50%, 0)" },
+  pillHorizontal: { width: 3, height: spacingVars["--spacing-8"] },
+  pillVertical: { width: spacingVars["--spacing-8"], height: 3 },
   pillHidden: { opacity: 0 },
+  pillVisible: { opacity: 1 },
+  pillHover: { opacity: 1, backgroundColor: colorVars["--color-border"] },
+  pillActive: { opacity: 1, backgroundColor: colorVars["--color-border-emphasized"] },
+});
+
+const dynamicStyles = stylex.create({
+  hitAreaBiasX: (percent: string) => ({ transform: `translateX(-${percent})` }),
+  hitAreaBiasY: (percent: string) => ({ transform: `translateY(-${percent})` }),
+  pillOffsetX: (direction: number) => ({
+    left: 0,
+    transform: `translate(calc(${direction} * (100% + ${spacingVars["--spacing-1"]})), -50%)`,
+  }),
+  pillOffsetY: (direction: number) => ({
+    top: 0,
+    transform: `translate(-50%, calc(${direction} * (100% + ${spacingVars["--spacing-1"]})))`,
+  }),
 });
 
 const pillTheme = themeProps("resize-handle-pill");
 
-function pillSide(props: ResizeHandleProps) {
-  if (props.pillPlacement && props.pillPlacement !== "auto") return props.pillPlacement;
+function resolveEffectiveSide(
+  placement: NonNullable<ResizeHandleProps["pillPlacement"]>,
+  isReversed: boolean,
+  isCollapsed: boolean,
+): "start" | "end" | "center" {
+  if (placement !== "auto") return placement;
 
-  const side = props.isReversed ? "end" : "start";
-  return props.resizable?._isCollapsed ? (side === "start" ? "end" : "start") : side;
+  const side = isReversed ? "end" : "start";
+  return isCollapsed ? (side === "start" ? "end" : "start") : side;
 }
 
-function resizeBy(resizable: ResizableProps, delta: number) {
-  resizable._onResizeStart();
-  resizable._onResizeMove(delta);
-  resizable._onResizeEnd();
-}
-
-function toggleResizable(resizable: ResizableProps) {
-  resizeBy(resizable, resizable._isCollapsed ? resizable._minSizePx : -resizable._size);
-}
-
-function resizeFromKey(
-  event: KeyboardEvent,
-  resizable: ResizableProps,
-  horizontal: boolean,
-  multiplier: number,
-) {
-  const step = event.shiftKey ? 50 : 10;
-  const positive = horizontal ? event.key === "ArrowRight" : event.key === "ArrowDown";
-  const negative = horizontal ? event.key === "ArrowLeft" : event.key === "ArrowUp";
-
-  if (positive || negative) {
-    event.preventDefault();
-    resizeBy(resizable, (positive ? step : -step) * multiplier);
-    return;
-  }
-
-  if (event.key === "Home") {
-    event.preventDefault();
-    resizeBy(resizable, resizable._minSizePx - resizable._size);
-    return;
-  }
-
-  if (event.key === "End" && Number.isFinite(resizable._maxSizePx)) {
-    event.preventDefault();
-    resizeBy(resizable, resizable._maxSizePx - resizable._size);
-    return;
-  }
-
-  if ((event.key === "Enter" || event.key === " ") && resizable._collapsible) {
-    event.preventDefault();
-    toggleResizable(resizable);
-  }
+function hitAreaBias(side: "start" | "end" | "center") {
+  return side === "center" ? "50%" : side === "start" ? "66.67%" : "33.33%";
 }
 
 function resizeHandleRest(props: ResizeHandleProps) {
@@ -416,8 +410,6 @@ function resizeHandleRest(props: ResizeHandleProps) {
 
 export function ResizeHandle(props: ResizeHandleProps) {
   const rest = resizeHandleRest(props);
-  const [dragging, setDragging] = createSignal(false);
-  const [interacting, setInteracting] = createSignal(false);
 
   let element: HTMLDivElement | undefined;
   const setElement = (next: HTMLDivElement) => {
@@ -432,59 +424,35 @@ export function ResizeHandle(props: ResizeHandleProps) {
     (horizontal() && element !== undefined && getComputedStyle(element).direction === "rtl"
       ? -1
       : 1);
+  const side = () =>
+    resolveEffectiveSide(
+      props.pillPlacement ?? "auto",
+      props.isReversed ?? false,
+      props.resizable?._isCollapsed ?? false,
+    );
+  const interactions = useResizeHandleInteractions({ props, horizontal, multiplier });
+  const pillStyle = () =>
+    stylexProps(
+      styles.pill,
+      horizontal() ? styles.pillHorizontal : styles.pillVertical,
+      side() !== "center" &&
+        (horizontal()
+          ? dynamicStyles.pillOffsetX(side() === "start" ? -1 : 1)
+          : dynamicStyles.pillOffsetY(side() === "start" ? -1 : 1)),
+      props.isAlwaysVisible !== false ? styles.pillVisible : styles.pillHidden,
+      interactions.interacting() && !interactions.dragging() && styles.pillHover,
+      interactions.dragging() && styles.pillActive,
+    );
 
-  let cancelDrag = () => {};
-  const finish = (complete: boolean) => {
-    cancelDrag();
-    setDragging(false);
-
-    if (typeof document !== "undefined") {
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    }
-
-    if (complete) props.resizable?._onResizeEnd();
-  };
-
-  const onPointerDown = (event: PointerEvent) => {
-    if (props.isDisabled || !props.resizable) return;
-
-    event.preventDefault();
-
-    const start = horizontal() ? event.clientX : event.clientY;
-    const sign = multiplier();
-
-    setDragging(true);
-    props.resizable._onResizeStart();
-    document.body.style.cursor = horizontal() ? "col-resize" : "row-resize";
-    document.body.style.userSelect = "none";
-
-    const move = (next: PointerEvent) =>
-      props.resizable?._onResizeMove(((horizontal() ? next.clientX : next.clientY) - start) * sign);
-    const up = () => finish(true);
-    const cancel = () => finish(false);
-
-    cancelDrag = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", cancel);
-      cancelDrag = () => {};
-    };
-
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", cancel);
-  };
-
-  const onKeyDown = (event: KeyboardEvent) => {
-    props.onKeyDown?.(event);
-
-    if (event.defaultPrevented || props.isDisabled || !props.resizable) return;
-
-    resizeFromKey(event, props.resizable, horizontal(), multiplier());
-  };
-
-  onCleanup(() => finish(false));
+  const hitAreaStyle = () =>
+    stylexProps(
+      styles.hitArea,
+      horizontal() ? styles.hitAreaHorizontal : styles.hitAreaVertical,
+      horizontal()
+        ? dynamicStyles.hitAreaBiasX(hitAreaBias(side()))
+        : dynamicStyles.hitAreaBiasY(hitAreaBias(side())),
+      props.isDisabled && styles.disabled,
+    );
 
   const theme = createMemo(() => themeProps("resize-handle"));
   const style = createMemo(() =>
@@ -497,21 +465,13 @@ export function ResizeHandle(props: ResizeHandleProps) {
           : styles.vertical,
       props.position === "overlay" &&
         (horizontal() ? styles.overlayHorizontal : styles.overlayVertical),
-      !props.hasDivider && props.position !== "overlay" && styles.invisible,
+      !props.hasDivider &&
+        props.position !== "overlay" &&
+        (horizontal() ? styles.invisibleHorizontal : styles.invisibleVertical),
       props.isDisabled && styles.disabled,
       props.xstyle,
     ),
   );
-
-  const side = () => pillSide(props);
-  const pillStyle = () =>
-    stylexProps(
-      styles.pill,
-      horizontal() ? styles.pillHorizontal : styles.pillVertical,
-      side() === "start" && (horizontal() ? styles.pillStartHorizontal : styles.pillStartVertical),
-      side() === "end" && (horizontal() ? styles.pillEndHorizontal : styles.pillEndVertical),
-      props.isAlwaysVisible === false && !interacting() && !dragging() && styles.pillHidden,
-    );
 
   return (
     <div
@@ -528,29 +488,32 @@ export function ResizeHandle(props: ResizeHandleProps) {
       aria-label={props.label ?? "Resize handle"}
       aria-disabled={props.isDisabled ? "true" : undefined}
       tabindex={props.isDisabled ? "-1" : "0"}
-      data-resizing={dragging() || undefined}
-      onPointerDown={onPointerDown}
-      onPointerEnter={() => setInteracting(true)}
-      onPointerLeave={() => !dragging() && setInteracting(false)}
-      onFocus={() => setInteracting(true)}
-      onBlur={() => setInteracting(false)}
+      data-resizing={interactions.dragging() || undefined}
+      onPointerDown={interactions.onPointerDown}
+      onFocus={() => interactions.setInteracting(true)}
+      onBlur={() => interactions.setInteracting(false)}
       onDblClick={() => {
-        if (props.resizable?._collapsible && !props.isDisabled) toggleResizable(props.resizable);
+        if (props.resizable?._collapsible && !props.isDisabled) {
+          interactions.toggleResizable(props.resizable);
+        }
       }}
-      onKeyDown={onKeyDown}
+      onKeyDown={interactions.onKeyDown}
       class={[theme().class, style().class, props.class]}
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}
     >
       <div
-        {...stylexProps(
-          styles.hitArea,
-          horizontal() ? styles.hitAreaHorizontal : styles.hitAreaVertical,
-        )}
+        {...hitAreaStyle()}
+        onPointerDown={interactions.onPointerDown}
+        onPointerEnter={() => interactions.setInteracting(true)}
+        onPointerLeave={() => !interactions.dragging() && interactions.setInteracting(false)}
       />
-      <div {...pillStyle()} class={[pillTheme.class, pillStyle().class]}>
+      <Show
+        when={props.children != null}
+        fallback={<div {...pillStyle()} class={[pillTheme.class, pillStyle().class]} />}
+      >
         {props.children}
-      </div>
+      </Show>
     </div>
   );
 }

@@ -1,5 +1,4 @@
-import type { JSX } from "@solidjs/web";
-
+import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
 import { createMemo, omit, Show } from "solid-js";
 
@@ -37,6 +36,7 @@ const styles = stylex.create({
   text: { display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "360px" },
   title: {
     margin: 0,
+    fontFamily: "inherit",
     fontSize: typeScaleVars["--text-large-size"],
     lineHeight: typeScaleVars["--text-large-leading"],
     fontWeight: fontWeightVars["--font-weight-semibold"],
@@ -45,6 +45,7 @@ const styles = stylex.create({
   titleCompact: { fontSize: typeScaleVars["--text-label-size"] },
   description: {
     margin: 0,
+    fontFamily: "inherit",
     fontSize: typeScaleVars["--text-body-size"],
     lineHeight: typeScaleVars["--text-body-leading"],
     fontWeight: fontWeightVars["--font-weight-normal"],
@@ -53,6 +54,7 @@ const styles = stylex.create({
   descriptionCompact: { fontSize: typeScaleVars["--text-supporting-size"] },
   actions: {
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     gap: spacingVars["--spacing-2"],
     marginTop: spacingVars["--spacing-1"],
@@ -60,18 +62,23 @@ const styles = stylex.create({
   actionsCompact: { flexDirection: "column" },
 });
 
+const headingTags: Record<NonNullable<EmptyStateProps["headingLevel"]>, ValidComponent> = {
+  1: "h1",
+  2: "h2",
+  3: "h3",
+  4: "h4",
+  5: "h5",
+  6: "h6",
+};
+
 function EmptyStateHeading(props: {
   level: NonNullable<EmptyStateProps["headingLevel"]>;
   title: string;
   isCompact: boolean;
 }) {
-  const style = stylexProps(styles.title, props.isCompact && styles.titleCompact);
-  if (props.level === 1) return <h1 {...style} textContent={props.title} />;
-  if (props.level === 2) return <h2 {...style} textContent={props.title} />;
-  if (props.level === 4) return <h4 {...style} textContent={props.title} />;
-  if (props.level === 5) return <h5 {...style} textContent={props.title} />;
-  if (props.level === 6) return <h6 {...style} textContent={props.title} />;
-  return <h3 {...style} textContent={props.title} />;
+  const style = createMemo(() => stylexProps(styles.title, props.isCompact && styles.titleCompact));
+
+  return <Dynamic component={headingTags[props.level]} {...style()} textContent={props.title} />;
 }
 
 export function EmptyState(props: EmptyStateProps) {

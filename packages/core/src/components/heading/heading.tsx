@@ -1,6 +1,6 @@
 import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { TextColor, TextDisplay, TextJustify, TextWrap, WordBreak } from "../text/text";
@@ -22,7 +22,7 @@ export interface HeadingProps extends BaseProps<HTMLHeadingElement> {
   color?: TextColor;
   display?: TextDisplay;
   maxLines?: number;
-  hasTruncateTooltip?: boolean;
+  hasTruncateTooltip?: boolean | "above" | "below" | "start" | "end";
   wordBreak?: WordBreak;
   textWrap?: TextWrap;
   justify?: TextJustify;
@@ -96,15 +96,23 @@ const styles = stylex.create({
   center: { textAlign: "center" },
   end: { textAlign: "end" },
   strikethrough: { textDecoration: "line-through" },
-  "break-word": { overflowWrap: "break-word" },
+  capsize: {
+    textBoxEdge: "cap alphabetic",
+    textBoxTrim: "trim-both",
+    display: "block",
+  },
+  "break-word": { wordBreak: "normal", overflowWrap: "break-word" },
   "break-all": { wordBreak: "break-all" },
   nowrap: { textWrap: "nowrap" },
   balance: { textWrap: "balance" },
   pretty: { textWrap: "pretty" },
+  wrap: { textWrap: "wrap" },
 });
 
 function headingWrapStyle(textWrap: TextWrap | undefined) {
   switch (textWrap) {
+    case "wrap":
+      return styles.wrap;
     case "nowrap":
       return styles.nowrap;
     case "balance":
@@ -117,8 +125,10 @@ function headingWrapStyle(textWrap: TextWrap | undefined) {
 }
 
 export function Heading(props: HeadingProps) {
+  const merged = merge({ color: "primary" } satisfies Partial<HeadingProps>, props);
+
   const rest = omit(
-    props,
+    merged,
     "level",
     "type",
     "accessibilityLevel",
@@ -137,53 +147,56 @@ export function Heading(props: HeadingProps) {
     "children",
   );
 
+  const truncation = useTruncation({
+    maxLines: () => merged.maxLines,
+    wordBreak: () => merged.wordBreak,
+    ref: merged.ref,
+  });
+
   const title = () =>
-    maxLines() > 0 && props.hasTruncateTooltip !== false && truncation.isTruncated()
+    maxLines() > 0 && merged.hasTruncateTooltip !== false && truncation.isTruncated()
       ? truncation.fullText()
       : undefined;
-  const color = () => props.color ?? "primary";
-  const truncation = useTruncation({
-    maxLines: () => props.maxLines,
-    wordBreak: () => props.wordBreak,
-    ref: props.ref,
-  });
   const { maxLines, wordBreak } = truncation;
-  const display = () => (maxLines() || props.hasCapsize ? "block" : (props.display ?? "block"));
+  const display = () => (maxLines() || merged.hasCapsize ? "block" : (merged.display ?? "block"));
 
   const theme = createMemo(() =>
-    themeProps("heading", { level: props.level, type: props.type, color: color() }),
+    themeProps("heading", { level: merged.level, type: merged.type, color: merged.color }),
   );
   const style = createMemo(() =>
     stylexProps(
-      styles[color()],
-      props.type ? styles[props.type] : styles[props.level],
+      styles[merged.color],
+      merged.type ? styles[merged.type] : styles[merged.level],
       maxLines() === 1 ? truncationStyles.singleLine : maxLines() > 1 && truncationStyles.multiLine,
       maxLines() > 0 && styles[wordBreak()],
       maxLines() === 0 && styles[display()],
-      headingWrapStyle(props.textWrap),
-      props.justify && props.justify !== "start" && styles[props.justify],
-      props.hasStrikethrough && styles.strikethrough,
-      props.xstyle,
+      merged.hasCapsize && styles.capsize,
+      headingWrapStyle(merged.textWrap),
+      merged.justify && merged.justify !== "start" && styles[merged.justify],
+      merged.hasStrikethrough && styles.strikethrough,
+      merged.xstyle,
     ),
   );
 
   return (
     <Dynamic
-      component={tags[props.level]}
+      component={tags[merged.level]}
       {...rest}
       {...theme()}
-      aria-level={props.accessibilityLevel !== props.level ? props.accessibilityLevel : undefined}
-      class={[theme().class, style().class, props.class]}
+      aria-level={
+        merged.accessibilityLevel !== merged.level ? merged.accessibilityLevel : undefined
+      }
+      class={[theme().class, style().class, merged.class]}
       ref={truncation.ref}
       title={title()}
       style={{
         ...style().style,
         ...(maxLines() > 1 && { "-webkit-line-clamp": maxLines() }),
-        ...props.style,
+        ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      {merged.children}
     </Dynamic>
   );
 }

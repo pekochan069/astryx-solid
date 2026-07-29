@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -25,34 +25,48 @@ export interface CodeProps extends BaseProps<HTMLElement> {
 }
 
 const styles = stylex.create({
-  root: {
+  base: {
     fontFamily: typographyVars["--font-family-code"],
     fontSize: typeScaleVars["--text-code-size"],
     lineHeight: "inherit",
     backgroundColor: colorVars["--color-background-muted"],
     paddingInline: spacingVars["--spacing-1"],
-    paddingBlock: 0,
+    paddingBlock: spacingVars["--spacing-0"],
     borderRadius: radiusVars["--radius-inner"],
+    // Prevent code from breaking parent layout.
     overflowWrap: "break-word",
     wordBreak: "break-word",
   },
+});
+
+const colorStyles = stylex.create({
   primary: { color: colorVars["--color-text-primary"] },
   secondary: { color: colorVars["--color-text-secondary"] },
-  inherit: { color: "inherit", fontSize: "inherit" },
+  inherit: { color: "inherit" },
+});
+
+const sizeStyles = stylex.create({
+  // Match surrounding text for inline code in differently-sized content.
+  inherit: { fontSize: "inherit", lineHeight: "inherit" },
 });
 
 export function Code(props: CodeProps) {
-  const rest = omit(props, "color", "size", "xstyle", "class", "style", "children");
+  const merged = merge(
+    {
+      color: "primary",
+    } satisfies Partial<CodeProps>,
+    props,
+  );
 
-  const color = () => props.color ?? "primary";
+  const rest = omit(merged, "color", "size", "xstyle", "class", "style", "children");
 
-  const theme = createMemo(() => themeProps("code", { color: color() }));
+  const theme = createMemo(() => themeProps("code", { color: merged.color }));
   const style = createMemo(() =>
     stylexProps(
-      styles.root,
-      styles[color()],
-      props.size === "inherit" && styles.inherit,
-      props.xstyle,
+      styles.base,
+      colorStyles[merged.color],
+      merged.size === "inherit" && sizeStyles.inherit,
+      merged.xstyle,
     ),
   );
 
@@ -60,11 +74,11 @@ export function Code(props: CodeProps) {
     <code
       {...rest}
       {...theme()}
-      class={[theme().class, style().class, props.class]}
-      style={{ ...style().style, ...props.style }}
+      class={[theme().class, style().class, merged.class]}
+      style={{ ...style().style, ...merged.style }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      {merged.children}
     </code>
   );
 }

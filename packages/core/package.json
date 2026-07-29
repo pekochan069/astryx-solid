@@ -36,6 +36,26 @@
       "node": "./dist/server/button.js",
       "default": "./dist/button.js"
     },
+    "./button-group": {
+      "types": "./dist/button-group.d.ts",
+      "node": "./dist/server/button-group.js",
+      "default": "./dist/button-group.js"
+    },
+    "./icon-button": {
+      "types": "./dist/icon-button.d.ts",
+      "node": "./dist/server/icon-button.js",
+      "default": "./dist/icon-button.js"
+    },
+    "./link": {
+      "types": "./dist/link.d.ts",
+      "node": "./dist/server/link.js",
+      "default": "./dist/link.js"
+    },
+    "./toggle-button": {
+      "types": "./dist/toggle-button.d.ts",
+      "node": "./dist/server/toggle-button.js",
+      "default": "./dist/toggle-button.js"
+    },
     "./card": {
       "types": "./dist/card.d.ts",
       "node": "./dist/server/card.js",

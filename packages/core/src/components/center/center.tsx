@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
@@ -31,8 +31,14 @@ const styles = stylex.create({
 
 /** Centers content along one or both flex axes. */
 export function Center(props: CenterProps) {
-  const rest = omit(
+  const merged = merge(
+    {
+      axis: "both",
+    } satisfies Partial<CenterProps>,
     props,
+  );
+  const rest = omit(
+    merged,
     "axis",
     "width",
     "height",
@@ -45,15 +51,14 @@ export function Center(props: CenterProps) {
     "children",
   );
 
-  const axis = () => props.axis ?? "both";
-
+  const axis = () => merged.axis ?? "both";
   const theme = createMemo(() => themeProps("center", { axis: axis() }));
   const style = createMemo(() =>
     stylexProps(
-      props.isInline ? styles.inline : styles.base,
+      merged.isInline ? styles.inline : styles.base,
       (axis() === "both" || axis() === "horizontal") && styles.horizontal,
       (axis() === "both" || axis() === "vertical") && styles.vertical,
-      props.xstyle,
+      merged.xstyle,
     ),
   );
 
@@ -61,18 +66,18 @@ export function Center(props: CenterProps) {
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, style().class, props.class]}
+      class={[theme().class, style().class, merged.class]}
       style={{
         ...style().style,
-        ...(props.width != null && { width: size(props.width) }),
-        ...(props.height != null && { height: size(props.height) }),
-        ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
-        ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
-        ...props.style,
+        ...(merged.width != null && { width: size(merged.width) }),
+        ...(merged.height != null && { height: size(merged.height) }),
+        ...(merged.maxWidth != null && { "max-width": size(merged.maxWidth) }),
+        ...(merged.minHeight != null && { "min-height": size(merged.minHeight) }),
+        ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      {merged.children}
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, createSignal, omit, onCleanup, onSettled, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { TextColor, TextSize, TextType, TextWeight } from "../text/text";
 
 import { stylexProps } from "../../stylex";
 import { colorVars } from "../../theme/tokens.stylex";
+import { setElementRef } from "../../utils/set-element-ref";
 import { themeProps } from "../../utils/theme-props";
 import { textStyles } from "../text/text";
 
@@ -34,46 +35,85 @@ export interface TimestampProps extends BaseProps<HTMLTimeElement> {
   isLive?: boolean;
 }
 
-const SECONDS_PER_DAY = 86_400;
+const MINUTE = 60;
+const HOUR = 3_600;
+const DAY = 86_400;
+const MONTH = 30 * DAY;
+const YEAR = 365 * DAY;
+const DEFAULT_AUTO_THRESHOLD = 7 * DAY;
+const FUTURE_SKEW_TOLERANCE = 30;
+
+type AbsoluteFormat = Exclude<TimestampFormat, "relative" | "auto">;
 
 const styles = stylex.create({
-  time: { display: "inline", fontFamily: "inherit", fontStyle: "normal" },
+  time: {
+    display: "inline",
+    fontFamily: "inherit",
+    fontStyle: "normal",
+    fontSize: "inherit",
+    lineHeight: "inherit",
+    color: "inherit",
+    fontWeight: "inherit",
+  },
   focus: {
     outline: { default: null, ":focus-visible": `2px solid ${colorVars["--color-accent"]}` },
+    outlineOffset: { default: "0", ":focus-visible": "2px" },
   },
 });
 
-function dateOf(value: string | number) {
+function parseValue(value: string | number) {
   return new Date(typeof value === "number" && value < 1e12 ? value * 1000 : value);
 }
 
 function relative(date: Date, now: Date) {
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  const future = seconds < 0;
-  const absoluteSeconds = Math.abs(seconds);
 
-  if ((!future && absoluteSeconds < 10) || (future && absoluteSeconds <= 30)) return "now";
+  if (Math.abs(seconds) < 10) return "now";
 
-  const units: Array<[number, string]> = [
-    [365 * SECONDS_PER_DAY, "year"],
-    [30 * SECONDS_PER_DAY, "month"],
-    [SECONDS_PER_DAY, "day"],
-    [3600, "hour"],
-    [60, "minute"],
-  ];
+  if (seconds < 0) {
+    const amount = Math.abs(seconds);
 
-  if (!future && absoluteSeconds >= SECONDS_PER_DAY && absoluteSeconds < 2 * SECONDS_PER_DAY)
-    return "yesterday";
-
-  for (const [span, unit] of units)
-    if (absoluteSeconds >= span) {
-      const count = Math.floor(absoluteSeconds / span);
-      return future
-        ? `in ${count} ${unit}${count === 1 ? "" : "s"}`
-        : `${count} ${unit}${count === 1 ? "" : "s"} ago`;
+    if (amount <= FUTURE_SKEW_TOLERANCE) return "now";
+    if (amount < MINUTE) return "in a few seconds";
+    if (amount < HOUR) {
+      const count = Math.floor(amount / MINUTE);
+      return `in ${count} minute${count === 1 ? "" : "s"}`;
+    }
+    if (amount < DAY) {
+      const count = Math.floor(amount / HOUR);
+      return `in ${count} hour${count === 1 ? "" : "s"}`;
+    }
+    if (amount < MONTH) {
+      const count = Math.floor(amount / DAY);
+      return `in ${count} day${count === 1 ? "" : "s"}`;
+    }
+    if (amount < YEAR) {
+      const count = Math.floor(amount / MONTH);
+      return `in ${count} month${count === 1 ? "" : "s"}`;
     }
 
-  return future ? "in a few seconds" : `${absoluteSeconds} seconds ago`;
+    const count = Math.floor(amount / YEAR);
+    return `in ${count} year${count === 1 ? "" : "s"}`;
+  }
+
+  if (seconds < MINUTE) return `${seconds} seconds ago`;
+  if (seconds < HOUR) {
+    const count = Math.floor(seconds / MINUTE);
+    return `${count} minute${count === 1 ? "" : "s"} ago`;
+  }
+  if (seconds < DAY) {
+    const count = Math.floor(seconds / HOUR);
+    return `${count} hour${count === 1 ? "" : "s"} ago`;
+  }
+  if (seconds < 2 * DAY) return "yesterday";
+  if (seconds < MONTH) return `${Math.floor(seconds / DAY)} days ago`;
+  if (seconds < YEAR) {
+    const count = Math.floor(seconds / MONTH);
+    return `${count} month${count === 1 ? "" : "s"} ago`;
+  }
+
+  const count = Math.floor(seconds / YEAR);
+  return `${count} year${count === 1 ? "" : "s"} ago`;
 }
 
 function timezoneName(date: Date) {
@@ -87,16 +127,31 @@ function withTimezone(value: string, date: Date, shown: boolean) {
   return name === undefined ? value : `${value} ${name}`;
 }
 
-function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
-  if (format === "system_date") return date.toLocaleDateString("en-CA");
-  if (format === "system_time")
-    return withTimezone(date.toLocaleTimeString("en-GB"), date, timezone);
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function formatSystemDate(date: Date) {
+  return `${String(date.getFullYear()).padStart(4, "0")}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatSystemDateTime(date: Date) {
+  return `${formatSystemDate(date)} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function formatSystemTime(date: Date) {
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function isAbsoluteFormat(format: TimestampFormat): format is AbsoluteFormat {
+  return format !== "relative" && format !== "auto";
+}
+
+function absolute(date: Date, format: AbsoluteFormat, timezone: boolean) {
+  if (format === "system_date") return formatSystemDate(date);
+  if (format === "system_time") return withTimezone(formatSystemTime(date), date, timezone);
   if (format === "system_date_time")
-    return withTimezone(
-      `${date.toLocaleDateString("en-CA")} ${date.toLocaleTimeString("en-GB")}`,
-      date,
-      timezone,
-    );
+    return withTimezone(formatSystemDateTime(date), date, timezone);
 
   const options: Intl.DateTimeFormatOptions =
     format === "date"
@@ -121,6 +176,26 @@ function absolute(date: Date, format: TimestampFormat, timezone: boolean) {
   }).format(date);
 }
 
+function fullAbsolute(date: Date) {
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  }).format(date);
+}
+
+function liveInterval(seconds: number) {
+  const amount = Math.abs(seconds);
+  if (amount < MINUTE) return 1_000;
+  if (amount < HOUR) return 30_000;
+  if (amount < DAY) return 60_000;
+  return 300_000;
+}
+
 export function Timestamp(props: TimestampProps) {
   const rest = omit(
     props,
@@ -134,32 +209,63 @@ export function Timestamp(props: TimestampProps) {
     "hasTooltip",
     "isTimezoneShown",
     "isLive",
+    "ref",
     "xstyle",
     "class",
     "style",
   );
 
   const [now, setNow] = createSignal(new Date());
-  const date = () => dateOf(props.value);
-  const valid = () => !Number.isNaN(date().getTime());
-  const effective = () =>
-    props.format === "auto" || props.format == null
-      ? Math.abs(now().getTime() - date().getTime()) / 1000 <=
-        (props.autoThreshold ?? 7 * SECONDS_PER_DAY)
-        ? "relative"
-        : "date_time"
-      : props.format;
-  const text = () =>
-    effective() === "relative"
-      ? relative(date(), now())
-      : absolute(date(), effective(), props.isTimezoneShown ?? false);
+  const date = createMemo(() => parseValue(props.value));
+  const valid = createMemo(() => !Number.isNaN(date().getTime()));
+  const effective = createMemo<TimestampFormat>(() => {
+    if (props.format !== undefined && props.format !== "auto") return props.format;
 
-  onSettled(() => {
-    if (!props.isLive) return;
-
-    const timer = setInterval(() => setNow(new Date()), 1_000);
-    onCleanup(() => clearInterval(timer));
+    return Math.abs(now().getTime() - date().getTime()) / 1000 <=
+      (props.autoThreshold ?? DEFAULT_AUTO_THRESHOLD)
+      ? "relative"
+      : "date_time";
   });
+  const relativeSeconds = createMemo(() => (now().getTime() - date().getTime()) / 1000);
+  const showTooltip = createMemo(() => props.hasTooltip !== false && effective() === "relative");
+  const text = createMemo(() => {
+    if (!valid()) return "";
+
+    const format = effective();
+    return format === "relative"
+      ? relative(date(), now())
+      : isAbsoluteFormat(format)
+        ? absolute(date(), format, props.isTimezoneShown ?? false)
+        : "";
+  });
+  const absoluteText = createMemo(() => (valid() ? fullAbsolute(date()) : ""));
+
+  const [warned, setWarned] = createSignal(false);
+  createEffect(
+    () => ({ valid: valid(), warned: warned(), value: props.value }),
+    ({ valid: isValid, warned: hasWarned, value }) => {
+      if (!isValid && !hasWarned) {
+        setWarned(true);
+        console.warn(
+          `Timestamp: could not parse value ${JSON.stringify(value)} as a date. Rendering nothing.`,
+        );
+      }
+    },
+  );
+  createEffect(
+    () => ({
+      isLive: props.isLive,
+      valid: valid(),
+      format: effective(),
+      seconds: relativeSeconds(),
+    }),
+    ({ isLive, valid: isValid, format, seconds }) => {
+      if (!isLive || !isValid || format !== "relative") return;
+
+      const timer = setInterval(() => setNow(new Date()), liveInterval(seconds));
+      return () => clearInterval(timer);
+    },
+  );
 
   const theme = createMemo(() =>
     themeProps("timestamp", {
@@ -179,7 +285,7 @@ export function Timestamp(props: TimestampProps) {
         props.size,
         props.weight,
       ),
-      props.hasTooltip !== false && effective() === "relative" && styles.focus,
+      showTooltip() && styles.focus,
       props.xstyle,
     ),
   );
@@ -189,14 +295,11 @@ export function Timestamp(props: TimestampProps) {
       <time
         {...rest}
         {...theme()}
+        ref={(element) => setElementRef(props.ref, element)}
         datetime={date().toISOString()}
-        aria-label={effective() === "relative" ? date().toLocaleString() : undefined}
-        title={
-          props.hasTooltip !== false && effective() === "relative"
-            ? date().toLocaleString()
-            : undefined
-        }
-        tabindex={props.hasTooltip !== false && effective() === "relative" ? "0" : undefined}
+        aria-label={effective() === "relative" ? absoluteText() : undefined}
+        title={showTooltip() ? absoluteText() : undefined}
+        tabindex={showTooltip() ? "0" : undefined}
         class={[theme().class, style().class, props.class]}
         style={{ ...style().style, ...props.style }}
         data-style-src={style()["data-style-src"]}

@@ -2,6 +2,54 @@
   "schemaVersion": 1,
   "components": [
     {
+      "name": "Link",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/link",
+      "docsPath": "/components/action-foundation",
+      "description": "Renders native, router-adapted, external, disabled, or button-like links.",
+      "states": ["native", "external", "router", "disabled", "button"]
+    },
+    {
+      "name": "Button",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/button",
+      "docsPath": "/components/action-foundation",
+      "description": "Runs synchronous or asynchronous actions as a button or link root.",
+      "states": ["default", "disabled", "loading", "link"]
+    },
+    {
+      "name": "ButtonGroup",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/button-group",
+      "docsPath": "/components/action-foundation",
+      "description": "Connects related buttons with group semantics and keyboard focus movement.",
+      "states": ["horizontal", "vertical", "disabled", "keyboard"]
+    },
+    {
+      "name": "IconButton",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/icon-button",
+      "docsPath": "/components/action-foundation",
+      "description": "Provides an accessible icon-only Button composition.",
+      "states": ["default", "tooltip", "disabled", "loading"]
+    },
+    {
+      "name": "ToggleButton",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/toggle-button",
+      "docsPath": "/components/action-foundation",
+      "description": "Expresses controlled pressed state with optimistic async intent.",
+      "states": ["pressed", "unpressed", "icon-swap", "disabled"]
+    },
+    {
+      "name": "ToggleButtonGroup",
+      "package": "@astryx-solid/core",
+      "subpath": "@astryx-solid/core/toggle-button",
+      "docsPath": "/components/action-foundation",
+      "description": "Controls nullable single or immutable multiple toggle selection.",
+      "states": ["single", "multiple", "disabled", "vertical"]
+    },
+    {
       "name": "VisuallyHidden",
       "package": "@astryx-solid/core",
       "subpath": "@astryx-solid/core/visually-hidden",

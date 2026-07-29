@@ -84,7 +84,7 @@ try {
         () =>
           document.getElementById("app")?.dataset.hydrated &&
           document.getElementById("content-primitives")?.dataset.hydrated &&
-          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 7,
+          document.querySelectorAll('[id^="packed-"][data-hydrated]').length === 8,
         undefined,
         {
           timeout: 5000,
@@ -99,6 +99,7 @@ try {
       .locator("#content-primitives")
       .getAttribute("data-hydrated");
     const layoutHydration = await page.locator("#packed-layout").getAttribute("data-hydrated");
+    const actionHydration = await page.locator("#packed-actions").getAttribute("data-hydrated");
 
     const closeLabels = await page.getByText("Close dialog").count();
     const rootExports = await page.getByText("Root export works").count();
@@ -114,23 +115,51 @@ try {
     );
 
     const updatedContext = await page.getByTestId("consumer-state").textContent();
+    const actions = page.getByTestId("packed-actions");
+    await actions.getByRole("button", { name: "Cancel action" }).click();
+    const first = actions.getByRole("button", { name: "First" });
+    await first.focus();
+    await first.press("ArrowRight");
+    const groupFocusMoved = await actions
+      .getByRole("link", { name: "Second" })
+      .evaluate((element) => element === document.activeElement);
+    const interactiveActions = page.getByTestId("packed-interactive-actions");
+    await interactiveActions.getByRole("button", { name: "Favorite" }).click();
+    const favoritePressed = await interactiveActions
+      .getByRole("button", { name: "Favorite" })
+      .getAttribute("aria-pressed");
+    await interactiveActions.getByRole("button", { name: "List" }).click();
+    const listPressed = await interactiveActions
+      .getByRole("button", { name: "List" })
+      .getAttribute("aria-pressed");
+    await interactiveActions.getByRole("button", { name: "Italic" }).click();
+    const italicPressed = await interactiveActions
+      .getByRole("button", { name: "Italic" })
+      .getAttribute("aria-pressed");
+    const routerAdapter = await interactiveActions.locator("[data-router-link=true]").count();
 
     if (
       hydration !== "reused" ||
       primitiveHydration !== "reused" ||
       layoutHydration !== "reused" ||
+      actionHydration !== "replaced" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
       contentPrimitives !== 1 ||
-      additionalPrimitives !== 7 ||
+      additionalPrimitives !== 9 ||
       initialContext !== "consumer-light:light:a:Hello" ||
       updatedContext !== "consumer-dark:dark:b:Bonjour" ||
       role !== "button" ||
       size !== "sm" ||
+      !groupFocusMoved ||
+      favoritePressed !== "true" ||
+      listPressed !== "true" ||
+      italicPressed !== "true" ||
+      routerAdapter !== 1 ||
       runtimeErrors.length
     ) {
       throw new Error(
-        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, layoutHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, runtimeErrors })}`,
+        `Packed consumer hydration failed: ${JSON.stringify({ hydration, primitiveHydration, layoutHydration, actionHydration, closeLabels, rootExports, contentPrimitives, additionalPrimitives, initialContext, updatedContext, role, size, groupFocusMoved, favoritePressed, listPressed, italicPressed, routerAdapter, runtimeErrors })}`,
       );
     }
   } finally {

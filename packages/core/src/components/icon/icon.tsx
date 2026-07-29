@@ -1,6 +1,6 @@
 import { Dynamic, type JSX, type ValidComponent } from "@solidjs/web";
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit, Show } from "solid-js";
+import { createMemo, merge, omit, Show } from "solid-js";
 
 import { stylexProps } from "../../stylex";
 import { colorVars } from "../../theme/tokens.stylex";
@@ -35,7 +35,7 @@ export type IconName =
   | "stop"
   | "microphone";
 export type IconType = ValidComponent;
-export type IconValue = JSX.Element | IconType;
+export type IconValue = JSX.Element | IconType | null;
 export type IconColor =
   | "primary"
   | "secondary"
@@ -66,7 +66,13 @@ export function registerIcons(icons: IconRegistry) {
 }
 
 export function getIconRegistry() {
-  return { ...defaultIcons, ...registry };
+  const icons: Record<string, IconValue> = { ...defaultIcons };
+
+  for (const [name, icon] of Object.entries(registry)) {
+    if (icon != null) icons[name] = icon;
+  }
+
+  return icons;
 }
 
 function isIconName(name: string): name is IconName {
@@ -107,37 +113,70 @@ const styles = stylex.create({
   orange: { color: colorVars["--color-icon-orange"] },
   pink: { color: colorVars["--color-icon-pink"] },
   purple: { color: colorVars["--color-icon-purple"] },
-  xsm: { width: 12, height: 12, fontSize: 12 },
-  sm: { width: 16, height: 16, fontSize: 16 },
-  md: { width: 20, height: 20, fontSize: 20 },
-  lg: { width: 24, height: 24, fontSize: 24 },
+  xsm: { width: "0.75rem", height: "0.75rem" },
+  sm: { width: "1rem", height: "1rem" },
+  md: { width: "1.25rem", height: "1.25rem" },
+  lg: { width: "1.5rem", height: "1.5rem" },
+});
+
+const spanSizeStyles = stylex.create({
+  xsm: { width: "0.75rem", height: "0.75rem", fontSize: "0.75rem" },
+  sm: { width: "1rem", height: "1rem", fontSize: "1rem" },
+  md: { width: "1.25rem", height: "1.25rem", fontSize: "1.25rem" },
+  lg: { width: "1.5rem", height: "1.5rem", fontSize: "1.5rem" },
 });
 
 export interface IconProps extends Omit<
   JSX.SvgSVGAttributes<SVGSVGElement>,
-  "color" | "icon" | "style"
+  "color" | "icon" | "style" | "label"
 > {
   icon: IconType | IconName;
   color?: IconColor;
   size?: IconSize;
   xstyle?: never;
   style?: JSX.CSSProperties;
+  label?: string;
   "data-testid"?: string;
 }
 
 export function Icon(props: IconProps) {
-  const rest = omit(props, "icon", "color", "size", "class", "style");
+  const merged = merge(
+    {
+      color: "inherit",
+      size: "md",
+    } satisfies Partial<IconProps>,
+    props,
+  );
 
-  const color = () => props.color ?? "inherit";
-  const size = () => props.size ?? "md";
+  const rest = omit(
+    merged,
+    "icon",
+    "color",
+    "size",
+    "class",
+    "style",
+    "label",
+    "role",
+    "aria-label",
+    "aria-hidden",
+  );
 
-  const theme = createMemo(() => themeProps("icon", { size: size(), color: color() }));
-  const style = createMemo(() => stylexProps(styles.root, styles[color()], styles[size()]));
-  const spanStyle = createMemo(() => stylexProps(styles.span, styles[color()], styles[size()]));
+  const hasLabel = () => merged.label != null && merged.label !== "";
+  const role = () => merged.role ?? (hasLabel() ? "img" : undefined);
+  const ariaLabel = () => merged["aria-label"] ?? (hasLabel() ? merged.label : undefined);
+  const ariaHidden = () => merged["aria-hidden"] ?? (hasLabel() ? undefined : "true");
 
-  const isRegistered = () => typeof props.icon === "string" && isIconName(props.icon);
+  const theme = createMemo(() => themeProps("icon", { size: merged.size, color: merged.color }));
+  const style = createMemo(() =>
+    stylexProps(styles.root, styles[merged.color], styles[merged.size]),
+  );
+  const spanStyle = createMemo(() =>
+    stylexProps(styles.span, styles[merged.color], spanSizeStyles[merged.size]),
+  );
+
+  const isRegistered = () => typeof merged.icon === "string" && isIconName(merged.icon);
   const registeredIcon = createMemo(() =>
-    isRegistered() && typeof props.icon === "string" ? getIcon(props.icon) : undefined,
+    isRegistered() && typeof merged.icon === "string" ? getIcon(merged.icon) : undefined,
   );
 
   const RegisteredElement = () => {
@@ -150,24 +189,26 @@ export function Icon(props: IconProps) {
       when={isRegistered()}
       fallback={
         <Dynamic
-          component={props.icon}
+          component={merged.icon}
           {...rest}
           {...theme()}
-          aria-hidden={props["aria-hidden"] ?? "true"}
-          class={[theme().class, style().class, props.class]}
-          style={{ ...style().style, ...props.style }}
+          role={role()}
+          aria-label={ariaLabel()}
+          aria-hidden={ariaHidden()}
+          class={[theme().class, style().class, merged.class]}
+          style={{ ...style().style, ...merged.style }}
           data-style-src={style()["data-style-src"]}
         />
       }
     >
       <span
         {...theme()}
-        data-testid={props["data-testid"]}
-        role={props.role}
-        aria-label={props["aria-label"]}
-        aria-hidden={props["aria-hidden"] ?? "true"}
-        class={[theme().class, spanStyle().class, props.class]}
-        style={{ ...spanStyle().style, ...props.style }}
+        data-testid={merged["data-testid"]}
+        role={role()}
+        aria-label={ariaLabel()}
+        aria-hidden={ariaHidden()}
+        class={[theme().class, spanStyle().class, merged.class]}
+        style={{ ...spanStyle().style, ...merged.style }}
         data-style-src={spanStyle()["data-style-src"]}
       >
         <RegisteredElement />

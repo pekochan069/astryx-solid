@@ -29,7 +29,7 @@ function CheckIcon(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
   );
 }
 
-export function ContentPrimitivesDocs() {
+function ContentPrimitivesDocs() {
   return (
     <Stack as="main" gap={4} padding={6} maxWidth={720}>
       <Heading level={1}>Content primitives</Heading>
@@ -40,7 +40,7 @@ export function ContentPrimitivesDocs() {
         <Skeleton width="100%" height="100%" />
       </AspectRatio>
 
-      <Stack direction="horizontal" gap={2} vAlign="center">
+      <Stack direction="horizontal" gap={2} align="center">
         <Badge variant="success" label="Ready" />
         <Icon icon={CheckIcon} aria-label="Ready" aria-hidden={false} />
         <Kbd keys="mod+k" />

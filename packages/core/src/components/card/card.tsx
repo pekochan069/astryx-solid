@@ -1,15 +1,26 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 import type { SizeValue } from "../../types/size-value.types";
 import type { SpacingStep } from "../../types/spacing-steps.types";
 
-import { paddingStyles } from "../../layout/padding.stylex";
+import {
+  containerPaddingBlockEndVarStyles,
+  containerPaddingBlockStartVarStyles,
+  containerPaddingInlineVarStyles,
+  paddingStyles,
+} from "../../layout/padding.stylex";
 import { stylexProps } from "../../stylex";
-import { colorVars, radiusVars, spacingVars } from "../../theme/tokens.stylex";
+import {
+  borderVars,
+  colorVars,
+  radiusVars,
+  shadowVars,
+  spacingVars,
+} from "../../theme/tokens.stylex";
 import { size } from "../../utils/size";
 import { themeProps } from "../../utils/theme-props";
 
@@ -28,6 +39,8 @@ export type CardVariant =
   | "teal"
   | "yellow";
 
+export type CardElevation = "none" | "low" | "med" | "high";
+
 export interface CardProps extends BaseProps<HTMLDivElement> {
   width?: SizeValue;
   height?: SizeValue;
@@ -35,23 +48,66 @@ export interface CardProps extends BaseProps<HTMLDivElement> {
   minHeight?: SizeValue;
   padding?: SpacingStep;
   variant?: CardVariant;
+  elevation?: CardElevation;
   children?: JSX.Element;
 }
 
+const cardPadding = `var(--astryx-card-padding, ${spacingVars["--spacing-4"]})`;
+const cardPaddingInline = `var(--astryx-card-padding-inline, ${cardPadding})`;
+const cardPaddingInlineStart = `var(--astryx-card-padding-inline-start, ${cardPaddingInline})`;
+const cardPaddingInlineEnd = `var(--astryx-card-padding-inline-end, ${cardPaddingInline})`;
+const cardPaddingBlockStart = `var(--astryx-card-padding-block-start, ${cardPadding})`;
+const cardPaddingBlockEnd = `var(--astryx-card-padding-block-end, ${cardPadding})`;
+
+const paddingValues: Record<SpacingStep, string> = {
+  0: spacingVars["--spacing-0"],
+  0.5: spacingVars["--spacing-0-5"],
+  1: spacingVars["--spacing-1"],
+  1.5: spacingVars["--spacing-1-5"],
+  2: spacingVars["--spacing-2"],
+  3: spacingVars["--spacing-3"],
+  4: spacingVars["--spacing-4"],
+  5: spacingVars["--spacing-5"],
+  6: spacingVars["--spacing-6"],
+  8: spacingVars["--spacing-8"],
+  10: spacingVars["--spacing-10"],
+};
+
 const styles = stylex.create({
-  root: {
-    borderRadius: radiusVars["--radius-container"],
+  card: {
+    boxSizing: "border-box",
+    "--_card-radius": radiusVars["--radius-container"],
+    borderRadius: "var(--_card-radius)",
     overflow: "clip",
-    padding: spacingVars["--spacing-4"],
+    paddingInlineStart: "var(--container-padding-inline-start)",
+    paddingInlineEnd: "var(--container-padding-inline-end)",
+    paddingBlockStart: "var(--container-padding-block-start)",
+    paddingBlockEnd: "var(--container-padding-block-end)",
+    "--container-padding-inline-start": cardPaddingInlineStart,
+    "--container-padding-inline-end": cardPaddingInlineEnd,
+    "--container-padding-block-start": cardPaddingBlockStart,
+    "--container-padding-block-end": cardPaddingBlockEnd,
+    "--layout-padding-outer-x": cardPaddingInlineStart,
+    "--layout-padding-outer-y": cardPaddingBlockStart,
+    "--layout-padding-inner-x": cardPaddingInlineStart,
+    "--layout-padding-inner-y": cardPaddingBlockStart,
+    boxShadow: "var(--_card-ring, 0 0 transparent), var(--_card-elevation, 0 0 transparent)",
   },
-  bordered: {
-    borderWidth: 1,
+  withBorder: {
+    borderWidth: borderVars["--border-width"],
     borderStyle: "solid",
     borderColor: colorVars["--color-border-emphasized"],
+    paddingInlineStart: `calc(var(--container-padding-inline-start) - ${borderVars["--border-width"]})`,
+    paddingInlineEnd: `calc(var(--container-padding-inline-end) - ${borderVars["--border-width"]})`,
+    paddingBlockStart: `calc(var(--container-padding-block-start) - ${borderVars["--border-width"]})`,
+    paddingBlockEnd: `calc(var(--container-padding-block-end) - ${borderVars["--border-width"]})`,
   },
   scrollable: { overflow: "auto" },
-  transparent: { backgroundColor: "transparent" },
+});
+
+const variantStyles = stylex.create({
   default: { backgroundColor: colorVars["--color-background-card"] },
+  transparent: { backgroundColor: "transparent" },
   muted: { backgroundColor: colorVars["--color-background-muted"] },
   blue: { backgroundColor: colorVars["--color-background-blue"] },
   cyan: { backgroundColor: colorVars["--color-background-cyan"] },
@@ -65,50 +121,86 @@ const styles = stylex.create({
   yellow: { backgroundColor: colorVars["--color-background-yellow"] },
 });
 
+const elevationStyles = stylex.create({
+  none: { "--_card-elevation": "0 0 transparent" },
+  low: { "--_card-elevation": shadowVars["--shadow-low"] },
+  med: { "--_card-elevation": shadowVars["--shadow-med"] },
+  high: { "--_card-elevation": shadowVars["--shadow-high"] },
+});
+
 export function Card(props: CardProps) {
-  const rest = omit(
+  const merged = merge(
+    { variant: "default", elevation: "none" } satisfies Partial<CardProps>,
     props,
+  );
+
+  const rest = omit(
+    merged,
     "width",
     "height",
     "maxWidth",
     "minHeight",
     "padding",
     "variant",
+    "elevation",
     "children",
     "xstyle",
     "class",
     "style",
   );
 
-  const variant = () => props.variant ?? "default";
-  const theme = createMemo(() => themeProps("card", { variant: variant() }));
-  const style = createMemo(() =>
-    stylexProps(
-      styles.root,
-      styles[variant()],
-      variant() === "default" && styles.bordered,
-      props.height != null && props.height !== "auto" && styles.scrollable,
-      props.padding != null && paddingStyles[props.padding],
-      props.xstyle,
-    ),
-  );
+  const explicitPaddingVars = createMemo(() => {
+    const value = merged.padding == null ? undefined : paddingValues[merged.padding];
+
+    return value == null
+      ? {}
+      : {
+          "--container-padding-inline-start": value,
+          "--container-padding-inline-end": value,
+          "--container-padding-block-start": value,
+          "--container-padding-block-end": value,
+          "--layout-padding-outer-x": value,
+          "--layout-padding-outer-y": value,
+          "--layout-padding-inner-x": value,
+          "--layout-padding-inner-y": value,
+        };
+  });
+
+  const theme = createMemo(() => themeProps("card", { variant: merged.variant }));
+  const style = createMemo(() => {
+    const padding = merged.padding;
+
+    return stylexProps(
+      styles.card,
+      variantStyles[merged.variant],
+      elevationStyles[merged.elevation],
+      merged.height != null && merged.height !== "auto" && styles.scrollable,
+      padding != null && paddingStyles[padding],
+      padding != null && containerPaddingInlineVarStyles[padding],
+      padding != null && containerPaddingBlockStartVarStyles[padding],
+      padding != null && containerPaddingBlockEndVarStyles[padding],
+      merged.variant === "default" && styles.withBorder,
+      merged.xstyle,
+    );
+  });
 
   return (
     <div
       {...rest}
       {...theme()}
-      class={[theme().class, style().class, props.class]}
+      class={[theme().class, style().class, merged.class]}
       style={{
         ...style().style,
-        ...(props.width != null && { width: size(props.width) }),
-        ...(props.height != null && { height: size(props.height) }),
-        ...(props.maxWidth != null && { "max-width": size(props.maxWidth) }),
-        ...(props.minHeight != null && { "min-height": size(props.minHeight) }),
-        ...props.style,
+        ...(merged.width != null && { width: size(merged.width) }),
+        ...(merged.height != null && { height: size(merged.height) }),
+        ...(merged.maxWidth != null && { "max-width": size(merged.maxWidth) }),
+        ...(merged.minHeight != null && { "min-height": size(merged.minHeight) }),
+        ...explicitPaddingVars(),
+        ...merged.style,
       }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.children}
+      {merged.children}
     </div>
   );
 }

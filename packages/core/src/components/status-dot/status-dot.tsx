@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, createUniqueId, omit } from "solid-js";
+import { createMemo, createSignal, createUniqueId, omit, Show } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -67,7 +67,7 @@ const styles = stylex.create({
     paddingBlock: 4,
     borderRadius: 4,
     backgroundColor: colorVars["--color-background-inverted"],
-    color: colorVars["--color-text-primary"],
+    color: colorVars["--color-on-dark"],
     whiteSpace: "nowrap",
     pointerEvents: "none",
   },
@@ -100,25 +100,12 @@ export function StatusDot(props: StatusDotProps) {
     "onKeyDown",
     "ref",
   );
-  let element: HTMLSpanElement | undefined;
-  let tooltipElement: HTMLSpanElement | undefined;
-  const tooltipId = `status-dot-tooltip-${createUniqueId()}`;
 
-  const hideTooltip = () => {
-    tooltipElement?.remove();
-    tooltipElement = undefined;
-    element?.removeAttribute("aria-describedby");
-  };
-  const showTooltip = () => {
-    if (tooltipElement || element === undefined || props.tooltip === undefined) return;
-    tooltipElement = document.createElement("span");
-    tooltipElement.id = tooltipId;
-    tooltipElement.setAttribute("role", "tooltip");
-    tooltipElement.textContent = props.tooltip;
-    tooltipElement.className = stylexProps(styles.tooltip).class ?? "";
-    element.append(tooltipElement);
-    element.setAttribute("aria-describedby", tooltipId);
-  };
+  const [isTooltipVisible, setTooltipVisible] = createSignal(false);
+  const tooltipId = `status-dot-tooltip-${createUniqueId()}`;
+  const hideTooltip = () => setTooltipVisible(false);
+  const showTooltip = () => setTooltipVisible(props.tooltip !== undefined);
+
   const onPointerEnter = (event: StatusDotEvent<PointerEvent>) => {
     showTooltip();
     invokeHandler(props.onPointerEnter, event);
@@ -139,11 +126,7 @@ export function StatusDot(props: StatusDotProps) {
     if (event.key === "Escape") hideTooltip();
     invokeHandler(props.onKeyDown, event);
   };
-  const setElement = (next: HTMLSpanElement) => {
-    element = next;
-    if (props.tooltip !== undefined) next.tabIndex = 0;
-    setElementRef(props.ref, next);
-  };
+  const setElement = (element: HTMLSpanElement) => setElementRef(props.ref, element);
 
   const theme = createMemo(() => themeProps("statusdot", { variant: props.variant }));
   const style = createMemo(() =>
@@ -162,6 +145,8 @@ export function StatusDot(props: StatusDotProps) {
       ref={setElement}
       role="img"
       aria-label={props.label}
+      aria-describedby={isTooltipVisible() ? tooltipId : undefined}
+      tabindex={props.tooltip === undefined ? -1 : 0}
       class={[theme().class, style().class, props.class]}
       style={{ ...style().style, ...props.style }}
       data-style-src={style()["data-style-src"]}
@@ -170,6 +155,15 @@ export function StatusDot(props: StatusDotProps) {
       onFocus={onFocus}
       onBlur={onBlur}
       onKeyDown={onKeyDown}
-    />
+    >
+      <Show when={isTooltipVisible()}>
+        <span
+          id={tooltipId}
+          role="tooltip"
+          class={stylexProps(styles.tooltip).class}
+          textContent={props.tooltip}
+        />
+      </Show>
+    </span>
   );
 }

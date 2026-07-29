@@ -1,7 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
-import { createMemo, omit } from "solid-js";
+import { createMemo, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props";
 
@@ -45,6 +45,7 @@ const styles = stylex.create({
     justifyContent: "center",
     gap: spacingVars["--spacing-1"],
     height: spacingVars["--spacing-5"],
+    paddingBlock: 0,
     paddingInline: spacingVars["--spacing-2"],
     borderRadius: radiusVars["--radius-full"],
     fontFamily: "inherit",
@@ -106,23 +107,28 @@ const styles = stylex.create({
 });
 
 export function Badge(props: BadgeProps) {
-  const rest = omit(props, "variant", "label", "icon", "xstyle", "class", "style");
+  const merged = merge(
+    {
+      variant: "neutral",
+    } satisfies Partial<BadgeProps>,
+    props,
+  );
 
-  const variant = () => props.variant ?? "neutral";
+  const rest = omit(merged, "variant", "label", "icon", "xstyle", "class", "style");
 
-  const theme = createMemo(() => themeProps("badge", { variant: variant() }));
-  const style = createMemo(() => stylexProps(styles.root, styles[variant()], props.xstyle));
+  const theme = createMemo(() => themeProps("badge", { variant: merged.variant }));
+  const style = createMemo(() => stylexProps(styles.root, styles[merged.variant], merged.xstyle));
 
   return (
     <span
       {...rest}
       {...theme()}
-      class={[theme().class, style().class, props.class]}
-      style={{ ...style().style, ...props.style }}
+      class={[theme().class, style().class, merged.class]}
+      style={{ ...style().style, ...merged.style }}
       data-style-src={style()["data-style-src"]}
     >
-      {props.icon}
-      {props.label}
+      {merged.icon}
+      {merged.label}
     </span>
   );
 }

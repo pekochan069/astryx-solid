@@ -21,7 +21,10 @@ const styles = stylex.create({
     borderInlineStartColor: colorVars["--color-border-emphasized"],
     paddingInlineStart: spacingVars["--spacing-4"],
     color: colorVars["--color-text-secondary"],
-    margin: 0,
+    marginInlineStart: 0,
+    marginInlineEnd: 0,
+    marginBlockStart: 0,
+    marginBlockEnd: 0,
   },
   cite: {
     display: "block",

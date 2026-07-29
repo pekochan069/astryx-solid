@@ -1,41 +1,100 @@
 import type { Accessor, Setter } from "solid-js";
 
-import { createUniqueId } from "solid-js";
+import { createSignal, createUniqueId, onCleanup } from "solid-js";
 
 import type { ButtonProps } from "./button.tsx";
 
 import { setElementRef } from "../../utils/set-element-ref.ts";
 
+const HOVER_SHOW_DELAY = 200;
+const HOVER_BRIDGE_DELAY = 100;
+
 export function createButtonTooltip(props: ButtonProps) {
-  const tooltipId = `button-tooltip-${createUniqueId()}`;
-  let root: HTMLButtonElement | HTMLAnchorElement | undefined;
-  let tooltipNode: HTMLSpanElement | undefined;
+  const id = `button-tooltip-${createUniqueId()}`;
+  const anchorName = `--${id}`;
+  const [visible, setVisible] = createSignal(false);
+  let element: HTMLSpanElement | undefined;
+  let showTimeout: ReturnType<typeof setTimeout> | undefined;
+  let hideTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  const hide = () => {
-    tooltipNode?.remove();
-    tooltipNode = undefined;
-    root?.removeAttribute("aria-describedby");
+  const clearTimeouts = () => {
+    clearTimeout(showTimeout);
+    clearTimeout(hideTimeout);
+    showTimeout = undefined;
+    hideTimeout = undefined;
   };
-
-  const show = () => {
-    if (root != null && tooltipNode == null && props.tooltip != null) {
-      tooltipNode = document.createElement("span");
-      tooltipNode.id = tooltipId;
-      tooltipNode.role = "tooltip";
-      tooltipNode.textContent = props.tooltip;
-      tooltipNode.style.position = "absolute";
-      tooltipNode.style.insetBlockEnd = "100%";
-      root.append(tooltipNode);
-      root.setAttribute("aria-describedby", tooltipId);
+  const describedBy = () =>
+    props.tooltip == null
+      ? props["aria-describedby"]
+      : [props["aria-describedby"], id].filter(Boolean).join(" ") || undefined;
+  const isPopoverOpen = () => {
+    try {
+      return element?.matches(":popover-open") ?? false;
+    } catch {
+      return false;
     }
   };
-
-  const setRoot = (element: HTMLButtonElement | HTMLAnchorElement) => {
-    root = element;
-    setElementRef(props.ref, element);
+  const openPopover = () => {
+    if (
+      visible() &&
+      element != null &&
+      !isPopoverOpen() &&
+      typeof element.showPopover === "function"
+    ) {
+      element.showPopover();
+    }
+  };
+  const reveal = () => {
+    if (props.tooltip != null) {
+      setVisible(true);
+      queueMicrotask(openPopover);
+    }
+  };
+  const hide = () => {
+    clearTimeouts();
+    if (isPopoverOpen() && typeof element?.hidePopover === "function") element.hidePopover();
+    setVisible(false);
+  };
+  const show = () => {
+    clearTimeouts();
+    reveal();
+  };
+  const scheduleShow = () => {
+    if (globalThis.matchMedia?.("(hover: none)").matches) return;
+    clearTimeouts();
+    showTimeout = setTimeout(reveal, HOVER_SHOW_DELAY);
+  };
+  const scheduleHide = () => {
+    clearTimeouts();
+    hideTimeout = setTimeout(hide, HOVER_BRIDGE_DELAY);
+  };
+  const cancelHide = () => {
+    clearTimeout(hideTimeout);
+    hideTimeout = undefined;
+  };
+  const setRoot = (root: HTMLButtonElement | HTMLAnchorElement) => {
+    setElementRef(props.ref, root);
+  };
+  const setElement = (node: HTMLSpanElement) => {
+    element = node;
+    if (visible()) queueMicrotask(openPopover);
   };
 
-  return { hide, show, setRoot };
+  onCleanup(clearTimeouts);
+
+  return {
+    anchorName,
+    cancelHide,
+    describedBy,
+    hide,
+    id,
+    scheduleHide,
+    scheduleShow,
+    setElement,
+    setRoot,
+    show,
+    visible,
+  };
 }
 
 export function createButtonClickHandler(
@@ -46,36 +105,34 @@ export function createButtonClickHandler(
   let locked = false;
 
   return (event: MouseEvent) => {
-    const blocked = disabled() || (locked && !props.isInterruptible);
-
-    if (blocked) {
+    if (disabled() || (locked && !props.isInterruptible)) {
       event.preventDefault();
-    } else {
-      props.onClick?.(event);
-
-      if (props.clickAction && !event.defaultPrevented) {
-        locked = true;
-        setActiveActions((count) => count + 1);
-        const finish = () => {
-          locked = false;
-          setActiveActions((count) => count - 1);
-        };
-        let result: void | Promise<void>;
-
-        try {
-          result = props.clickAction(event);
-        } catch (error) {
-          finish();
-          throw error;
-        }
-
-        void Promise.resolve(result).then(finish, (error) => {
-          finish();
-          queueMicrotask(() => {
-            throw error;
-          });
-        });
-      }
+      return;
     }
+
+    props.onClick?.(event);
+    if (props.clickAction == null || event.defaultPrevented) return;
+
+    locked = true;
+    setActiveActions((count) => count + 1);
+    const finish = () => {
+      locked = false;
+      setActiveActions((count) => count - 1);
+    };
+
+    let result: void | Promise<void>;
+    try {
+      result = props.clickAction(event);
+    } catch (error) {
+      finish();
+      throw error;
+    }
+
+    void Promise.resolve(result).then(finish, (error) => {
+      finish();
+      queueMicrotask(() => {
+        throw error;
+      });
+    });
   };
 }

@@ -59,7 +59,7 @@ describe("Button actions", () => {
     expect(action).toHaveBeenCalledTimes(1);
     await Promise.resolve();
     expect(root.querySelector("button")?.getAttribute("aria-busy")).toBe("true");
-    expect(button.children.item(1)?.getAttribute("style")).toContain("visibility: hidden");
+    expect(button.children.item(1)?.getAttribute("aria-hidden")).toBe("true");
     work.resolve();
     await Promise.resolve();
     await Promise.resolve();

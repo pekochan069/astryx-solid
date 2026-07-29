@@ -1,9 +1,9 @@
 import type { JSX } from "@solidjs/web";
 
-import { Dynamic } from "@solidjs/web";
 import { createMemo, createSignal, merge, omit } from "solid-js";
 
 import type { BaseProps } from "../../base-props.ts";
+import type { SizeValue } from "../../types/size-value.types.ts";
 import type { LinkComponent } from "../link/link-provider.tsx";
 
 import { useSize } from "../../size-context/size-context.ts";
@@ -12,15 +12,15 @@ import { themeProps } from "../../utils/theme-props.ts";
 import { useButtonGroup } from "../button-group/button-group-context.ts";
 import { computeTargetAndRel } from "../link/compute-target-and-rel.ts";
 import { useLinkComponent } from "../link/use-link-component.ts";
-import { ButtonContent } from "./button-content.tsx";
 import { createButtonClickHandler, createButtonTooltip } from "./button-interactions.ts";
-import { groupStyles, sizeStyles, styles, variants } from "./button.stylex.ts";
+import { ButtonRoot } from "./button-root.tsx";
+import { ButtonTooltip } from "./button-tooltip.tsx";
+import { elevationStyles, groupStyles, sizeStyles, styles, variants } from "./button.stylex.ts";
 
 function callConsumerHandler(handler: unknown, event: Event) {
   if (typeof handler === "function") handler(event);
 }
 
-/** Built-in visual variants supported by {@link Button}. */
 export interface ButtonVariantMap {
   primary: true;
   secondary: true;
@@ -28,13 +28,10 @@ export interface ButtonVariantMap {
   destructive: true;
 }
 
-/** Visual treatment supported by {@link Button}. */
 export type ButtonVariant = keyof ButtonVariantMap;
-
-/** Button size derived from the supported StyleX size styles. */
 export type ButtonSize = keyof typeof sizeStyles;
+export type ButtonElevation = keyof typeof elevationStyles;
 
-/** Props for the {@link Button} component. */
 export interface ButtonProps extends BaseProps<HTMLButtonElement> {
   ref?: (element: HTMLButtonElement | HTMLAnchorElement) => void;
   label: string;
@@ -43,6 +40,8 @@ export interface ButtonProps extends BaseProps<HTMLButtonElement> {
   endContent?: JSX.Element;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  elevation?: ButtonElevation;
+  width?: SizeValue;
   tooltip?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
@@ -65,15 +64,16 @@ export interface ButtonProps extends BaseProps<HTMLButtonElement> {
   onClick?: (event: MouseEvent) => void;
 }
 
-/** Accessible action button. Async actions dedupe unless interruptible. */
 export function Button(props: ButtonProps) {
   const merged = merge(
     {
       variant: "secondary" as ButtonVariant,
       type: "button" as const,
+      elevation: "none" as ButtonElevation,
       isDisabled: false,
       isLoading: false,
       isIconOnly: false,
+      isInterruptible: false,
     },
     props,
   );
@@ -86,6 +86,8 @@ export function Button(props: ButtonProps) {
     "endContent",
     "size",
     "variant",
+    "elevation",
+    "width",
     "isDisabled",
     "isLoading",
     "isInterruptible",
@@ -111,6 +113,8 @@ export function Button(props: ButtonProps) {
     "onPointerLeave",
     "onFocus",
     "onBlur",
+    "aria-label",
+    "aria-describedby",
     "class",
     "style",
     "ref",
@@ -118,102 +122,89 @@ export function Button(props: ButtonProps) {
 
   const group = useButtonGroup();
   const inheritedSize = useSize();
+  const adapter = useLinkComponent(() => merged.as);
 
   const [activeActions, setActiveActions] = createSignal(0);
   const size = createMemo(() => merged.size ?? inheritedSize());
   const variant = createMemo(() => merged.variant ?? "secondary");
   const loading = createMemo(() => merged.isLoading || activeActions() > 0);
+  const delaySpinner = createMemo(() => activeActions() > 0 || merged.isInterruptible);
   const disabled = createMemo(
     () => merged.isDisabled || group?.isDisabled || (loading() && !merged.isInterruptible),
   );
   const ariaDisabled = createMemo(() => merged.tooltip != null && disabled());
-  const ariaLabel = createMemo(() =>
-    merged.isIconOnly || loading() || merged.children != null ? merged.label : undefined,
-  );
-  const adapter = useLinkComponent(() => merged.as);
+  const renderAsLink = createMemo(() => merged.href != null && !disabled());
   const targetAndRel = createMemo(() => computeTargetAndRel(merged.target, merged.rel));
   const tooltip = createButtonTooltip(merged);
-  const renderAsLink = createMemo(() => merged.href != null && !disabled());
-  const component = createMemo(() => (renderAsLink() ? adapter() : "button"));
+  const needsAriaLabel = createMemo(
+    () =>
+      (merged.isIconOnly && merged.label !== "") ||
+      (loading() && !merged.isIconOnly) ||
+      (merged.children != null && merged.children !== merged.label),
+  );
+  const ariaLabel = createMemo(() => (needsAriaLabel() ? merged.label : merged["aria-label"]));
 
   const theme = createMemo(() => themeProps("button", { variant: variant(), size: size() }));
-  const style = createMemo(() => {
-    const currentSize = size();
+  const styled = createMemo(() => {
     const currentVariant = variant();
+    const solidGroup = currentVariant === "primary" || currentVariant === "destructive";
 
     return stylexProps(
       styles.base,
-      currentSize === "sm" && sizeStyles.sm,
-      currentSize === "md" && sizeStyles.md,
-      currentSize === "lg" && sizeStyles.lg,
+      size() === "sm" && sizeStyles.sm,
+      size() === "md" && sizeStyles.md,
+      size() === "lg" && sizeStyles.lg,
       currentVariant === "primary" && variants.primary,
       currentVariant === "secondary" && variants.secondary,
       currentVariant === "ghost" && variants.ghost,
       currentVariant === "destructive" && variants.destructive,
-      group == null && styles.pressable,
-      group?.orientation === "horizontal" && groupStyles.horizontal,
-      group?.orientation === "vertical" && groupStyles.vertical,
       merged.isIconOnly && styles.iconOnly,
       disabled() && styles.disabled,
       ariaDisabled() && styles.ariaDisabled,
+      renderAsLink() && styles.link,
+      group == null && styles.pressable,
+      group?.orientation === "horizontal" && groupStyles.horizontal,
+      group?.orientation === "vertical" && groupStyles.vertical,
+      solidGroup && group?.orientation === "horizontal" && groupStyles.onSolidHorizontal,
+      solidGroup && group?.orientation === "vertical" && groupStyles.onSolidVertical,
+      group == null && elevationStyles[merged.elevation],
       merged.xstyle,
     );
   });
 
-  const onClick = createButtonClickHandler(props, disabled, setActiveActions);
+  const onClick = createButtonClickHandler(merged, disabled, setActiveActions);
   const onKeyDown = (event: KeyboardEvent) => {
-    callConsumerHandler(props.onKeyDown, event);
-    if (!event.defaultPrevented) {
-      if (event.key === "Escape") tooltip.hide();
-      if (ariaDisabled() && (event.key === "Enter" || event.key === " ")) event.preventDefault();
-    }
+    if (ariaDisabled() && (event.key === "Enter" || event.key === " ")) event.preventDefault();
+    else callConsumerHandler(merged.onKeyDown, event);
+    if (event.key === "Escape") tooltip.hide();
   };
 
   return (
-    <Dynamic
-      component={component()}
-      {...rest}
-      {...theme()}
-      ref={tooltip.setRoot}
-      href={renderAsLink() ? merged.href : undefined}
-      target={renderAsLink() ? targetAndRel().target : undefined}
-      rel={renderAsLink() ? targetAndRel().rel : undefined}
-      class={[theme().class, style().class, props.class]}
-      style={{ ...style().style, ...merged.style }}
-      data-style-src={style()["data-style-src"]}
-      type={renderAsLink() ? undefined : merged.type}
-      name={renderAsLink() ? undefined : merged.name}
-      value={renderAsLink() || merged.value == null ? undefined : String(merged.value)}
-      form={renderAsLink() ? undefined : merged.form}
-      formaction={renderAsLink() ? undefined : merged.formAction}
-      formenctype={renderAsLink() ? undefined : merged.formEncType}
-      formmethod={renderAsLink() ? undefined : merged.formMethod}
-      formnovalidate={renderAsLink() ? undefined : merged.formNoValidate}
-      formtarget={renderAsLink() ? undefined : merged.formTarget}
-      disabled={renderAsLink() || ariaDisabled() ? undefined : disabled()}
-      aria-busy={loading() ? "true" : undefined}
-      aria-disabled={ariaDisabled() ? "true" : undefined}
-      aria-label={ariaLabel()}
-      onClick={onClick}
-      onKeyDown={onKeyDown}
-      onPointerEnter={(event: PointerEvent) => {
-        callConsumerHandler(props.onPointerEnter, event);
-        if (!event.defaultPrevented) tooltip.show();
-      }}
-      onPointerLeave={(event: PointerEvent) => {
-        callConsumerHandler(props.onPointerLeave, event);
-        if (!event.defaultPrevented) tooltip.hide();
-      }}
-      onFocus={(event: FocusEvent) => {
-        callConsumerHandler(props.onFocus, event);
-        if (!event.defaultPrevented) tooltip.show();
-      }}
-      onBlur={(event: FocusEvent) => {
-        callConsumerHandler(props.onBlur, event);
-        if (!event.defaultPrevented) tooltip.hide();
-      }}
-    >
-      <ButtonContent button={merged} size={size()} loading={loading()} />
-    </Dynamic>
+    <>
+      <ButtonRoot
+        button={merged}
+        rest={rest}
+        adapter={adapter()}
+        renderAsLink={renderAsLink()}
+        disabled={disabled()}
+        ariaDisabled={ariaDisabled()}
+        loading={loading()}
+        delaySpinner={delaySpinner()}
+        size={size()}
+        variant={variant()}
+        target={targetAndRel().target}
+        rel={targetAndRel().rel}
+        theme={theme()}
+        stylexClass={styled().class}
+        stylexStyle={styled().style}
+        width={merged.width}
+        dataStyleSrc={styled()["data-style-src"]}
+        ariaLabel={ariaLabel()}
+        tooltip={tooltip}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+      />
+      {merged.tooltip != null && <ButtonTooltip text={merged.tooltip} tooltip={tooltip} />}
+    </>
   );
 }

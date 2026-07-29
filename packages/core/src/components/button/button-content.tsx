@@ -1,6 +1,7 @@
 import type { JSX } from "@solidjs/web";
 
 import * as stylex from "@stylexjs/stylex";
+import { Show } from "solid-js";
 
 import type { ButtonProps, ButtonSize } from "./button.tsx";
 
@@ -12,42 +13,44 @@ interface ButtonContentProps {
   button: ButtonProps;
   size: ButtonSize;
   loading: boolean;
+  delaySpinner: boolean;
 }
 
 export function ButtonContent(props: ButtonContentProps): JSX.Element {
   return (
     <>
-      <span
-        {...stylex.attrs(loadingStyles.overlay)}
-        style={{ display: props.loading ? "grid" : "none" }}
-        aria-hidden="true"
-      >
-        <Spinner size="sm" shade="inherit" />
-      </span>
-      <span
-        {...stylex.attrs(styles.contentWrapper)}
-        style={{ visibility: props.loading ? "hidden" : undefined }}
-        aria-hidden={props.loading ? "true" : undefined}
-      >
+      <Show when={props.loading}>
         <span
           {...stylex.attrs(
-            styles.iconWrapper,
-            props.size === "lg" && iconSizeStyles.lg,
-            props.size !== "lg" && iconSizeStyles.md,
+            loadingStyles.spinnerOverlay,
+            props.delaySpinner && loadingStyles.spinnerDelayed,
           )}
-          hidden={props.button.icon == null}
+          aria-hidden="true"
         >
-          {props.button.icon}
+          <Spinner size="sm" shade="inherit" />
         </span>
-        <span {...stylex.attrs(styles.labelText)} hidden={props.button.isIconOnly}>
-          {props.button.isIconOnly ? undefined : (props.button.children ?? props.button.label)}
-        </span>
-        <span
-          {...stylex.attrs(styles.endContentWrapper)}
-          hidden={props.button.isIconOnly || props.button.endContent == null}
-        >
-          {props.button.isIconOnly ? undefined : props.button.endContent}
-        </span>
+      </Show>
+      <span
+        {...stylex.attrs(
+          styles.contentWrapper,
+          props.loading &&
+            (props.delaySpinner ? loadingStyles.hiddenContentDelayed : loadingStyles.hiddenContent),
+        )}
+        aria-hidden={props.loading ? "true" : undefined}
+      >
+        <Show when={props.button.icon}>
+          {(icon) => (
+            <span {...stylex.attrs(styles.iconWrapper, iconSizeStyles[props.size])}>{icon()}</span>
+          )}
+        </Show>
+        <Show when={!props.button.isIconOnly}>
+          <span {...stylex.attrs(styles.labelText)}>
+            {props.button.children ?? props.button.label}
+          </span>
+        </Show>
+        <Show when={!props.button.isIconOnly && props.button.endContent != null}>
+          <span {...stylex.attrs(styles.endContentWrapper)}>{props.button.endContent}</span>
+        </Show>
       </span>
       <VisuallyHidden
         role="status"

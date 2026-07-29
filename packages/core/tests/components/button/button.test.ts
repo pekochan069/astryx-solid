@@ -130,4 +130,50 @@ describe("Button", () => {
     expect(button.getAttribute("aria-label")).toBe("Add item");
     expect(button.textContent).toBe("+");
   });
+
+  it("ports width, elevation, visible children, and end content", () => {
+    const container = mount(() => [
+      createComponent(Button, {
+        label: "Save",
+        width: 120,
+        elevation: "high",
+        endContent: "!",
+        get children() {
+          return "Store";
+        },
+      }),
+      createComponent(Button, { label: "Flat" }),
+    ]);
+    const [button, flatButton] = Array.from(container.querySelectorAll("button"));
+
+    expect(button?.style.width).toBe("120px");
+    expect(button?.getAttribute("aria-label")).toBe("Save");
+    expect(button?.textContent).toBe("Store!");
+    expect(button?.className).not.toBe(flatButton?.className);
+  });
+
+  it("composes tooltip descriptions and suppresses disabled activation keys", () => {
+    const onKeyDown = mock();
+    const container = mount(() =>
+      createComponent(Button, {
+        label: "Unavailable",
+        tooltip: "Try later",
+        isDisabled: true,
+        "aria-describedby": "existing-description",
+        onKeyDown,
+      }),
+    );
+    const button = buttonIn(container);
+
+    expect(button.getAttribute("aria-describedby")?.split(" ")).toContain("existing-description");
+    const enter = new Event("keydown", { bubbles: true, cancelable: true });
+    Object.defineProperty(enter, "key", { value: "Enter" });
+    button.dispatchEvent(enter);
+    expect(onKeyDown).not.toHaveBeenCalled();
+
+    const arrow = new Event("keydown", { bubbles: true });
+    Object.defineProperty(arrow, "key", { value: "ArrowRight" });
+    button.dispatchEvent(arrow);
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+  });
 });

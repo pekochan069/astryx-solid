@@ -96,7 +96,10 @@ describe("ToggleButton", () => {
     await Promise.resolve();
     expect(button.textContent).toContain("★");
     expect(button.textContent).toContain("Star");
-    expect(button.style.fontWeight).not.toBe("");
+    const reservation = Array.from(button.querySelectorAll('[aria-hidden="true"]')).find(
+      (element) => element.textContent === "Star",
+    );
+    expect(reservation).toBeDefined();
     iconOnly.focus();
     expect(
       document.getElementById(iconOnly.getAttribute("aria-describedby") ?? "")?.textContent,

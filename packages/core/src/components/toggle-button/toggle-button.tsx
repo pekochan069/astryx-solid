@@ -1,6 +1,7 @@
 import type { JSX } from "@solidjs/web";
 import type { Accessor } from "solid-js";
 
+import * as stylex from "@stylexjs/stylex";
 import { createMemo, createSignal, omit } from "solid-js";
 
 import { colorVars, fontWeightVars } from "../../theme/tokens.stylex.ts";
@@ -8,6 +9,26 @@ import { Button, type ButtonProps } from "../button/button.tsx";
 import { useToggleButtonGroup } from "./toggle-button-group.tsx";
 
 type ToggleButtonGroup = ReturnType<typeof useToggleButtonGroup>;
+
+const labelStyles = stylex.create({
+  wrapper: {
+    display: "inline-flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pressed: {
+    fontWeight: fontWeightVars["--font-weight-semibold"],
+  },
+  widthReservation: {
+    display: "block",
+    height: 0,
+    overflow: "hidden",
+    visibility: "hidden",
+    pointerEvents: "none",
+    fontWeight: fontWeightVars["--font-weight-semibold"],
+  },
+});
 
 export interface ToggleButtonProps extends Omit<
   ButtonProps,
@@ -86,6 +107,7 @@ export function ToggleButton(props: ToggleButtonProps) {
     "pressedChangeAction",
     "pressedIcon",
     "value",
+    "children",
   );
 
   const group = useToggleButtonGroup();
@@ -104,7 +126,6 @@ export function ToggleButton(props: ToggleButtonProps) {
       variant="ghost"
       style={{
         "background-color": state.pressed() ? colorVars["--color-overlay-pressed"] : undefined,
-        "font-weight": state.pressed() ? fontWeightVars["--font-weight-semibold"] : undefined,
         ...props.style,
       }}
       isDisabled={state.disabled()}
@@ -120,6 +141,15 @@ export function ToggleButton(props: ToggleButtonProps) {
             ? state.action
             : undefined
       }
-    />
+    >
+      <span {...stylex.attrs(labelStyles.wrapper)}>
+        <span {...stylex.attrs(state.pressed() && labelStyles.pressed)}>
+          {props.children ?? props.label}
+        </span>
+        <span {...stylex.attrs(labelStyles.widthReservation)} aria-hidden="true">
+          {props.children ?? props.label}
+        </span>
+      </span>
+    </Button>
   );
 }

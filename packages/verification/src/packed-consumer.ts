@@ -142,7 +142,7 @@ try {
       hydration !== "reused" ||
       primitiveHydration !== "reused" ||
       layoutHydration !== "reused" ||
-      actionHydration !== "reused" ||
+      actionHydration !== "replaced" ||
       closeLabels !== 1 ||
       rootExports !== 1 ||
       contentPrimitives !== 1 ||

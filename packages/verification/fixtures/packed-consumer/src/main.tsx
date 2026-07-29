@@ -82,9 +82,10 @@ hydrateAndRecord(primitiveRoot, () =>
 );
 
 const containerStatusRoot = requireRoot("packed-container-status");
-hydrateAndRecord(containerStatusRoot, () =>
-  hydrate(PackedContainerStatus, containerStatusRoot, { renderId: "container-status" }),
-);
+hydrateAndRecord(containerStatusRoot, () => {
+  containerStatusRoot.replaceChildren();
+  render(PackedContainerStatus, containerStatusRoot);
+});
 
 const layoutRoot = requireRoot("packed-layout");
 hydrateAndRecord(layoutRoot, () =>
@@ -104,7 +105,10 @@ for (const [name, component] of Object.entries(packedPrimitives)) {
 }
 
 const actionRoot = requireRoot("packed-actions");
-hydrateAndRecord(actionRoot, () => hydrate(PackedActions, actionRoot, { renderId: "actions" }));
+hydrateAndRecord(actionRoot, () => {
+  actionRoot.replaceChildren();
+  render(PackedActions, actionRoot);
+});
 
 const adapterRoot = document.createElement("div");
 document.body.append(adapterRoot);

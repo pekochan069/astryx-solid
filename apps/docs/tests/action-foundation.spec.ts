@@ -26,7 +26,11 @@ test("action foundation hydrates accessible interaction states", async ({ page }
 
   const unavailable = page.getByRole("button", { name: "Unavailable action" });
   await unavailable.focus();
-  await expect(page.getByRole("tooltip")).toHaveText("Available after setup");
+  const tooltip = page.getByRole("tooltip");
+  await expect(tooltip).toHaveText("Available after setup");
+  await expect(tooltip).toBeVisible();
+  await unavailable.press("Escape");
+  await expect(tooltip).toBeHidden();
   await unavailable.press("Enter");
   await expect(unavailable).toHaveAttribute("aria-disabled", "true");
   await expect(page.locator('button[aria-busy="true"]')).toHaveCount(1);

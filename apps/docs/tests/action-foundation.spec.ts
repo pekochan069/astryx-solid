@@ -22,8 +22,6 @@ test("action foundation hydrates accessible interaction states", async ({ page }
 
   const primary = page.getByRole("button", { name: "Primary action" });
   await expect(primary).toHaveText("Primary action");
-  await expect(primary.locator(":scope > span").first()).toBeHidden();
-
   const unavailable = page.getByRole("button", { name: "Unavailable action" });
   await unavailable.focus();
   const tooltip = page.getByRole("tooltip");

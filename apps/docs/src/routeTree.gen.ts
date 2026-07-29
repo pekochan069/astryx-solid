@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CoreSubstrateRouteImport } from './routes/core-substrate'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComponentsVisuallyHiddenRouteImport } from './routes/components/visually-hidden'
 import { Route as ComponentsLayoutPrimitivesRouteImport } from './routes/components/layout-primitives'
@@ -20,6 +21,11 @@ import { Route as ComponentsActionFoundationRouteImport } from './routes/compone
 const CoreSubstrateRoute = CoreSubstrateRouteImport.update({
   id: '/core-substrate',
   path: '/core-substrate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +66,7 @@ const ComponentsActionFoundationRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/core-substrate': typeof CoreSubstrateRoute
   '/components/action-foundation': typeof ComponentsActionFoundationRoute
   '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/core-substrate': typeof CoreSubstrateRoute
   '/components/action-foundation': typeof ComponentsActionFoundationRoute
   '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
@@ -79,6 +87,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/core-substrate': typeof CoreSubstrateRoute
   '/components/action-foundation': typeof ComponentsActionFoundationRoute
   '/components/container-status-primitives': typeof ComponentsContainerStatusPrimitivesRoute
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/core-substrate'
     | '/components/action-foundation'
     | '/components/container-status-primitives'
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/core-substrate'
     | '/components/action-foundation'
     | '/components/container-status-primitives'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/core-substrate'
     | '/components/action-foundation'
     | '/components/container-status-primitives'
@@ -118,6 +130,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   CoreSubstrateRoute: typeof CoreSubstrateRoute
   ComponentsActionFoundationRoute: typeof ComponentsActionFoundationRoute
   ComponentsContainerStatusPrimitivesRoute: typeof ComponentsContainerStatusPrimitivesRoute
@@ -133,6 +146,13 @@ declare module '@tanstack/solid-router' {
       path: '/core-substrate'
       fullPath: '/core-substrate'
       preLoaderRoute: typeof CoreSubstrateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -182,6 +202,7 @@ declare module '@tanstack/solid-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   CoreSubstrateRoute: CoreSubstrateRoute,
   ComponentsActionFoundationRoute: ComponentsActionFoundationRoute,
   ComponentsContainerStatusPrimitivesRoute:

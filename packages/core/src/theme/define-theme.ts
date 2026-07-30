@@ -188,7 +188,16 @@ export function generateThemeCSS(theme: DefinedTheme): string {
     }),
   );
 
-  return [`[data-astryx-solid-theme="${theme.name}"] {\n${tokenRules}\n}`, ...componentRules]
+  const mediaRules = [
+    `[data-astryx-solid-theme="${theme.name}"] [data-astryx-solid-media="dark"] {\n  color-scheme: dark;\n  --color-text-primary: var(--color-on-dark);\n  --color-icon-primary: var(--color-on-dark);\n  --color-accent: var(--color-on-dark);\n}`,
+    `[data-astryx-solid-theme="${theme.name}"] [data-astryx-solid-media="light"] {\n  color-scheme: light;\n  --color-text-primary: var(--color-on-light);\n  --color-icon-primary: var(--color-on-light);\n  --color-accent: var(--color-on-light);\n}`,
+  ];
+
+  return [
+    `[data-astryx-solid-theme="${theme.name}"] {\n${tokenRules}\n}`,
+    ...mediaRules,
+    ...componentRules,
+  ]
     .filter(Boolean)
     .join("\n");
 }

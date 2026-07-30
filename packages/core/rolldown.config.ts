@@ -38,6 +38,8 @@ const input = {
   "status-dot": "./src/components/status-dot/index.ts",
   text: "./src/components/text/index.ts",
   thumbnail: "./src/components/thumbnail/index.ts",
+  layer: "./src/components/layer/index.ts",
+  overlay: "./src/components/overlay/index.ts",
   timestamp: "./src/components/timestamp/index.ts",
   vstack: "./src/components/stack/vstack.tsx",
   "visually-hidden": "./src/components/visually-hidden/index.ts",

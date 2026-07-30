@@ -176,6 +176,16 @@
       "node": "./dist/server/thumbnail.js",
       "default": "./dist/thumbnail.js"
     },
+    "./layer": {
+      "types": "./dist/layer.d.ts",
+      "node": "./dist/server/layer.js",
+      "default": "./dist/layer.js"
+    },
+    "./overlay": {
+      "types": "./dist/overlay.d.ts",
+      "node": "./dist/server/overlay.js",
+      "default": "./dist/overlay.js"
+    },
     "./timestamp": {
       "types": "./dist/timestamp.d.ts",
       "node": "./dist/server/timestamp.js",
